@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dimensions, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
@@ -43,7 +43,7 @@ export function SwipeCard({ peer, onSwiped, isTop }: Props) {
       }
     });
 
-  const cardStyle = useAnimatedStyle<ViewStyle>(() => ({
+  const cardStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: translateX.value },
       { translateY: translateY.value },
@@ -51,27 +51,18 @@ export function SwipeCard({ peer, onSwiped, isTop }: Props) {
     ],
   }));
 
-  const likeOpacity = useAnimatedStyle<ViewStyle>(() => ({ opacity: translateX.value > 0 ? Math.min(translateX.value / SWIPE_THRESHOLD, 1) : 0 }));
-  const passOpacity = useAnimatedStyle<ViewStyle>(() => ({ opacity: translateX.value < 0 ? Math.min(-translateX.value / SWIPE_THRESHOLD, 1) : 0 }));
+  const likeOpacity = useAnimatedStyle(() => ({ opacity: translateX.value > 0 ? Math.min(translateX.value / SWIPE_THRESHOLD, 1) : 0 }));
+  const passOpacity = useAnimatedStyle(() => ({ opacity: translateX.value < 0 ? Math.min(-translateX.value / SWIPE_THRESHOLD, 1) : 0 }));
 
   const profile = peer.profile;
 
-  // react-native-reanimated's AnimatedStyle<T> type recurses deeply when
-  // unioned inline with a StyleSheet.create() result under this TS version;
-  // combining through an explicitly `any`-typed array sidesteps that rather
-  // than changing behavior.
-  const cardStyles: any = [styles.card, cardStyle];
-  const likeStampStyles: any = [styles.stamp, styles.likeStamp, likeOpacity];
-  const passStampStyles: any = [styles.stamp, styles.passStamp, passOpacity];
-
   return (
     <GestureDetector gesture={pan}>
-      {/* @ts-expect-error: reanimated style types recurse beyond TS's depth limit here; runtime is unaffected. */}
-      <Animated.View style={cardStyles}>
-        <Animated.View style={likeStampStyles}>
+      <Animated.View style={[styles.card, cardStyle]}>
+        <Animated.View style={[styles.stamp, styles.likeStamp, likeOpacity]}>
           <Text style={styles.likeStampText}>LIKE</Text>
         </Animated.View>
-        <Animated.View style={passStampStyles}>
+        <Animated.View style={[styles.stamp, styles.passStamp, passOpacity]}>
           <Text style={styles.passStampText}>PASS</Text>
         </Animated.View>
 
