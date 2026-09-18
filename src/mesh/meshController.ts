@@ -8,8 +8,12 @@ import { requestBlePermissions } from '../utils/permissions';
 import { newId } from '../utils/id';
 import type { ChatMessage, PresenceAlert, Profile } from '../types';
 
-/** Flip to false for real-device builds once you're testing on hardware. */
-export const USE_MOCK_MESH = true;
+/**
+ * Real BLE. Set back to true to get the simulated cabin (fake passengers,
+ * no radio), which is the only way to see the UI work in a simulator - real
+ * Bluetooth needs two physical phones.
+ */
+export const USE_MOCK_MESH = false;
 
 let service: MeshService | null = null;
 

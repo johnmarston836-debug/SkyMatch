@@ -25,6 +25,7 @@
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.4.0",
     "react-native-worklets": "^0.12.2",
+    "skymatch-peripheral": "file:./modules/skymatch-peripheral",
     "zustand": "^5.0.0"
   },
   "devDependencies": {
