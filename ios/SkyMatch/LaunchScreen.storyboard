@@ -18,6 +18,10 @@
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="LaunchLogo" translatesAutoresizingMaskIntoConstraints="NO" id="lgo-Ez-1cn">
                                 <rect key="frame" x="97.5" y="273.5" width="180" height="180"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="180" id="lgo-w-1"/>
+                                    <constraint firstAttribute="height" constant="180" id="lgo-h-1"/>
+                                </constraints>
                             </imageView>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="by EFS" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumFontSize="9" translatesAutoresizingMaskIntoConstraints="NO" id="MN2-I3-ftu">
                                 <rect key="frame" x="0.0" y="626" width="375" height="21"/>
@@ -32,9 +36,7 @@
                             <constraint firstItem="MN2-I3-ftu" firstAttribute="centerX" secondItem="Bcu-3y-fUS" secondAttribute="centerX" id="akx-eg-2ui"/>
                             <constraint firstItem="MN2-I3-ftu" firstAttribute="leading" secondItem="Bcu-3y-fUS" secondAttribute="leading" id="i1E-0Y-4RG"/>
                             <constraint firstItem="lgo-Ez-1cn" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="lgo-cx-1"/>
-                            <constraint firstItem="lgo-Ez-1cn" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="bottom" multiplier="1/3" constant="1" id="moa-c2-u7t"/>
-                            <constraint firstItem="lgo-Ez-1cn" firstAttribute="width" constant="180" id="lgo-w-1"/>
-                            <constraint firstItem="lgo-Ez-1cn" firstAttribute="height" constant="180" id="lgo-h-1"/>
+                            <constraint firstItem="lgo-Ez-1cn" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="moa-c2-u7t"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
                     </view>
@@ -45,6 +47,6 @@
         </scene>
     </scenes>
     <resources>
-        <image name="LaunchLogo" width="1254" height="1254"/>
+        <image name="LaunchLogo" width="180" height="180"/>
     </resources>
 </document>
