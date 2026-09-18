@@ -47,7 +47,7 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   });
 
   service.on('presence', (alert) => {
-    usePresenceStore.getState().addAlert(alert);
+    usePresenceStore.getState().applyAlert(alert);
   });
 
   await service.start(myProfile.seat);
@@ -87,19 +87,45 @@ export async function sendPrivateChatMessage(myProfile: Profile, toId: string, b
   await service.sendPrivateMessage(message);
 }
 
-export async function announceBathroomBreak(myProfile: Profile) {
+/**
+ * Toggles the bathroom button: first press announces "I'm heading to the
+ * bathroom" (active alert, shown to everyone); pressing it again broadcasts
+ * "I'm back" with the *same* alert id, which clears it everywhere - not
+ * just on this phone. If "I'm back" never arrives (app closed, out of
+ * range), the alert's own `expiresAt` clears it after a while regardless.
+ */
+export async function toggleBathroomBreak(myProfile: Profile) {
   if (!service) return;
+  const currentId = usePresenceStore.getState().myActiveAlertId;
+
+  if (currentId) {
+    const alert: PresenceAlert = {
+      id: currentId,
+      fromId: myProfile.id,
+      seat: myProfile.seat,
+      status: 'bathroom',
+      active: false,
+      startedAt: Date.now(),
+      expiresAt: Date.now(),
+    };
+    usePresenceStore.getState().applyAlert(alert);
+    await service.sendPresenceAlert(alert);
+    return;
+  }
+
   const alert: PresenceAlert = {
     id: newId(),
     fromId: myProfile.id,
     seat: myProfile.seat,
     status: 'bathroom',
+    active: true,
     startedAt: Date.now(),
     expiresAt: Date.now() + 5 * 60_000,
   };
   // Broadcasts never loop back to the sender (see MeshRouter.send), so - same
   // as the group/private send helpers above - add it locally before sending.
-  usePresenceStore.getState().addAlert(alert);
+  usePresenceStore.getState().applyAlert(alert);
+  usePresenceStore.getState().setMyActiveAlertId(alert.id);
   await service.sendPresenceAlert(alert);
 }
 

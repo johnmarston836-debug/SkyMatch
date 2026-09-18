@@ -33,12 +33,14 @@ export interface ChatMessage {
 export type PresenceStatus = 'bathroom';
 
 export interface PresenceAlert {
-  id: string;
+  id: string; // same id reused for the "back" broadcast that cancels this alert
   fromId: string;
   seat: Seat;
   status: PresenceStatus;
+  /** false means "I'm back" - broadcast with the same id to clear the alert everywhere, not just locally. */
+  active: boolean;
   startedAt: number;
-  /** Alerts are ephemeral; the UI drops them once now() passes this. */
+  /** Safety net in case "I'm back" never arrives (app closed, out of range): the UI drops it once now() passes this regardless. */
   expiresAt: number;
 }
 

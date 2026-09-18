@@ -7,7 +7,8 @@ import { PresenceBanner } from '../../components/PresenceBanner';
 import { SeatBadge } from '../../components/SeatBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useProfileStore } from '../../state/profileStore';
-import { announceBathroomBreak, sendGroupChatMessage, startMesh } from '../../mesh/meshController';
+import { usePresenceStore } from '../../state/presenceStore';
+import { sendGroupChatMessage, startMesh, toggleBathroomBreak } from '../../mesh/meshController';
 import { colorForPeer } from '../../theme';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import type { ChatMessage } from '../../types';
@@ -19,6 +20,7 @@ export function CabinChatScreen({ navigation }: Props) {
   const theme = useAppTheme();
   const myProfile = useProfileStore((state) => state.profile);
   const groupMessages = useChatStore((state) => state.groupMessages);
+  const isBathroomActive = usePresenceStore((state) => state.myActiveAlertId !== null);
   const [draft, setDraft] = useState('');
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
@@ -60,11 +62,15 @@ export function CabinChatScreen({ navigation }: Props) {
       width: 44,
       height: 44,
       borderRadius: radii.pill,
-      backgroundColor: colors.accentAlt,
+      backgroundColor: colors.surfaceAlt,
+      borderWidth: 1,
+      borderColor: colors.border,
       alignItems: 'center' as const,
       justifyContent: 'center' as const,
     },
-    bathroomButtonIcon: { width: 22, height: 22 },
+    bathroomButtonActive: { backgroundColor: colors.accentAlt, borderColor: colors.accentAlt },
+    bathroomButtonIcon: { width: 22, height: 22, tintColor: colors.textMuted },
+    bathroomButtonIconActive: { tintColor: '#FFFFFF' },
     input: {
       flex: 1,
       backgroundColor: colors.surface,
@@ -144,8 +150,15 @@ export function CabinChatScreen({ navigation }: Props) {
       />
 
       <View style={[styles.inputRow, { paddingBottom: insets.bottom + theme.spacing(1) }]}>
-        <Pressable style={styles.bathroomButton} onPress={() => void announceBathroomBreak(myProfile)}>
-          <Image source={require('../../assets/icons/bathroom.png')} style={styles.bathroomButtonIcon} resizeMode="contain" />
+        <Pressable
+          style={[styles.bathroomButton, isBathroomActive && styles.bathroomButtonActive]}
+          onPress={() => void toggleBathroomBreak(myProfile)}
+        >
+          <Image
+            source={require('../../assets/icons/bathroom.png')}
+            style={[styles.bathroomButtonIcon, isBathroomActive && styles.bathroomButtonIconActive]}
+            resizeMode="contain"
+          />
         </Pressable>
         <TextInput
           style={styles.input}
