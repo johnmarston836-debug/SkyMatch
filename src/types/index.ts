@@ -30,7 +30,7 @@ export interface ChatMessage {
   viaMesh?: boolean;
 }
 
-export type PresenceStatus = 'bathroom';
+export type PresenceStatus = 'standing';
 
 export interface PresenceAlert {
   id: string; // same id reused for the "back" broadcast that cancels this alert

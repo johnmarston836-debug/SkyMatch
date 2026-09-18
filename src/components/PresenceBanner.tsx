@@ -4,7 +4,7 @@ import { usePresenceStore } from '../state/presenceStore';
 import { useThemedStyles } from '../theme/ThemeContext';
 import { formatSeat } from '../utils/seat';
 
-/** Stack of "seat X is in the bathroom" banners above the group chat, self-clearing as alerts expire. */
+/** Stack of "seat X is standing up" banners above the group chat, self-clearing as alerts expire. */
 export function PresenceBanner() {
   const alerts = usePresenceStore((state) => state.alerts);
   const pruneExpired = usePresenceStore((state) => state.pruneExpired);
@@ -38,9 +38,9 @@ export function PresenceBanner() {
     <View style={styles.container}>
       {active.map((alert) => (
         <View key={alert.id} style={styles.banner}>
-          <Image source={require('../assets/icons/bathroom.png')} style={styles.icon} resizeMode="contain" />
+          <Image source={require('../assets/icons/standing.png')} style={styles.icon} resizeMode="contain" />
           <Text style={styles.text}>
-            <Text style={styles.seat}>{formatSeat(alert.seat)}</Text> va al baño
+            <Text style={styles.seat}>{formatSeat(alert.seat)}</Text> está de pie
           </Text>
         </View>
       ))}

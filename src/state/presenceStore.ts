@@ -3,7 +3,7 @@ import type { PresenceAlert } from '../types';
 
 interface PresenceState {
   alerts: Record<string, PresenceAlert>; // keyed by alert id, active ones only
-  /** The alert id *I* currently have active, if any - drives the bathroom button's on/off look. */
+  /** The alert id *I* currently have active, if any - drives the stand-up button's on/off look. */
   myActiveAlertId: string | null;
 
   /** Adds an active alert, or removes it (by id) when it arrives as "I'm back". */

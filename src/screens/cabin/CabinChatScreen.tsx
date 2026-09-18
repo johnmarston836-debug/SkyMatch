@@ -8,7 +8,7 @@ import { SeatBadge } from '../../components/SeatBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useProfileStore } from '../../state/profileStore';
 import { usePresenceStore } from '../../state/presenceStore';
-import { sendGroupChatMessage, startMesh, toggleBathroomBreak } from '../../mesh/meshController';
+import { sendGroupChatMessage, startMesh, toggleStandUp } from '../../mesh/meshController';
 import { colorForPeer } from '../../theme';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import type { ChatMessage } from '../../types';
@@ -20,7 +20,7 @@ export function CabinChatScreen({ navigation }: Props) {
   const theme = useAppTheme();
   const myProfile = useProfileStore((state) => state.profile);
   const groupMessages = useChatStore((state) => state.groupMessages);
-  const isBathroomActive = usePresenceStore((state) => state.myActiveAlertId !== null);
+  const isStanding = usePresenceStore((state) => state.myActiveAlertId !== null);
   const [draft, setDraft] = useState('');
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
@@ -58,7 +58,7 @@ export function CabinChatScreen({ navigation }: Props) {
       borderTopWidth: 1,
       borderTopColor: colors.border,
     },
-    bathroomButton: {
+    standButton: {
       width: 44,
       height: 44,
       borderRadius: radii.pill,
@@ -68,9 +68,9 @@ export function CabinChatScreen({ navigation }: Props) {
       alignItems: 'center' as const,
       justifyContent: 'center' as const,
     },
-    bathroomButtonActive: { backgroundColor: colors.accentAlt, borderColor: colors.accentAlt },
-    bathroomButtonIcon: { width: 22, height: 22, tintColor: colors.textMuted },
-    bathroomButtonIconActive: { tintColor: '#FFFFFF' },
+    standButtonActive: { backgroundColor: colors.accentAlt, borderColor: colors.accentAlt },
+    standButtonIcon: { width: 22, height: 22, tintColor: colors.textMuted },
+    standButtonIconActive: { tintColor: '#FFFFFF' },
     input: {
       flex: 1,
       backgroundColor: colors.surface,
@@ -151,12 +151,12 @@ export function CabinChatScreen({ navigation }: Props) {
 
       <View style={[styles.inputRow, { paddingBottom: insets.bottom + theme.spacing(1) }]}>
         <Pressable
-          style={[styles.bathroomButton, isBathroomActive && styles.bathroomButtonActive]}
-          onPress={() => void toggleBathroomBreak(myProfile)}
+          style={[styles.standButton, isStanding && styles.standButtonActive]}
+          onPress={() => void toggleStandUp(myProfile)}
         >
           <Image
-            source={require('../../assets/icons/bathroom.png')}
-            style={[styles.bathroomButtonIcon, isBathroomActive && styles.bathroomButtonIconActive]}
+            source={require('../../assets/icons/standing.png')}
+            style={[styles.standButtonIcon, isStanding && styles.standButtonIconActive]}
             resizeMode="contain"
           />
         </Pressable>
