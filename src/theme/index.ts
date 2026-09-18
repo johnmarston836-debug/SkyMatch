@@ -1,11 +1,11 @@
 /**
  * Deliberately minimal: white in light mode, black in dark mode, no accent
  * tint anywhere in the base palette. Color is spent only on the handful of
- * things that need to stand out - `accent` (send button, primary CTAs) and
- * `accentAlt` (stand-up button only - a distinct blue so the two buttons
- * sitting side by side in the cabin chat don't blend together) - plus each
- * person's name in chat (see `colorForPeer` below). Everything else
- * (badges, links, bubbles, selection states) stays grayscale.
+ * things that need to stand out - `accent` (send button, passengers button,
+ * primary CTAs) and `accentAlt` (stand-up button only - a distinct blue so
+ * the two buttons sitting side by side in the cabin chat don't blend
+ * together) - plus each person's name in chat (see `colorForPeer` below).
+ * Everything else (badges, bubbles, selection states) stays grayscale.
  */
 export const lightColors = {
   background: '#FFFFFF',
@@ -14,7 +14,7 @@ export const lightColors = {
   border: '#D8D8D8',
   text: '#0A0A0A',
   textMuted: '#6B6B6B',
-  accent: '#2563EB', // send button, primary CTAs
+  accent: '#2563EB', // send button, passengers button, primary CTAs
   accentAlt: '#0891B2', // stand-up button only
   danger: '#E5484D',
 };

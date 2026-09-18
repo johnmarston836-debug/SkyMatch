@@ -9,6 +9,7 @@ import { useChatStore } from '../../state/chatStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
 import { useProfileStore } from '../../state/profileStore';
 import { sendPrivateChatMessage } from '../../mesh/meshController';
+import { colorForPeer } from '../../theme';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import type { ChatMessage } from '../../types';
 
@@ -31,7 +32,20 @@ export function ChatScreen({ route, navigation }: Props) {
   const [draft, setDraft] = useState('');
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
-    peerHeader: { paddingHorizontal: spacing(2), paddingTop: spacing(1) },
+    peerHeader: {
+      marginHorizontal: spacing(2),
+      marginTop: spacing(1),
+      padding: spacing(1.5),
+      gap: spacing(0.5),
+      backgroundColor: colors.surface,
+      borderRadius: radii.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    peerHeaderRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: spacing(1) },
+    peerName: { fontSize: 15, fontWeight: '700' as const },
+    peerContact: { ...typography.body, fontSize: 14 },
+    peerContactEmpty: { ...typography.subtitle, fontSize: 13 },
     list: { padding: spacing(2), gap: spacing(1) },
     bubbleRow: { flexDirection: 'row' as const, marginBottom: spacing(1) },
     bubbleRowMine: { justifyContent: 'flex-end' as const },
@@ -124,7 +138,15 @@ export function ChatScreen({ route, navigation }: Props) {
     >
       {peer?.profile && (
         <View style={styles.peerHeader}>
-          <SeatBadge seat={peer.profile.seat} />
+          <View style={styles.peerHeaderRow}>
+            <SeatBadge seat={peer.profile.seat} />
+            <Text style={[styles.peerName, { color: colorForPeer(peerId) }]}>{peer.profile.nickname}</Text>
+          </View>
+          {peer.profile.contact ? (
+            <Text style={styles.peerContact}>{peer.profile.contact}</Text>
+          ) : (
+            <Text style={styles.peerContactEmpty}>No ha compartido contacto</Text>
+          )}
         </View>
       )}
       <FlatList data={messages} keyExtractor={(item) => item.id} renderItem={renderItem} contentContainerStyle={styles.list} />

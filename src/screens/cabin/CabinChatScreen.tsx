@@ -33,7 +33,14 @@ export function CabinChatScreen({ navigation }: Props) {
     },
     title: typography.title,
     headerSubtitle: { ...typography.subtitle, fontSize: 13, marginTop: spacing(0.5) },
-    passengersLink: { color: colors.text, fontWeight: '700' as const, marginTop: spacing(0.5) },
+    passengersButton: {
+      backgroundColor: colors.accent,
+      borderRadius: radii.pill,
+      paddingHorizontal: spacing(2),
+      paddingVertical: spacing(1),
+      marginTop: spacing(0.5),
+    },
+    passengersButtonText: { color: '#FFFFFF', fontWeight: '700' as const, fontSize: 13 },
     bannerArea: { paddingHorizontal: spacing(3) },
     list: { padding: spacing(3), flexGrow: 1 },
     emptyState: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, gap: spacing(1), paddingTop: spacing(8) },
@@ -126,8 +133,8 @@ export function CabinChatScreen({ navigation }: Props) {
           <Text style={styles.title}>Cabina</Text>
           <Text style={styles.headerSubtitle}>Chat de todo el avión, sin wifi</Text>
         </View>
-        <Pressable onPress={() => navigation.navigate('Passengers')}>
-          <Text style={styles.passengersLink}>Pasajeros</Text>
+        <Pressable style={styles.passengersButton} onPress={() => navigation.navigate('Passengers')}>
+          <Text style={styles.passengersButtonText}>Pasajeros</Text>
         </Pressable>
       </View>
 
