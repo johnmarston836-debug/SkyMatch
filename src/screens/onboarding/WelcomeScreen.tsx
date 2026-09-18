@@ -14,10 +14,10 @@ export function WelcomeScreen({ navigation }: Props) {
     <View style={[styles.container, { paddingTop: insets.top + spacing(6), paddingBottom: insets.bottom + spacing(3) }]}>
       <View>
         <Text style={styles.badge}>✈️ MODO AVIÓN</Text>
-        <Text style={[typography.title, styles.title]}>Conoce a quien vuela contigo</Text>
+        <Text style={[typography.title, styles.title]}>El chat de todo tu vuelo</Text>
         <Text style={[typography.subtitle, styles.subtitle]}>
-          SkyMatch funciona sin wifi ni datos: encuentra y chatea con otros pasajeros cerca de ti
-          usando la red Bluetooth del propio avión.
+          SkyMatch funciona sin wifi ni datos: un chat común con todos los pasajeros cerca de ti,
+          identificados por su asiento, usando la red Bluetooth del propio avión.
         </Text>
       </View>
 

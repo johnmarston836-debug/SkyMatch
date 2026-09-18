@@ -1,25 +1,28 @@
 import type { Seat } from '../types';
 import type { BleTransport } from './BleTransport';
+import { BROADCAST_ID } from './protocol';
 
 interface SimulatedPeer {
   peerId: string;
   seat: Seat;
+  nickname: string;
   rssi: number;
 }
 
 const SIMULATED_PEERS: SimulatedPeer[] = [
-  { peerId: 'sim-mia', seat: { row: 14, letter: 'A' }, rssi: -52 },
-  { peerId: 'sim-leo', seat: { row: 14, letter: 'C' }, rssi: -61 },
-  { peerId: 'sim-noa', seat: { row: 16, letter: 'F' }, rssi: -70 },
-  { peerId: 'sim-max', seat: { row: 9, letter: 'D' }, rssi: -58 },
+  { peerId: 'sim-mia', seat: { row: 14, letter: 'A' }, nickname: 'Mia', rssi: -52 },
+  { peerId: 'sim-leo', seat: { row: 14, letter: 'C' }, nickname: 'Leo', rssi: -61 },
+  { peerId: 'sim-noa', seat: { row: 16, letter: 'F' }, nickname: 'Noa', rssi: -70 },
+  { peerId: 'sim-max', seat: { row: 9, letter: 'D' }, nickname: 'Max', rssi: -58 },
 ];
 
+const GROUP_LINES = ['¿Alguien sabe si hay wifi en este vuelo? 😅', 'Menuda turbulencia hace un rato', '¿A qué hora aterrizamos?'];
+
 /**
- * Deterministic in-memory simulation so the swipe deck, matching and chat
- * flows can be built and demoed without two physical phones. Every
- * "simulated peer" also echoes back a like once yours is sent, so a match
- * always triggers a few seconds later - useful for demoing the match/chat
- * screens end to end.
+ * Deterministic in-memory simulation so the cabin group chat, private
+ * messages and presence alerts can be built and demoed without two physical
+ * phones. Simulated peers announce themselves, drop a line or two in the
+ * group chat, and echo back private messages sent to them.
  */
 export class MockBleTransport implements BleTransport {
   private peerSeenListeners = new Set<(peerId: string, rssi: number, seat: Seat | null) => void>();
@@ -30,11 +33,32 @@ export class MockBleTransport implements BleTransport {
   async start(myPeerId: string): Promise<void> {
     this.myPeerId = myPeerId;
     SIMULATED_PEERS.forEach((peer, index) => {
-      const delay = 800 + index * 650;
-      const timer = setTimeout(() => {
-        this.peerSeenListeners.forEach((listener) => listener(peer.peerId, peer.rssi, peer.seat));
-      }, delay);
-      this.timers.push(timer as unknown as ReturnType<typeof setInterval>);
+      const seenDelay = 800 + index * 650;
+      this.timers.push(
+        setTimeout(() => {
+          this.peerSeenListeners.forEach((listener) => listener(peer.peerId, peer.rssi, peer.seat));
+          this.deliver(this.makeEnvelope('profile', peer, { id: peer.peerId, seat: peer.seat, nickname: peer.nickname }));
+        }, seenDelay) as unknown as ReturnType<typeof setInterval>,
+      );
+
+      const chatDelay = 4000 + index * 3000;
+      if (index < GROUP_LINES.length) {
+        this.timers.push(
+          setTimeout(() => {
+            this.deliver(
+              this.makeEnvelope('chat', peer, {
+                id: `${peer.peerId}-group-${Date.now()}`,
+                scope: 'group',
+                fromId: peer.peerId,
+                fromSeat: peer.seat,
+                fromNickname: peer.nickname,
+                body: GROUP_LINES[index],
+                sentAt: Date.now(),
+              }),
+            );
+          }, chatDelay) as unknown as ReturnType<typeof setInterval>,
+        );
+      }
     });
   }
 
@@ -60,63 +84,58 @@ export class MockBleTransport implements BleTransport {
   }
 
   async sendToPeer(peerId: string, raw: string): Promise<boolean> {
-    const isSimulated = SIMULATED_PEERS.some((peer) => peer.peerId === peerId);
-    if (!isSimulated) return false;
-
-    // Echo the packet straight back so the sender can observe delivery in
-    // the mock, and auto-reply with a like/message so demo flows complete.
-    setTimeout(() => this.autoReply(peerId, raw), 600 + Math.random() * 900);
+    const peer = SIMULATED_PEERS.find((candidate) => candidate.peerId === peerId);
+    if (!peer) return false;
+    setTimeout(() => this.autoReply(peer, raw), 600 + Math.random() * 900);
     return true;
   }
 
   async broadcast(raw: string, excludePeerId?: string): Promise<void> {
     SIMULATED_PEERS.filter((peer) => peer.peerId !== excludePeerId).forEach((peer) => {
-      setTimeout(() => this.autoReply(peer.peerId, raw), 600 + Math.random() * 900);
+      setTimeout(() => this.autoReply(peer, raw), 600 + Math.random() * 900);
     });
   }
 
-  private autoReply(peerId: string, raw: string) {
+  private autoReply(peer: SimulatedPeer, raw: string) {
     try {
       const envelope = JSON.parse(raw);
-      if (envelope.kind === 'swipe' && envelope.payload?.direction === 'like') {
-        this.envelopeListeners.forEach((listener) =>
-          listener(
-            JSON.stringify({
-              id: `${peerId}-like-${Date.now()}`,
-              kind: 'swipe',
-              fromId: peerId,
-              toId: this.myPeerId,
-              ttl: 1,
-              payload: { fromId: peerId, toId: this.myPeerId, direction: 'like', timestamp: Date.now() },
-            }),
-            peerId,
-          ),
-        );
-      }
-      if (envelope.kind === 'chat') {
-        this.envelopeListeners.forEach((listener) =>
-          listener(
-            JSON.stringify({
-              id: `${peerId}-msg-${Date.now()}`,
-              kind: 'chat',
-              fromId: peerId,
-              toId: this.myPeerId,
-              ttl: 1,
-              payload: {
-                id: `${peerId}-${Date.now()}`,
-                matchId: envelope.payload.matchId,
-                fromId: peerId,
-                toId: this.myPeerId,
-                body: '¡Hola! 👋 (respuesta simulada)',
-                sentAt: Date.now(),
-              },
-            }),
-            peerId,
-          ),
-        );
-      }
+      if (envelope.kind !== 'chat' || envelope.payload?.scope !== 'private') return;
+
+      this.deliver(
+        this.makeEnvelope(
+          'chat',
+          peer,
+          {
+            id: `${peer.peerId}-reply-${Date.now()}`,
+            scope: 'private',
+            fromId: peer.peerId,
+            fromSeat: peer.seat,
+            fromNickname: peer.nickname,
+            toId: this.myPeerId,
+            body: '¡Hola! 👋 (respuesta simulada)',
+            sentAt: Date.now(),
+          },
+          this.myPeerId,
+        ),
+      );
     } catch {
       // ignore malformed mock traffic
     }
+  }
+
+  private makeEnvelope(kind: 'profile' | 'chat' | 'presence', peer: SimulatedPeer, payload: unknown, toId: string = BROADCAST_ID) {
+    return {
+      id: `${peer.peerId}-${kind}-${Date.now()}-${Math.random()}`,
+      kind,
+      fromId: peer.peerId,
+      toId,
+      ttl: 1,
+      payload,
+    };
+  }
+
+  private deliver(envelope: object) {
+    const raw = JSON.stringify(envelope);
+    this.envelopeListeners.forEach((listener) => listener(raw, (envelope as { fromId: string }).fromId));
   }
 }

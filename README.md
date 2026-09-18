@@ -1,15 +1,17 @@
 # SkyMatch
 
-Tinder-style matching and chat for passengers on the same flight, running entirely over Bluetooth — no wifi, no cellular data, no server. Onboarding asks for your seat so a match knows where to find you in the cabin.
+A common group chat for every passenger on the same flight, running entirely over Bluetooth — no wifi, no cellular data, no server. Your seat is your identity: onboarding asks for it, and every message in the cabin chat is labelled by seat. Tap anyone to open a private 1:1 chat, which (unlike the group chat) can also carry a small image.
 
 ## How it works
 
 There is no backend. Every phone is simultaneously:
 
-- a **BLE peripheral**, continuously advertising a tiny payload (protocol version + short peer id + packed seat byte) so it shows up on nearby swipe decks without needing a connection;
-- a **BLE central**, scanning for those adverts and opening a GATT connection to exchange full profiles, swipes and chat messages.
+- a **BLE peripheral**, continuously advertising a tiny payload (protocol version + short peer id + packed seat byte) so it shows up to others without needing a connection;
+- a **BLE central**, scanning for those adverts and opening a GATT connection to exchange profiles, the group chat, private messages and presence alerts (the "I'm heading to the bathroom" button).
 
-Two phones directly in range talk to each other straight away. A match whose phone has moved out of range is reached by **flood routing**: any other phone running the app that's still in range of both relays the message on their behalf, decrementing a hop counter (TTL) and deduping by message id, the same approach offline mesh chat apps like Bridgefy or Briar use. See `src/mesh/protocol.ts` for the wire format and `src/mesh/MeshRouter.ts` for the routing logic.
+Two phones directly in range talk to each other straight away. The group chat and presence alerts are **broadcast**: every node that receives one delivers it locally *and* keeps flooding it outward, so it reaches the whole cabin, hop by hop, decrementing a TTL and deduping by message id along the way - the same approach offline mesh chat apps like Bridgefy or Briar use. A private message instead targets one peer id directly, relayed the same way if that person isn't in direct range. See `src/mesh/protocol.ts` for the wire format and `src/mesh/MeshRouter.ts` for the routing logic.
+
+**Images only ever travel privately, never in the group chat** - broadcasting a photo means every relay hop re-sends the whole thing to everyone else's phone, which would flood the cabin's Bluetooth for one picture. A private image only costs the direct connection (or few hops) between the two people actually talking. See `MeshService.sendPrivateMessage` for the full reasoning.
 
 ```
 src/mesh/
@@ -24,15 +26,15 @@ src/mesh/
 
 ### Mock vs. real mesh
 
-`USE_MOCK_MESH` in `src/mesh/meshController.ts` defaults to `true`: the app runs against `MockBleTransport`, which simulates a handful of nearby passengers so the full swipe → match → chat flow can be built, demoed and tested on a single device or simulator. Flip it to `false` to switch to `RealBleTransport` on real hardware.
+`USE_MOCK_MESH` in `src/mesh/meshController.ts` defaults to `true`: the app runs against `MockBleTransport`, which simulates a handful of nearby passengers (profile broadcasts, a couple of group chat lines, private-message echoes) so the full cabin chat → private chat flow can be built, demoed and tested on a single device or simulator. Flip it to `false` to switch to `RealBleTransport` on real hardware.
 
 **Read this before testing on real phones:** `react-native-ble-plx` only implements the BLE central role. Peripheral/advertising support comes from `react-native-ble-advertiser`, which is solid on Android but not reliable for background/foreground GATT serving on iOS — a production iOS build needs a small native module around `CBPeripheralManager` (Swift). `RealBleTransport` is written and type-checked but, like any BLE code, can only really be verified on two physical phones — treat it as a reviewed reference implementation, not a tested one, until you've done that.
 
 ### Data model
 
-- `Profile` (name, age, bio, interests, seat) is created once during onboarding and stored locally (`src/state/profileStore.ts`, AsyncStorage) — it never leaves the device except as the exact payload sent to phones you're actually near.
-- Swipes and matches (`src/state/discoveryStore.ts`, `src/state/matchStore.ts`) are in-memory per session: there is no server to persist a "likes you" list, so a like only becomes a match while both phones are running the app.
-- Chat history (`src/state/chatStore.ts`) is also in-memory per session for the same reason — there's nothing to sync it from once the app is closed.
+- `Profile` (seat, nickname) is created once during onboarding and stored locally (`src/state/profileStore.ts`, AsyncStorage) — the seat is the real identity; the nickname just labels it in chat.
+- Discovered peers (`src/state/discoveryStore.ts`) and messages (`src/state/chatStore.ts`: `groupMessages` plus `privateMessagesByPeer`) are in-memory per session — there is no server, so there's nothing to sync history from once the app is closed.
+- Presence alerts (`src/state/presenceStore.ts`) are even more ephemeral: each one carries its own `expiresAt` and the UI (`PresenceBanner`) prunes expired ones on a timer, same as the button that raises them (`announceBathroomBreak`) being a plain manual toggle rather than any kind of sensor-based detection.
 
 ## Getting Started
 

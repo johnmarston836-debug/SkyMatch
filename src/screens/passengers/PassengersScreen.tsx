@@ -3,26 +3,33 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
-import { useMatchStore } from '../../state/matchStore';
+import { SeatBadge } from '../../components/SeatBadge';
+import { useDiscoveryStore } from '../../state/discoveryStore';
 import { colors, radii, spacing, typography } from '../../theme';
-import { formatSeat } from '../../utils/seat';
-import type { Match } from '../../types';
+import type { DiscoveredPeer } from '../../types';
 
-type Props = NativeStackScreenProps<MainStackParamList, 'Matches'>;
+type Props = NativeStackScreenProps<MainStackParamList, 'Passengers'>;
 
-export function MatchesListScreen({ navigation }: Props) {
+export function PassengersScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
-  const matches = useMatchStore((state) => state.matches);
-  const list = useMemo(() => Object.values(matches).sort((a, b) => b.matchedAt - a.matchedAt), [matches]);
+  const peers = useDiscoveryStore((state) => state.peers);
 
-  const renderItem = ({ item }: { item: Match }) => (
-    <Pressable style={styles.row} onPress={() => navigation.navigate('Chat', { matchId: item.id })}>
+  const list = useMemo(
+    () =>
+      Object.values(peers)
+        .filter((peer) => peer.profile)
+        .sort((a, b) => b.lastSeenAt - a.lastSeenAt),
+    [peers],
+  );
+
+  const renderItem = ({ item }: { item: DiscoveredPeer }) => (
+    <Pressable style={styles.row} onPress={() => navigation.navigate('Chat', { peerId: item.peerId })}>
       <View style={styles.avatar}>
-        <Text style={styles.avatarText}>{item.peerProfile.name.charAt(0).toUpperCase()}</Text>
+        <Text style={styles.avatarText}>{(item.profile?.nickname ?? '?').charAt(0).toUpperCase()}</Text>
       </View>
       <View style={styles.rowInfo}>
-        <Text style={styles.rowName}>{item.peerProfile.name}</Text>
-        <Text style={styles.rowSeat}>Asiento {formatSeat(item.peerProfile.seat)}</Text>
+        <Text style={styles.rowName}>{item.profile?.nickname}</Text>
+        {item.profile && <SeatBadge seat={item.profile.seat} muted />}
       </View>
     </Pressable>
   );
@@ -33,17 +40,17 @@ export function MatchesListScreen({ navigation }: Props) {
         <Pressable onPress={() => navigation.goBack()}>
           <Text style={styles.backLink}>← Volver</Text>
         </Pressable>
-        <Text style={typography.title}>Matches</Text>
+        <Text style={typography.title}>Pasajeros</Text>
         <View style={styles.headerSpacer} />
       </View>
 
       {list.length === 0 ? (
         <View style={styles.emptyState}>
-          <Text style={styles.emptyEmoji}>💌</Text>
-          <Text style={typography.subtitle}>Todavía no tienes matches en este vuelo.</Text>
+          <Text style={styles.emptyEmoji}>📡</Text>
+          <Text style={typography.subtitle}>Buscando pasajeros cerca…</Text>
         </View>
       ) : (
-        <FlatList data={list} keyExtractor={(item) => item.id} renderItem={renderItem} contentContainerStyle={styles.list} />
+        <FlatList data={list} keyExtractor={(item) => item.peerId} renderItem={renderItem} contentContainerStyle={styles.list} />
       )}
     </View>
   );
@@ -70,7 +77,6 @@ const styles = StyleSheet.create({
   },
   avatar: { width: 48, height: 48, borderRadius: radii.pill, backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
   avatarText: { color: colors.text, fontWeight: '700', fontSize: 18 },
-  rowInfo: { flex: 1 },
+  rowInfo: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   rowName: { ...typography.body, fontWeight: '700' },
-  rowSeat: { ...typography.subtitle, fontSize: 13 },
 });

@@ -4,8 +4,9 @@ import { Platform } from 'react-native';
 import { Buffer } from 'buffer';
 import type { Seat } from '../types';
 import type { BleTransport } from './BleTransport';
-import { chunk, reassemble, SERVICE_UUID, PROFILE_CHAR_UUID } from './protocol';
+import { frameChunks, encodeFrame, decodeFrame, reassembleFrames, SERVICE_UUID, PROFILE_CHAR_UUID } from './protocol';
 import { packSeat, unpackSeat } from '../utils/seat';
+import { newId } from '../utils/id';
 
 // react-native-ble-advertiser injects these as runtime constants on its native
 // module, but its type declarations don't expose them - values match the
@@ -31,7 +32,9 @@ const ADVERTISE_TX_POWER_MEDIUM = 2;
  *   scan-only (you can see people, they may not see you) on iOS until that
  *   native module is written.
  * - GATT throughput is small (a few hundred bytes/connection interval), so
- *   payloads are chunked with `chunk`/`reassemble` from protocol.ts.
+ *   payloads are split into `Frame`s (protocol.ts) tagged with a per-send
+ *   frame id and reassembled by index on the other end - needed for a
+ *   private message's image, which is many chunks, not just one.
  *
  * None of this can be exercised by an automated agent without real
  * hardware; treat this class as a reviewed-but-untested reference
@@ -46,7 +49,8 @@ export class RealBleTransport implements BleTransport {
   private envelopeListeners = new Set<(raw: string, fromPeerId: string) => void>();
   private staleCheckTimer: ReturnType<typeof setInterval> | null = null;
   private lastSeenAt = new Map<string, number>();
-  private pendingChunks = new Map<string, string[]>();
+  /** frameId -> (chunk index -> chunk part), across all devices - frame ids are globally unique so one map is enough. */
+  private pendingFrames = new Map<string, Map<number, string>>();
 
   async start(myPeerId: string, seat: Seat | null): Promise<void> {
     await this.startAdvertising(myPeerId, seat);
@@ -87,11 +91,11 @@ export class RealBleTransport implements BleTransport {
   async sendToPeer(peerId: string, raw: string): Promise<boolean> {
     const device = this.connectedDevices.get(peerId);
     if (!device) return false;
-    for (const part of chunk(raw)) {
+    for (const frame of frameChunks(raw, newId())) {
       await device.writeCharacteristicWithResponseForService(
         SERVICE_UUID,
         PROFILE_CHAR_UUID,
-        Buffer.from(part, 'utf8').toString('base64'),
+        Buffer.from(encodeFrame(frame), 'utf8').toString('base64'),
       );
     }
     return true;
@@ -149,15 +153,16 @@ export class RealBleTransport implements BleTransport {
 
     connected.monitorCharacteristicForService(SERVICE_UUID, PROFILE_CHAR_UUID, (error, characteristic) => {
       if (error || !characteristic?.value) return;
-      const part = Buffer.from(characteristic.value, 'base64').toString('utf8');
-      const buffered = [...(this.pendingChunks.get(device.id) ?? []), part];
-      this.pendingChunks.set(device.id, buffered);
+      const frame = decodeFrame(Buffer.from(characteristic.value, 'base64').toString('utf8'));
+      if (!frame) return;
 
-      // A real implementation frames chunks with a length/end marker; this
-      // reference build assumes chat/profile payloads arrive as a single
-      // characteristic write per app-level message for simplicity.
-      const raw = reassemble(buffered);
-      this.pendingChunks.set(device.id, []);
+      const parts = this.pendingFrames.get(frame.id) ?? new Map<number, string>();
+      parts.set(frame.index, frame.part);
+      this.pendingFrames.set(frame.id, parts);
+
+      const raw = reassembleFrames(parts, frame.total);
+      if (raw === null) return; // still waiting on more chunks of this frame
+      this.pendingFrames.delete(frame.id);
       this.envelopeListeners.forEach((listener) => listener(raw, device.id));
     });
 

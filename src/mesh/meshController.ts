@@ -2,10 +2,11 @@ import { MeshService } from './MeshService';
 import { MockBleTransport } from './MockBleTransport';
 import { RealBleTransport } from './RealBleTransport';
 import { useDiscoveryStore } from '../state/discoveryStore';
-import { useMatchStore } from '../state/matchStore';
 import { useChatStore } from '../state/chatStore';
+import { usePresenceStore } from '../state/presenceStore';
 import { requestBlePermissions } from '../utils/permissions';
-import type { Profile } from '../types';
+import { newId } from '../utils/id';
+import type { ChatMessage, Profile } from '../types';
 
 /** Flip to false for real-device builds once you're testing on hardware. */
 export const USE_MOCK_MESH = true;
@@ -22,8 +23,10 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   service = new MeshService(transport, myProfile.id);
 
   service.on('peerSeen', (peerId, seat) => {
+    const isNewPeer = !useDiscoveryStore.getState().peers[peerId];
     useDiscoveryStore.getState().upsertPeer(peerId, seat);
-    void service?.sendProfile(peerId, myProfile);
+    // Broadcast (not targeted) so every newcomer picks it up too, not just this one peer.
+    if (isNewPeer) void service?.broadcastProfile(myProfile);
   });
 
   service.on('peerLost', (peerId) => {
@@ -34,36 +37,59 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
     useDiscoveryStore.getState().setProfile(peerId, profile);
   });
 
-  service.on('swipe', (action) => {
-    if (action.direction !== 'like') return;
-    const discovery = useDiscoveryStore.getState();
-    discovery.recordIncomingLike(action.fromId);
-    if (discovery.hasMutualLike(action.fromId)) {
-      const peer = discovery.peers[action.fromId];
-      if (peer?.profile) useMatchStore.getState().addMatch(myProfile.id, action.fromId, peer.profile);
+  service.on('message', (message) => {
+    if (message.scope === 'group') {
+      useChatStore.getState().addGroupMessage({ ...message, viaMesh: true });
+    } else {
+      const peerId = message.fromId === myProfile.id ? message.toId! : message.fromId;
+      useChatStore.getState().addPrivateMessage(peerId, { ...message, viaMesh: true });
     }
   });
 
-  service.on('chat', (message) => {
-    useChatStore.getState().addMessage({ ...message, viaMesh: true });
+  service.on('presence', (alert) => {
+    usePresenceStore.getState().addAlert(alert);
   });
 
   await service.start(myProfile.seat);
+  await service.broadcastProfile(myProfile);
   return service;
 }
 
-/** Sends a like/pass and creates the match locally the moment it becomes mutual. */
-export async function swipeOn(myProfile: Profile, peerId: string, direction: 'like' | 'pass') {
+export async function sendGroupChatMessage(myProfile: Profile, body: string) {
   if (!service) return;
-  const discovery = useDiscoveryStore.getState();
-  if (direction === 'like') {
-    discovery.recordOutgoingLike(peerId);
-    if (discovery.hasMutualLike(peerId)) {
-      const peer = discovery.peers[peerId];
-      if (peer?.profile) useMatchStore.getState().addMatch(myProfile.id, peerId, peer.profile);
-    }
-  }
-  await service.sendSwipe(peerId, direction);
+  const message: ChatMessage = {
+    id: newId(),
+    scope: 'group',
+    fromId: myProfile.id,
+    fromSeat: myProfile.seat,
+    fromNickname: myProfile.nickname,
+    body,
+    sentAt: Date.now(),
+  };
+  useChatStore.getState().addGroupMessage(message);
+  await service.sendGroupMessage(message);
+}
+
+export async function sendPrivateChatMessage(myProfile: Profile, toId: string, body: string, imageBase64?: string) {
+  if (!service) return;
+  const message: ChatMessage = {
+    id: newId(),
+    scope: 'private',
+    fromId: myProfile.id,
+    fromSeat: myProfile.seat,
+    fromNickname: myProfile.nickname,
+    toId,
+    body,
+    imageBase64,
+    sentAt: Date.now(),
+  };
+  useChatStore.getState().addPrivateMessage(toId, message);
+  await service.sendPrivateMessage(message);
+}
+
+export async function announceBathroomBreak(myProfile: Profile) {
+  if (!service) return;
+  await service.sendPresenceAlert(myProfile.seat, 'bathroom');
 }
 
 export function getMeshService(): MeshService | null {

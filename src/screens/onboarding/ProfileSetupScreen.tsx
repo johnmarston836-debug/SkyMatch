@@ -1,103 +1,59 @@
 import React, { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/RootNavigator';
 import { useProfileStore } from '../../state/profileStore';
 import { colors, radii, spacing, typography } from '../../theme';
+import { formatSeat } from '../../utils/seat';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'ProfileSetup'>;
-
-const INTEREST_OPTIONS = ['Viajar', 'Música', 'Series', 'Deporte', 'Foodie', 'Lectura', 'Fotografía', 'Tech'];
 
 export function ProfileSetupScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets();
   const save = useProfileStore((state) => state.save);
-  const [name, setName] = useState('');
-  const [age, setAge] = useState('');
-  const [bio, setBio] = useState('');
-  const [interests, setInterests] = useState<string[]>([]);
+  const [nickname, setNickname] = useState('');
 
-  const toggleInterest = (interest: string) => {
-    setInterests((current) =>
-      current.includes(interest) ? current.filter((i) => i !== interest) : [...current, interest],
-    );
-  };
-
-  const canContinue = name.trim().length > 0 && Number(age) >= 18;
+  const canContinue = nickname.trim().length > 0;
 
   const handleContinue = async () => {
     if (!canContinue) return;
-    await save({ name: name.trim(), age: Number(age), bio: bio.trim(), interests, seat: route.params.seat });
+    await save({ nickname: nickname.trim(), seat: route.params.seat });
     navigation.getParent()?.navigate('Main');
   };
 
   return (
-    <ScrollView
-      style={[styles.container, { paddingTop: insets.top + spacing(4) }]}
-      contentContainerStyle={{ paddingBottom: insets.bottom + spacing(4) }}
-    >
+    <View style={[styles.container, { paddingTop: insets.top + spacing(4), paddingBottom: insets.bottom + spacing(4) }]}>
       <Text style={typography.label}>PASO 2 DE 2</Text>
-      <Text style={[typography.title, styles.title]}>Tu perfil de vuelo</Text>
+      <Text style={[typography.title, styles.title]}>¿Cómo te llamamos?</Text>
+      <Text style={[typography.subtitle, styles.subtitle]}>
+        En el chat de la cabina te verán como{' '}
+        <Text style={styles.previewSeat}>{formatSeat(route.params.seat)}</Text> — el nombre es solo para
+        acompañarlo.
+      </Text>
 
-      <Text style={styles.fieldLabel}>Nombre</Text>
       <TextInput
         style={styles.input}
-        value={name}
-        onChangeText={setName}
-        placeholder="¿Cómo te llamas?"
+        value={nickname}
+        onChangeText={setNickname}
+        placeholder="Tu nombre o apodo"
         placeholderTextColor={colors.textMuted}
+        maxLength={24}
+        autoFocus
       />
-
-      <Text style={styles.fieldLabel}>Edad</Text>
-      <TextInput
-        style={styles.input}
-        value={age}
-        onChangeText={setAge}
-        placeholder="18+"
-        placeholderTextColor={colors.textMuted}
-        keyboardType="number-pad"
-        maxLength={2}
-      />
-
-      <Text style={styles.fieldLabel}>Sobre ti</Text>
-      <TextInput
-        style={[styles.input, styles.bioInput]}
-        value={bio}
-        onChangeText={setBio}
-        placeholder="Una frase para romper el hielo a 10.000 metros"
-        placeholderTextColor={colors.textMuted}
-        multiline
-        maxLength={140}
-      />
-
-      <Text style={styles.fieldLabel}>Intereses</Text>
-      <View style={styles.chipsRow}>
-        {INTEREST_OPTIONS.map((interest) => {
-          const selected = interests.includes(interest);
-          return (
-            <Pressable
-              key={interest}
-              onPress={() => toggleInterest(interest)}
-              style={[styles.chip, selected && styles.chipSelected]}
-            >
-              <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{interest}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
 
       <Pressable style={[styles.cta, !canContinue && styles.ctaDisabled]} disabled={!canContinue} onPress={handleContinue}>
-        <Text style={styles.ctaText}>Despegar 🛫</Text>
+        <Text style={styles.ctaText}>Entrar a la cabina 🛫</Text>
       </Pressable>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing(3) },
-  title: { marginTop: spacing(1), marginBottom: spacing(3) },
-  fieldLabel: { ...typography.label, marginBottom: spacing(1), marginTop: spacing(2) },
+  title: { marginTop: spacing(1) },
+  subtitle: { marginTop: spacing(1), marginBottom: spacing(4), lineHeight: 22 },
+  previewSeat: { color: colors.primary, fontWeight: '700' },
   input: {
     backgroundColor: colors.surface,
     borderRadius: radii.md,
@@ -108,21 +64,8 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: 15,
   },
-  bioInput: { minHeight: 80, textAlignVertical: 'top' },
-  chipsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing(1) },
-  chip: {
-    paddingHorizontal: spacing(2),
-    paddingVertical: spacing(1),
-    borderRadius: radii.pill,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  chipSelected: { backgroundColor: colors.secondary, borderColor: colors.secondary },
-  chipText: { color: colors.textMuted, fontWeight: '600' },
-  chipTextSelected: { color: colors.background },
   cta: {
-    marginTop: spacing(4),
+    marginTop: 'auto',
     backgroundColor: colors.primary,
     borderRadius: radii.pill,
     paddingVertical: spacing(2),

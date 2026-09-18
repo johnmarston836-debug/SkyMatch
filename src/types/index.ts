@@ -7,48 +7,44 @@ export interface Seat {
 
 export interface Profile {
   id: string; // stable local UUID, regenerated per install (not tied to BLE MAC)
-  name: string;
-  age: number;
-  bio: string;
-  interests: string[];
-  photoUri?: string; // local file URI; never transmitted at full resolution over mesh
   seat: Seat;
+  nickname: string; // shown alongside the seat badge; the seat itself is the real identity
 }
 
-export type SwipeDirection = 'like' | 'pass';
-
-export interface SwipeAction {
-  fromId: string;
-  toId: string;
-  direction: SwipeDirection;
-  timestamp: number;
-}
-
-export interface Match {
-  id: string; // deterministic: sorted(profileAId, profileBId)
-  peerId: string;
-  peerProfile: Profile;
-  matchedAt: number;
-}
+export type MessageScope = 'group' | 'private';
 
 export interface ChatMessage {
   id: string; // uuid, used for mesh dedup
-  matchId: string;
+  scope: MessageScope;
   fromId: string;
-  toId: string;
+  fromSeat: Seat;
+  fromNickname: string;
+  toId?: string; // only set for scope 'private'
   body: string;
+  /** Small (<20KB) JPEG, base64-encoded. Private messages only - see MeshService docs on why group messages never carry images. */
+  imageBase64?: string;
   sentAt: number;
-  deliveredAt?: number;
   /** true when this bubble was relayed to us over the mesh rather than received directly */
   viaMesh?: boolean;
+}
+
+export type PresenceStatus = 'bathroom';
+
+export interface PresenceAlert {
+  id: string;
+  fromId: string;
+  seat: Seat;
+  status: PresenceStatus;
+  startedAt: number;
+  /** Alerts are ephemeral; the UI drops them once now() passes this. */
+  expiresAt: number;
 }
 
 /** Discovered peer, kept fresh by repeated BLE adverts; pruned when it goes stale. */
 export interface DiscoveredPeer {
   peerId: string;
-  profile?: Profile; // populated once full GATT exchange completes
-  seat?: Seat; // available immediately from the advertisement, before full exchange
+  profile?: Profile; // populated once the lightweight profile broadcast is received
+  seat?: Seat; // available immediately from the advertisement, before the profile arrives
   rssi: number;
   lastSeenAt: number;
-  directlyConnectable: boolean;
 }

@@ -4,8 +4,8 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { WelcomeScreen } from '../screens/onboarding/WelcomeScreen';
 import { SeatPickerScreen } from '../screens/onboarding/SeatPickerScreen';
 import { ProfileSetupScreen } from '../screens/onboarding/ProfileSetupScreen';
-import { SwipeDeckScreen } from '../screens/discovery/SwipeDeckScreen';
-import { MatchesListScreen } from '../screens/matches/MatchesListScreen';
+import { CabinChatScreen } from '../screens/cabin/CabinChatScreen';
+import { PassengersScreen } from '../screens/passengers/PassengersScreen';
 import { ChatScreen } from '../screens/chat/ChatScreen';
 import { colors } from '../theme';
 import type { Seat } from '../types';
@@ -17,9 +17,9 @@ export type OnboardingStackParamList = {
 };
 
 export type MainStackParamList = {
-  SwipeDeck: undefined;
-  Matches: undefined;
-  Chat: { matchId: string };
+  CabinChat: undefined;
+  Passengers: undefined;
+  Chat: { peerId: string };
 };
 
 export type RootStackParamList = {
@@ -49,8 +49,8 @@ function OnboardingNavigator() {
 function MainNavigator() {
   return (
     <MainStack.Navigator screenOptions={{ headerShown: false }}>
-      <MainStack.Screen name="SwipeDeck" component={SwipeDeckScreen} />
-      <MainStack.Screen name="Matches" component={MatchesListScreen} />
+      <MainStack.Screen name="CabinChat" component={CabinChatScreen} />
+      <MainStack.Screen name="Passengers" component={PassengersScreen} />
       <MainStack.Screen name="Chat" component={ChatScreen} options={{ headerShown: true, title: '' }} />
     </MainStack.Navigator>
   );

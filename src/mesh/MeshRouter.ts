@@ -1,5 +1,5 @@
 import type { BleTransport } from './BleTransport';
-import { decodeEnvelope, encodeEnvelope, DEFAULT_TTL, SEEN_CACHE_SIZE, type MeshEnvelope } from './protocol';
+import { decodeEnvelope, encodeEnvelope, BROADCAST_ID, DEFAULT_TTL, SEEN_CACHE_SIZE, type MeshEnvelope } from './protocol';
 
 /**
  * Flood routing with a bounded "seen" cache: every node that relays a
@@ -25,10 +25,19 @@ export class MeshRouter {
     return () => this.deliverListeners.delete(listener);
   }
 
-  /** Sends an envelope addressed to `toId`, direct if in range, flooded otherwise. */
+  /**
+   * Sends an envelope. `toId: BROADCAST_ID` floods it to the whole mesh (the
+   * group chat, presence alerts); any other `toId` goes direct if that peer
+   * is in range, flooded toward them otherwise.
+   */
   async send(envelope: Omit<MeshEnvelope, 'ttl'> & { ttl?: number }): Promise<void> {
     const full: MeshEnvelope = { ttl: DEFAULT_TTL, ...envelope };
     this.markSeen(full.id);
+
+    if (full.toId === BROADCAST_ID) {
+      await this.transport.broadcast(encodeEnvelope(full));
+      return;
+    }
 
     const deliveredDirectly = await this.transport.sendToPeer(full.toId, encodeEnvelope(full));
     if (!deliveredDirectly) {
@@ -41,6 +50,14 @@ export class MeshRouter {
     if (!envelope) return;
     if (this.seenSet.has(envelope.id)) return;
     this.markSeen(envelope.id);
+
+    if (envelope.toId === BROADCAST_ID) {
+      this.deliverListeners.forEach((listener) => listener(envelope));
+      if (envelope.ttl > 1) {
+        void this.transport.broadcast(encodeEnvelope({ ...envelope, ttl: envelope.ttl - 1 }), fromPeerId);
+      }
+      return;
+    }
 
     if (envelope.toId === this.myPeerId) {
       this.deliverListeners.forEach((listener) => listener(envelope));
