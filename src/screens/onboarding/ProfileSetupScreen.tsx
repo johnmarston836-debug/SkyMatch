@@ -13,12 +13,13 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets();
   const save = useProfileStore((state) => state.save);
   const [nickname, setNickname] = useState('');
+  const [contact, setContact] = useState('');
 
   const canContinue = nickname.trim().length > 0;
 
   const handleContinue = async () => {
     if (!canContinue) return;
-    await save({ nickname: nickname.trim(), seat: route.params.seat });
+    await save({ nickname: nickname.trim(), seat: route.params.seat, contact: contact.trim() || undefined });
     navigation.getParent()?.navigate('Main');
   };
 
@@ -42,6 +43,20 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
         autoFocus
       />
 
+      <Text style={styles.fieldLabel}>Instagram / WhatsApp (opcional)</Text>
+      <TextInput
+        style={styles.input}
+        value={contact}
+        onChangeText={setContact}
+        placeholder="@tuusuario o tu número"
+        placeholderTextColor={colors.textMuted}
+        maxLength={40}
+      />
+      <Text style={styles.hint}>
+        Solo lo verá quien toque tu nombre en el chat para abrir tu ficha. Déjalo en blanco si prefieres no
+        compartirlo.
+      </Text>
+
       <Pressable style={[styles.cta, !canContinue && styles.ctaDisabled]} disabled={!canContinue} onPress={handleContinue}>
         <Text style={styles.ctaText}>Entrar a la cabina 🛫</Text>
       </Pressable>
@@ -54,6 +69,8 @@ const styles = StyleSheet.create({
   title: { marginTop: spacing(1) },
   subtitle: { marginTop: spacing(1), marginBottom: spacing(4), lineHeight: 22 },
   previewSeat: { color: colors.primary, fontWeight: '700' },
+  fieldLabel: { ...typography.label, marginTop: spacing(3), marginBottom: spacing(1) },
+  hint: { ...typography.subtitle, fontSize: 12, marginTop: spacing(1) },
   input: {
     backgroundColor: colors.surface,
     borderRadius: radii.md,

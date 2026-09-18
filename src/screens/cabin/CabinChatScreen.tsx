@@ -37,7 +37,7 @@ export function CabinChatScreen({ navigation }: Props) {
     return (
       <Pressable
         style={[styles.bubbleRow, mine && styles.bubbleRowMine]}
-        onPress={() => !mine && navigation.navigate('Chat', { peerId: item.fromId })}
+        onPress={() => !mine && navigation.navigate('Profile', { peerId: item.fromId })}
         disabled={mine}
       >
         <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>

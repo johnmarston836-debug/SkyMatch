@@ -9,6 +9,8 @@ export interface Profile {
   id: string; // stable local UUID, regenerated per install (not tied to BLE MAC)
   seat: Seat;
   nickname: string; // shown alongside the seat badge; the seat itself is the real identity
+  /** Optional free-text contact (Instagram handle, WhatsApp number, ...), shown only on the profile screen someone reaches by tapping your name - never in the group chat or the passenger list. */
+  contact?: string;
 }
 
 export type MessageScope = 'group' | 'private';

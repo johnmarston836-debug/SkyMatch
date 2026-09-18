@@ -6,14 +6,15 @@ interface SimulatedPeer {
   peerId: string;
   seat: Seat;
   nickname: string;
+  contact?: string;
   rssi: number;
 }
 
 const SIMULATED_PEERS: SimulatedPeer[] = [
-  { peerId: 'sim-mia', seat: { row: 14, letter: 'A' }, nickname: 'Mia', rssi: -52 },
+  { peerId: 'sim-mia', seat: { row: 14, letter: 'A' }, nickname: 'Mia', contact: '@mia.viaja', rssi: -52 },
   { peerId: 'sim-leo', seat: { row: 14, letter: 'C' }, nickname: 'Leo', rssi: -61 },
   { peerId: 'sim-noa', seat: { row: 16, letter: 'F' }, nickname: 'Noa', rssi: -70 },
-  { peerId: 'sim-max', seat: { row: 9, letter: 'D' }, nickname: 'Max', rssi: -58 },
+  { peerId: 'sim-max', seat: { row: 9, letter: 'D' }, nickname: 'Max', contact: '+34 600 111 222', rssi: -58 },
 ];
 
 const GROUP_LINES = ['¿Alguien sabe si hay wifi en este vuelo? 😅', 'Menuda turbulencia hace un rato', '¿A qué hora aterrizamos?'];
@@ -37,7 +38,9 @@ export class MockBleTransport implements BleTransport {
       this.timers.push(
         setTimeout(() => {
           this.peerSeenListeners.forEach((listener) => listener(peer.peerId, peer.rssi, peer.seat));
-          this.deliver(this.makeEnvelope('profile', peer, { id: peer.peerId, seat: peer.seat, nickname: peer.nickname }));
+          this.deliver(
+            this.makeEnvelope('profile', peer, { id: peer.peerId, seat: peer.seat, nickname: peer.nickname, contact: peer.contact }),
+          );
         }, seenDelay) as unknown as ReturnType<typeof setInterval>,
       );
 
