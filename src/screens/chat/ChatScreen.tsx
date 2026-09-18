@@ -19,6 +19,7 @@ export function ChatScreen({ route, navigation }: Props) {
   const theme = useAppTheme();
   const { peerId } = route.params;
   const peer = useDiscoveryStore((state) => state.peers[peerId]);
+  const peerNickname = peer?.profile?.nickname;
   const messages = useChatStore((state) => state.privateMessagesByPeer[peerId] ?? []);
   const myProfile = useProfileStore((state) => state.profile);
   const [draft, setDraft] = useState('');
@@ -69,8 +70,8 @@ export function ChatScreen({ route, navigation }: Props) {
   }));
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: peer?.profile?.nickname ?? 'Privado' });
-  }, [navigation, peer]);
+    navigation.setOptions({ title: peerNickname ?? 'Privado' });
+  }, [navigation, peerNickname]);
 
   if (!myProfile) return null;
 
