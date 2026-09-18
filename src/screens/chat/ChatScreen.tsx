@@ -14,13 +14,19 @@ import type { ChatMessage } from '../../types';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Chat'>;
 
+// Stable reference for the "no messages yet" case: returning a fresh `[]`
+// from a zustand selector makes React think the snapshot changes on every
+// read (it never `Object.is`-equals the previous one), which spins into an
+// infinite render loop - exactly the failure mode this constant avoids.
+const EMPTY_MESSAGES: ChatMessage[] = [];
+
 export function ChatScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
   const { peerId } = route.params;
   const peer = useDiscoveryStore((state) => state.peers[peerId]);
   const peerNickname = peer?.profile?.nickname;
-  const messages = useChatStore((state) => state.privateMessagesByPeer[peerId] ?? []);
+  const messages = useChatStore((state) => state.privateMessagesByPeer[peerId] ?? EMPTY_MESSAGES);
   const myProfile = useProfileStore((state) => state.profile);
   const [draft, setDraft] = useState('');
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
