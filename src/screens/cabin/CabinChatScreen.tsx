@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, Pressable, Text, TextInput, View } from 'react-native';
+import { FlatList, Image, Pressable, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
@@ -64,7 +64,7 @@ export function CabinChatScreen({ navigation }: Props) {
       alignItems: 'center' as const,
       justifyContent: 'center' as const,
     },
-    bathroomButtonText: { fontSize: 20 },
+    bathroomButtonIcon: { width: 22, height: 22 },
     input: {
       flex: 1,
       backgroundColor: colors.surface,
@@ -145,7 +145,7 @@ export function CabinChatScreen({ navigation }: Props) {
 
       <View style={[styles.inputRow, { paddingBottom: insets.bottom + theme.spacing(1) }]}>
         <Pressable style={styles.bathroomButton} onPress={() => void announceBathroomBreak(myProfile)}>
-          <Text style={styles.bathroomButtonText}>🚻</Text>
+          <Image source={require('../../assets/icons/bathroom.png')} style={styles.bathroomButtonIcon} resizeMode="contain" />
         </Pressable>
         <TextInput
           style={styles.input}

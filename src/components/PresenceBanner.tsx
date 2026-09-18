@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Text, View } from 'react-native';
+import { Image, Text, View } from 'react-native';
 import { usePresenceStore } from '../state/presenceStore';
 import { useThemedStyles } from '../theme/ThemeContext';
 import { formatSeat } from '../utils/seat';
@@ -21,7 +21,7 @@ export function PresenceBanner() {
       paddingHorizontal: spacing(1.5),
       paddingVertical: spacing(1),
     },
-    emoji: { fontSize: 16 },
+    icon: { width: 16, height: 16, tintColor: colors.accentAlt },
     text: { color: colors.textMuted, fontSize: 13, fontWeight: '500' as const },
     seat: { color: colors.accentAlt, fontWeight: '700' as const },
   }));
@@ -38,7 +38,7 @@ export function PresenceBanner() {
     <View style={styles.container}>
       {active.map((alert) => (
         <View key={alert.id} style={styles.banner}>
-          <Text style={styles.emoji}>🚻</Text>
+          <Image source={require('../assets/icons/bathroom.png')} style={styles.icon} resizeMode="contain" />
           <Text style={styles.text}>
             <Text style={styles.seat}>{formatSeat(alert.seat)}</Text> va al baño
           </Text>

@@ -1,7 +1,7 @@
 import type { BleTransport } from './BleTransport';
 import { MeshRouter } from './MeshRouter';
 import { BROADCAST_ID, type MeshEnvelope } from './protocol';
-import type { ChatMessage, PresenceAlert, PresenceStatus, Profile, Seat } from '../types';
+import type { ChatMessage, PresenceAlert, Profile, Seat } from '../types';
 import { newId } from '../utils/id';
 
 type Listeners = {
@@ -78,15 +78,7 @@ export class MeshService {
     await this.router.send({ id: message.id, kind: 'chat', fromId: this.myPeerId, toId: message.toId, payload: message });
   }
 
-  async sendPresenceAlert(seat: Seat, status: PresenceStatus) {
-    const alert: PresenceAlert = {
-      id: newId(),
-      fromId: this.myPeerId,
-      seat,
-      status,
-      startedAt: Date.now(),
-      expiresAt: Date.now() + 5 * 60_000,
-    };
+  async sendPresenceAlert(alert: PresenceAlert) {
     await this.router.send({ id: alert.id, kind: 'presence', fromId: this.myPeerId, toId: BROADCAST_ID, payload: alert });
   }
 

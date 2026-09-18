@@ -6,7 +6,7 @@ import { useChatStore } from '../state/chatStore';
 import { usePresenceStore } from '../state/presenceStore';
 import { requestBlePermissions } from '../utils/permissions';
 import { newId } from '../utils/id';
-import type { ChatMessage, Profile } from '../types';
+import type { ChatMessage, PresenceAlert, Profile } from '../types';
 
 /** Flip to false for real-device builds once you're testing on hardware. */
 export const USE_MOCK_MESH = true;
@@ -89,7 +89,18 @@ export async function sendPrivateChatMessage(myProfile: Profile, toId: string, b
 
 export async function announceBathroomBreak(myProfile: Profile) {
   if (!service) return;
-  await service.sendPresenceAlert(myProfile.seat, 'bathroom');
+  const alert: PresenceAlert = {
+    id: newId(),
+    fromId: myProfile.id,
+    seat: myProfile.seat,
+    status: 'bathroom',
+    startedAt: Date.now(),
+    expiresAt: Date.now() + 5 * 60_000,
+  };
+  // Broadcasts never loop back to the sender (see MeshRouter.send), so - same
+  // as the group/private send helpers above - add it locally before sending.
+  usePresenceStore.getState().addAlert(alert);
+  await service.sendPresenceAlert(alert);
 }
 
 export function getMeshService(): MeshService | null {
