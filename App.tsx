@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StatusBar, View, StyleSheet, ActivityIndicator } from 'react-native';
+import { StatusBar, View, StyleSheet, ActivityIndicator, Image, Text } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RootNavigator } from './src/navigation/RootNavigator';
@@ -31,7 +31,9 @@ function AppContent() {
   if (!hydrated) {
     return (
       <View style={[styles.loading, { backgroundColor: colors.background }]}>
-        <ActivityIndicator color={colors.accent} />
+        <Image source={require('./src/assets/branding/logo.png')} style={styles.logo} resizeMode="contain" />
+        <Text style={[styles.byline, { color: colors.textMuted }]}>by EFS</Text>
+        <ActivityIndicator color={colors.accent} style={styles.spinner} />
       </View>
     );
   }
@@ -47,6 +49,9 @@ function AppContent() {
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  logo: { width: 160, height: 160 },
+  byline: { marginTop: 8, fontSize: 15, fontWeight: '600' },
+  spinner: { marginTop: 24 },
 });
 
 export default App;
