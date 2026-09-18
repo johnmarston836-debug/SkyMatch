@@ -23,7 +23,7 @@ export function PresenceBanner() {
     },
     emoji: { fontSize: 16 },
     text: { color: colors.textMuted, fontSize: 13, fontWeight: '500' as const },
-    seat: { color: colors.accent, fontWeight: '700' as const },
+    seat: { color: colors.accentAlt, fontWeight: '700' as const },
   }));
 
   useEffect(() => {

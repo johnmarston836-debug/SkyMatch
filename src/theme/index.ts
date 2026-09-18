@@ -1,8 +1,10 @@
 /**
  * Deliberately minimal: white in light mode, black in dark mode, no accent
  * tint anywhere in the base palette. Color is spent only on the handful of
- * things that need to stand out - the send/bathroom buttons and each
- * person's name in chat (see `colorForPeer` below) - everything else
+ * things that need to stand out - `accent` (send button, primary CTAs) and
+ * `accentAlt` (bathroom button only - a distinct blue so the two buttons
+ * sitting side by side in the cabin chat don't blend together) - plus each
+ * person's name in chat (see `colorForPeer` below). Everything else
  * (badges, links, bubbles, selection states) stays grayscale.
  */
 export const lightColors = {
@@ -12,7 +14,8 @@ export const lightColors = {
   border: '#D8D8D8',
   text: '#0A0A0A',
   textMuted: '#6B6B6B',
-  accent: '#FF6B5B', // send button, bathroom button - nothing else
+  accent: '#2563EB', // send button, primary CTAs
+  accentAlt: '#0891B2', // bathroom button only
   danger: '#E5484D',
 };
 
@@ -23,7 +26,8 @@ export const darkColors = {
   border: '#2E2E2E',
   text: '#FAFAFA',
   textMuted: '#9A9A9A',
-  accent: '#FF6B5B',
+  accent: '#2563EB',
+  accentAlt: '#0891B2',
   danger: '#E5484D',
 };
 

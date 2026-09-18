@@ -60,7 +60,7 @@ export function CabinChatScreen({ navigation }: Props) {
       width: 44,
       height: 44,
       borderRadius: radii.pill,
-      backgroundColor: colors.accent,
+      backgroundColor: colors.accentAlt,
       alignItems: 'center' as const,
       justifyContent: 'center' as const,
     },
