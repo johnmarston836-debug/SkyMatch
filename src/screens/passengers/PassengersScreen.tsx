@@ -57,7 +57,7 @@ export function PassengersScreen({ navigation }: Props) {
   );
 
   const renderItem = ({ item }: { item: DiscoveredPeer }) => (
-    <Pressable style={styles.row} onPress={() => navigation.navigate('Profile', { peerId: item.peerId })}>
+    <Pressable style={styles.row} onPress={() => navigation.navigate('Chat', { peerId: item.peerId })}>
       <View style={styles.avatar}>
         <Text style={styles.avatarText}>{(item.profile?.nickname ?? '?').charAt(0).toUpperCase()}</Text>
       </View>

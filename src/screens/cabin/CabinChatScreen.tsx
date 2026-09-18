@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, Image, Pressable, Text, TextInput, View } from 'react-native';
+import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
@@ -33,12 +33,21 @@ export function CabinChatScreen({ navigation }: Props) {
     },
     title: typography.title,
     headerSubtitle: { ...typography.subtitle, fontSize: 13, marginTop: spacing(0.5) },
+    headerActions: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: spacing(1), marginTop: spacing(0.5) },
+    myProfileButton: {
+      backgroundColor: colors.surfaceAlt,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radii.pill,
+      paddingHorizontal: spacing(2),
+      paddingVertical: spacing(1),
+    },
+    myProfileButtonText: { color: colors.text, fontWeight: '700' as const, fontSize: 13 },
     passengersButton: {
       backgroundColor: colors.accent,
       borderRadius: radii.pill,
       paddingHorizontal: spacing(2),
       paddingVertical: spacing(1),
-      marginTop: spacing(0.5),
     },
     passengersButtonText: { color: '#FFFFFF', fontWeight: '700' as const, fontSize: 13 },
     bannerArea: { paddingHorizontal: spacing(3) },
@@ -53,7 +62,11 @@ export function CabinChatScreen({ navigation }: Props) {
     bubbleTheirs: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, alignSelf: 'flex-start' as const },
     bubbleMine: { backgroundColor: colors.text, alignSelf: 'flex-end' as const },
     senderRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: spacing(1), marginBottom: spacing(0.5) },
+    senderRowMine: { justifyContent: 'flex-end' as const },
     senderName: { fontSize: 12, fontWeight: '700' as const },
+    // Own bubbles are filled with `colors.text`, so the name has to invert
+    // like the body does rather than use this person's palette colour.
+    senderNameMine: { fontSize: 12, fontWeight: '700' as const, color: colors.background },
     bodyText: { ...typography.body },
     bodyTextMine: { ...typography.body, color: colors.background },
     inputRow: {
@@ -114,12 +127,12 @@ export function CabinChatScreen({ navigation }: Props) {
         disabled={mine}
       >
         <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>
-          {!mine && (
-            <View style={styles.senderRow}>
-              <SeatBadge seat={item.fromSeat} />
-              <Text style={[styles.senderName, { color: colorForPeer(item.fromId) }]}>{item.fromNickname}</Text>
-            </View>
-          )}
+          <View style={[styles.senderRow, mine && styles.senderRowMine]}>
+            <SeatBadge seat={item.fromSeat} />
+            <Text style={mine ? styles.senderNameMine : [styles.senderName, { color: colorForPeer(item.fromId) }]}>
+              {item.fromNickname}
+            </Text>
+          </View>
           <Text style={mine ? styles.bodyTextMine : styles.bodyText}>{item.body}</Text>
         </View>
       </Pressable>
@@ -127,15 +140,23 @@ export function CabinChatScreen({ navigation }: Props) {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + theme.spacing(2) }]}>
+    <KeyboardAvoidingView
+      style={[styles.container, { paddingTop: insets.top + theme.spacing(2) }]}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
       <View style={styles.header}>
         <View>
           <Text style={styles.title}>Cabina</Text>
           <Text style={styles.headerSubtitle}>Chat de todo el avión, sin wifi</Text>
         </View>
-        <Pressable style={styles.passengersButton} onPress={() => navigation.navigate('Passengers')}>
-          <Text style={styles.passengersButtonText}>Pasajeros</Text>
-        </Pressable>
+        <View style={styles.headerActions}>
+          <Pressable style={styles.myProfileButton} onPress={() => navigation.navigate('MyProfile')}>
+            <Text style={styles.myProfileButtonText}>Mi perfil</Text>
+          </Pressable>
+          <Pressable style={styles.passengersButton} onPress={() => navigation.navigate('Passengers')}>
+            <Text style={styles.passengersButtonText}>Pasajeros</Text>
+          </Pressable>
+        </View>
       </View>
 
       <View style={styles.bannerArea}>
@@ -181,6 +202,6 @@ export function CabinChatScreen({ navigation }: Props) {
           <Text style={styles.sendButtonText}>Enviar</Text>
         </Pressable>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }

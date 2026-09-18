@@ -129,6 +129,16 @@ export async function toggleStandUp(myProfile: Profile) {
   await service.sendPresenceAlert(alert);
 }
 
+/**
+ * Re-floods our profile after the user edits their seat, name or contact.
+ * Without this, everyone else keeps labelling our messages with the old
+ * details until they happen to rediscover us.
+ */
+export async function announceProfileUpdate(myProfile: Profile) {
+  if (!service) return;
+  await service.broadcastProfile(myProfile);
+}
+
 export function getMeshService(): MeshService | null {
   return service;
 }
