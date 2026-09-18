@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/RootNavigator';
@@ -17,11 +17,12 @@ export function WelcomeScreen({ navigation }: Props) {
       paddingHorizontal: spacing(3),
       justifyContent: 'space-between' as const,
     },
+    badgeRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: spacing(1), marginBottom: spacing(2) },
+    badgeIcon: { width: 14, height: 14, tintColor: colors.textMuted },
     badge: {
       color: colors.textMuted,
       fontWeight: '700' as const,
       letterSpacing: 1,
-      marginBottom: spacing(2),
     },
     title: { ...typography.title, marginBottom: spacing(2) },
     subtitle: { ...typography.subtitle, lineHeight: 22 },
@@ -39,11 +40,15 @@ export function WelcomeScreen({ navigation }: Props) {
   return (
     <View style={[styles.container, { paddingTop: insets.top + themeSpacing(6), paddingBottom: insets.bottom + themeSpacing(3) }]}>
       <View>
-        <Text style={styles.badge}>✈️ MODO AVIÓN</Text>
+        <View style={styles.badgeRow}>
+          <Image source={require('../../assets/icons/plane.png')} style={styles.badgeIcon} resizeMode="contain" />
+          <Text style={styles.badge}>MODO AVIÓN</Text>
+        </View>
         <Text style={styles.title}>El chat de todo tu vuelo</Text>
         <Text style={styles.subtitle}>
           SkyMatch funciona sin wifi ni datos: un chat común con todos los pasajeros cerca de ti,
-          identificados por su asiento, usando la red Bluetooth del propio avión.
+          identificados por su asiento, usando el Bluetooth de tu propio móvil para conectar
+          directamente con los demás.
         </Text>
       </View>
 

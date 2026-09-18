@@ -86,7 +86,7 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
       </Text>
 
       <Pressable style={[styles.cta, !canContinue && styles.ctaDisabled]} disabled={!canContinue} onPress={handleContinue}>
-        <Text style={styles.ctaText}>Entrar a la cabina 🛫</Text>
+        <Text style={styles.ctaText}>Entrar a la cabina</Text>
       </Pressable>
     </View>
   );
