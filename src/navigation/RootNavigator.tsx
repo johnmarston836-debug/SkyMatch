@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationContainer, DarkTheme } from '@react-navigation/native';
+import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { WelcomeScreen } from '../screens/onboarding/WelcomeScreen';
 import { SeatPickerScreen } from '../screens/onboarding/SeatPickerScreen';
@@ -8,7 +8,7 @@ import { CabinChatScreen } from '../screens/cabin/CabinChatScreen';
 import { PassengersScreen } from '../screens/passengers/PassengersScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { ChatScreen } from '../screens/chat/ChatScreen';
-import { colors } from '../theme';
+import { useAppTheme } from '../theme/ThemeContext';
 import type { Seat } from '../types';
 
 export type OnboardingStackParamList = {
@@ -33,11 +33,6 @@ const OnboardingStack = createNativeStackNavigator<OnboardingStackParamList>();
 const MainStack = createNativeStackNavigator<MainStackParamList>();
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
-const navTheme = {
-  ...DarkTheme,
-  colors: { ...DarkTheme.colors, background: colors.background, card: colors.background, text: colors.text },
-};
-
 function OnboardingNavigator() {
   return (
     <OnboardingStack.Navigator screenOptions={{ headerShown: false }}>
@@ -60,6 +55,10 @@ function MainNavigator() {
 }
 
 export function RootNavigator({ hasProfile }: { hasProfile: boolean }) {
+  const { colors, scheme } = useAppTheme();
+  const base = scheme === 'light' ? DefaultTheme : DarkTheme;
+  const navTheme = { ...base, colors: { ...base.colors, background: colors.background, card: colors.background, text: colors.text } };
+
   return (
     <NavigationContainer theme={navTheme}>
       <RootStack.Navigator screenOptions={{ headerShown: false }} initialRouteName={hasProfile ? 'Main' : 'Onboarding'}>

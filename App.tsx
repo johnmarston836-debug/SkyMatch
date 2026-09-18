@@ -4,9 +4,22 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { useProfileStore } from './src/state/profileStore';
-import { colors } from './src/theme';
+import { ThemeProvider, useAppTheme } from './src/theme/ThemeContext';
 
 function App() {
+  return (
+    <GestureHandlerRootView style={styles.flex}>
+      <ThemeProvider>
+        <SafeAreaProvider>
+          <AppContent />
+        </SafeAreaProvider>
+      </ThemeProvider>
+    </GestureHandlerRootView>
+  );
+}
+
+function AppContent() {
+  const { colors, scheme } = useAppTheme();
   const hydrate = useProfileStore((state) => state.hydrate);
   const hydrated = useProfileStore((state) => state.hydrated);
   const profile = useProfileStore((state) => state.profile);
@@ -15,25 +28,25 @@ function App() {
     void hydrate();
   }, [hydrate]);
 
+  if (!hydrated) {
+    return (
+      <View style={[styles.loading, { backgroundColor: colors.background }]}>
+        <ActivityIndicator color={colors.accent} />
+      </View>
+    );
+  }
+
   return (
-    <GestureHandlerRootView style={styles.flex}>
-      <SafeAreaProvider>
-        <StatusBar barStyle="light-content" />
-        {hydrated ? (
-          <RootNavigator hasProfile={!!profile} />
-        ) : (
-          <View style={styles.loading}>
-            <ActivityIndicator color={colors.primary} />
-          </View>
-        )}
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <>
+      <StatusBar barStyle={scheme === 'light' ? 'dark-content' : 'light-content'} />
+      <RootNavigator hasProfile={!!profile} />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
-  loading: { flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' },
+  loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 });
 
 export default App;

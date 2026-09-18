@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, radii, spacing, typography } from '../theme';
+import { FlatList, Pressable, Text, View } from 'react-native';
+import { useThemedStyles } from '../theme/ThemeContext';
 import { MAX_ROW } from '../utils/seat';
 import type { Seat, SeatLetter } from '../types';
 
@@ -14,6 +14,62 @@ interface Props {
 
 export function SeatMap({ seat, onChange }: Props) {
   const rowListRef = useRef<FlatList<number>>(null);
+  const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
+    fuselage: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      backgroundColor: colors.surface,
+      borderRadius: radii.lg,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingVertical: spacing(3),
+      paddingHorizontal: spacing(2),
+    },
+    seat: {
+      width: 44,
+      height: 44,
+      borderRadius: radii.sm,
+      backgroundColor: colors.surfaceAlt,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      marginHorizontal: 4,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    seatSelected: {
+      backgroundColor: colors.text,
+      borderColor: colors.text,
+    },
+    seatText: { color: colors.textMuted, fontWeight: '700' as const },
+    seatTextSelected: { color: colors.background },
+    aisle: { width: spacing(3) },
+    helperText: {
+      ...typography.subtitle,
+      textAlign: 'center' as const,
+      marginTop: spacing(1.5),
+      marginBottom: spacing(3),
+    },
+    rowLabel: { ...typography.label, textAlign: 'center' as const, marginBottom: spacing(1) },
+    rowList: { paddingHorizontal: spacing(2) },
+    rowChip: {
+      width: 48,
+      height: 48,
+      marginHorizontal: 4,
+      borderRadius: radii.pill,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+    },
+    rowChipSelected: {
+      backgroundColor: colors.text,
+      borderColor: colors.text,
+    },
+    rowChipText: { color: colors.textMuted, fontWeight: '700' as const, fontSize: 16 },
+    rowChipTextSelected: { color: colors.background },
+  }));
 
   const renderRow = useCallback(
     ({ item }: { item: number }) => {
@@ -27,7 +83,7 @@ export function SeatMap({ seat, onChange }: Props) {
         </Pressable>
       );
     },
-    [seat, onChange],
+    [seat, onChange, styles],
   );
 
   return (
@@ -51,7 +107,7 @@ export function SeatMap({ seat, onChange }: Props) {
       </View>
       <Text style={styles.helperText}>Toca tu letra de asiento</Text>
 
-      <Text style={[typography.label, styles.rowLabel]}>FILA</Text>
+      <Text style={styles.rowLabel}>FILA</Text>
       <FlatList
         ref={rowListRef}
         data={ROWS}
@@ -66,60 +122,3 @@ export function SeatMap({ seat, onChange }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  fuselage: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radii.lg,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingVertical: spacing(3),
-    paddingHorizontal: spacing(2),
-  },
-  seat: {
-    width: 44,
-    height: 44,
-    borderRadius: radii.sm,
-    backgroundColor: colors.surfaceAlt,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginHorizontal: 4,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  seatSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  seatText: { color: colors.textMuted, fontWeight: '700' },
-  seatTextSelected: { color: colors.background },
-  aisle: { width: spacing(3) },
-  helperText: {
-    ...typography.subtitle,
-    textAlign: 'center',
-    marginTop: spacing(1.5),
-    marginBottom: spacing(3),
-  },
-  rowLabel: { textAlign: 'center', marginBottom: spacing(1) },
-  rowList: { paddingHorizontal: spacing(2) },
-  rowChip: {
-    width: 48,
-    height: 48,
-    marginHorizontal: 4,
-    borderRadius: radii.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  rowChipSelected: {
-    backgroundColor: colors.secondary,
-    borderColor: colors.secondary,
-  },
-  rowChipText: { color: colors.textMuted, fontWeight: '700', fontSize: 16 },
-  rowChipTextSelected: { color: colors.background },
-});

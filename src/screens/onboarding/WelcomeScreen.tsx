@@ -1,21 +1,47 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/RootNavigator';
-import { colors, radii, spacing, typography } from '../../theme';
+import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'Welcome'>;
 
 export function WelcomeScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const { spacing: themeSpacing } = useAppTheme();
+  const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingHorizontal: spacing(3),
+      justifyContent: 'space-between' as const,
+    },
+    badge: {
+      color: colors.textMuted,
+      fontWeight: '700' as const,
+      letterSpacing: 1,
+      marginBottom: spacing(2),
+    },
+    title: { ...typography.title, marginBottom: spacing(2) },
+    subtitle: { ...typography.subtitle, lineHeight: 22 },
+    footer: { gap: spacing(2) },
+    cta: {
+      backgroundColor: colors.accent,
+      borderRadius: radii.pill,
+      paddingVertical: spacing(2),
+      alignItems: 'center' as const,
+    },
+    ctaText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700' as const },
+    disclaimer: { ...typography.subtitle, fontSize: 12, textAlign: 'center' as const },
+  }));
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + spacing(6), paddingBottom: insets.bottom + spacing(3) }]}>
+    <View style={[styles.container, { paddingTop: insets.top + themeSpacing(6), paddingBottom: insets.bottom + themeSpacing(3) }]}>
       <View>
         <Text style={styles.badge}>✈️ MODO AVIÓN</Text>
-        <Text style={[typography.title, styles.title]}>El chat de todo tu vuelo</Text>
-        <Text style={[typography.subtitle, styles.subtitle]}>
+        <Text style={styles.title}>El chat de todo tu vuelo</Text>
+        <Text style={styles.subtitle}>
           SkyMatch funciona sin wifi ni datos: un chat común con todos los pasajeros cerca de ti,
           identificados por su asiento, usando la red Bluetooth del propio avión.
         </Text>
@@ -30,29 +56,3 @@ export function WelcomeScreen({ navigation }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    paddingHorizontal: spacing(3),
-    justifyContent: 'space-between',
-  },
-  badge: {
-    color: colors.secondary,
-    fontWeight: '700',
-    letterSpacing: 1,
-    marginBottom: spacing(2),
-  },
-  title: { marginBottom: spacing(2) },
-  subtitle: { lineHeight: 22 },
-  footer: { gap: spacing(2) },
-  cta: {
-    backgroundColor: colors.primary,
-    borderRadius: radii.pill,
-    paddingVertical: spacing(2),
-    alignItems: 'center',
-  },
-  ctaText: { color: colors.background, fontSize: 17, fontWeight: '700' },
-  disclaimer: { ...typography.subtitle, fontSize: 12, textAlign: 'center' },
-});

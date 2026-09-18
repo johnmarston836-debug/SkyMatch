@@ -1,19 +1,48 @@
 import React, { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/RootNavigator';
 import { useProfileStore } from '../../state/profileStore';
-import { colors, radii, spacing, typography } from '../../theme';
+import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import { formatSeat } from '../../utils/seat';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'ProfileSetup'>;
 
 export function ProfileSetupScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const theme = useAppTheme();
   const save = useProfileStore((state) => state.save);
   const [nickname, setNickname] = useState('');
   const [contact, setContact] = useState('');
+  const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
+    container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing(3) },
+    label: typography.label,
+    title: { ...typography.title, marginTop: spacing(1) },
+    subtitle: { ...typography.subtitle, marginTop: spacing(1), marginBottom: spacing(4), lineHeight: 22 },
+    previewSeat: { color: colors.text, fontWeight: '700' as const },
+    fieldLabel: { ...typography.label, marginTop: spacing(3), marginBottom: spacing(1) },
+    hint: { ...typography.subtitle, fontSize: 12, marginTop: spacing(1) },
+    input: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: spacing(2),
+      paddingVertical: spacing(1.5),
+      color: colors.text,
+      fontSize: 15,
+    },
+    cta: {
+      marginTop: 'auto' as const,
+      backgroundColor: colors.accent,
+      borderRadius: radii.pill,
+      paddingVertical: spacing(2),
+      alignItems: 'center' as const,
+    },
+    ctaDisabled: { opacity: 0.4 },
+    ctaText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700' as const },
+  }));
 
   const canContinue = nickname.trim().length > 0;
 
@@ -24,13 +53,12 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + spacing(4), paddingBottom: insets.bottom + spacing(4) }]}>
-      <Text style={typography.label}>PASO 2 DE 2</Text>
-      <Text style={[typography.title, styles.title]}>¿Cómo te llamamos?</Text>
-      <Text style={[typography.subtitle, styles.subtitle]}>
-        En el chat de la cabina te verán como{' '}
-        <Text style={styles.previewSeat}>{formatSeat(route.params.seat)}</Text> — el nombre es solo para
-        acompañarlo.
+    <View style={[styles.container, { paddingTop: insets.top + theme.spacing(4), paddingBottom: insets.bottom + theme.spacing(4) }]}>
+      <Text style={styles.label}>PASO 2 DE 2</Text>
+      <Text style={styles.title}>¿Cómo te llamamos?</Text>
+      <Text style={styles.subtitle}>
+        En el chat de la cabina te verán como <Text style={styles.previewSeat}>{formatSeat(route.params.seat)}</Text> — el
+        nombre es solo para acompañarlo.
       </Text>
 
       <TextInput
@@ -38,7 +66,7 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
         value={nickname}
         onChangeText={setNickname}
         placeholder="Tu nombre o apodo"
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={theme.colors.textMuted}
         maxLength={24}
         autoFocus
       />
@@ -49,7 +77,7 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
         value={contact}
         onChangeText={setContact}
         placeholder="@tuusuario o tu número"
-        placeholderTextColor={colors.textMuted}
+        placeholderTextColor={theme.colors.textMuted}
         maxLength={40}
       />
       <Text style={styles.hint}>
@@ -63,31 +91,3 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing(3) },
-  title: { marginTop: spacing(1) },
-  subtitle: { marginTop: spacing(1), marginBottom: spacing(4), lineHeight: 22 },
-  previewSeat: { color: colors.primary, fontWeight: '700' },
-  fieldLabel: { ...typography.label, marginTop: spacing(3), marginBottom: spacing(1) },
-  hint: { ...typography.subtitle, fontSize: 12, marginTop: spacing(1) },
-  input: {
-    backgroundColor: colors.surface,
-    borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing(2),
-    paddingVertical: spacing(1.5),
-    color: colors.text,
-    fontSize: 15,
-  },
-  cta: {
-    marginTop: 'auto',
-    backgroundColor: colors.primary,
-    borderRadius: radii.pill,
-    paddingVertical: spacing(2),
-    alignItems: 'center',
-  },
-  ctaDisabled: { opacity: 0.4 },
-  ctaText: { color: colors.background, fontSize: 17, fontWeight: '700' },
-});

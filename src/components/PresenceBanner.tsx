@@ -1,13 +1,30 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 import { usePresenceStore } from '../state/presenceStore';
-import { colors, radii, spacing } from '../theme';
+import { useThemedStyles } from '../theme/ThemeContext';
 import { formatSeat } from '../utils/seat';
 
 /** Stack of "seat X is in the bathroom" banners above the group chat, self-clearing as alerts expire. */
 export function PresenceBanner() {
   const alerts = usePresenceStore((state) => state.alerts);
   const pruneExpired = usePresenceStore((state) => state.pruneExpired);
+  const styles = useThemedStyles(({ colors, radii, spacing }) => ({
+    container: { gap: spacing(1) },
+    banner: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: spacing(1),
+      backgroundColor: colors.surfaceAlt,
+      borderRadius: radii.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: spacing(1.5),
+      paddingVertical: spacing(1),
+    },
+    emoji: { fontSize: 16 },
+    text: { color: colors.textMuted, fontSize: 13, fontWeight: '500' as const },
+    seat: { color: colors.accent, fontWeight: '700' as const },
+  }));
 
   useEffect(() => {
     const timer = setInterval(pruneExpired, 10_000);
@@ -30,21 +47,3 @@ export function PresenceBanner() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { gap: spacing(1) },
-  banner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing(1),
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: radii.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing(1.5),
-    paddingVertical: spacing(1),
-  },
-  emoji: { fontSize: 16 },
-  text: { color: colors.textMuted, fontSize: 13, fontWeight: '500' },
-  seat: { color: colors.secondary, fontWeight: '700' },
-});

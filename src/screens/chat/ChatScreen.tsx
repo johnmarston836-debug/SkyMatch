@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useState } from 'react';
-import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -9,18 +9,64 @@ import { useChatStore } from '../../state/chatStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
 import { useProfileStore } from '../../state/profileStore';
 import { sendPrivateChatMessage } from '../../mesh/meshController';
-import { colors, radii, spacing, typography } from '../../theme';
+import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import type { ChatMessage } from '../../types';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Chat'>;
 
 export function ChatScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets();
+  const theme = useAppTheme();
   const { peerId } = route.params;
   const peer = useDiscoveryStore((state) => state.peers[peerId]);
   const messages = useChatStore((state) => state.privateMessagesByPeer[peerId] ?? []);
   const myProfile = useProfileStore((state) => state.profile);
   const [draft, setDraft] = useState('');
+  const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
+    container: { flex: 1, backgroundColor: colors.background },
+    peerHeader: { paddingHorizontal: spacing(2), paddingTop: spacing(1) },
+    list: { padding: spacing(2), gap: spacing(1) },
+    bubbleRow: { flexDirection: 'row' as const, marginBottom: spacing(1) },
+    bubbleRowMine: { justifyContent: 'flex-end' as const },
+    bubble: { maxWidth: '78%' as const, borderRadius: radii.md, paddingHorizontal: spacing(2), paddingVertical: spacing(1.5) },
+    bubbleMine: { backgroundColor: colors.text },
+    bubbleTheirs: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
+    bubbleTextMine: { ...typography.body, color: colors.background },
+    bubbleTextTheirs: { ...typography.body },
+    image: { width: 220, height: 220, borderRadius: radii.sm, marginBottom: spacing(1) },
+    inputRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: spacing(1),
+      paddingHorizontal: spacing(2),
+      paddingTop: spacing(1),
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+    },
+    attachButton: {
+      width: 44,
+      height: 44,
+      borderRadius: radii.pill,
+      backgroundColor: colors.surfaceAlt,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    attachButtonText: { fontSize: 18 },
+    input: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      borderRadius: radii.pill,
+      borderWidth: 1,
+      borderColor: colors.border,
+      paddingHorizontal: spacing(2),
+      paddingVertical: spacing(1.2),
+      color: colors.text,
+    },
+    sendButton: { backgroundColor: colors.accent, borderRadius: radii.pill, paddingHorizontal: spacing(2), paddingVertical: spacing(1.2) },
+    sendButtonText: { color: '#FFFFFF', fontWeight: '700' as const },
+  }));
 
   useLayoutEffect(() => {
     navigation.setOptions({ title: peer?.profile?.nickname ?? 'Privado' });
@@ -75,7 +121,7 @@ export function ChatScreen({ route, navigation }: Props) {
         </View>
       )}
       <FlatList data={messages} keyExtractor={(item) => item.id} renderItem={renderItem} contentContainerStyle={styles.list} />
-      <View style={[styles.inputRow, { paddingBottom: insets.bottom + spacing(1) }]}>
+      <View style={[styles.inputRow, { paddingBottom: insets.bottom + theme.spacing(1) }]}>
         <Pressable style={styles.attachButton} onPress={handleAttachImage}>
           <Text style={styles.attachButtonText}>📷</Text>
         </Pressable>
@@ -84,7 +130,7 @@ export function ChatScreen({ route, navigation }: Props) {
           value={draft}
           onChangeText={setDraft}
           placeholder="Escribe un mensaje…"
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={theme.colors.textMuted}
           onSubmitEditing={handleSend}
         />
         <Pressable style={styles.sendButton} onPress={handleSend}>
@@ -94,49 +140,3 @@ export function ChatScreen({ route, navigation }: Props) {
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  peerHeader: { paddingHorizontal: spacing(2), paddingTop: spacing(1) },
-  list: { padding: spacing(2), gap: spacing(1) },
-  bubbleRow: { flexDirection: 'row', marginBottom: spacing(1) },
-  bubbleRowMine: { justifyContent: 'flex-end' },
-  bubble: { maxWidth: '78%', borderRadius: radii.md, paddingHorizontal: spacing(2), paddingVertical: spacing(1.5) },
-  bubbleMine: { backgroundColor: colors.primary },
-  bubbleTheirs: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
-  bubbleTextMine: { ...typography.body, color: colors.background },
-  bubbleTextTheirs: { ...typography.body },
-  image: { width: 220, height: 220, borderRadius: radii.sm, marginBottom: spacing(1) },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing(1),
-    paddingHorizontal: spacing(2),
-    paddingTop: spacing(1),
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  attachButton: {
-    width: 44,
-    height: 44,
-    borderRadius: radii.pill,
-    backgroundColor: colors.surfaceAlt,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  attachButtonText: { fontSize: 18 },
-  input: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    borderRadius: radii.pill,
-    borderWidth: 1,
-    borderColor: colors.border,
-    paddingHorizontal: spacing(2),
-    paddingVertical: spacing(1.2),
-    color: colors.text,
-  },
-  sendButton: { backgroundColor: colors.primary, borderRadius: radii.pill, paddingHorizontal: spacing(2), paddingVertical: spacing(1.2) },
-  sendButtonText: { color: colors.background, fontWeight: '700' },
-});
