@@ -155,7 +155,9 @@ export function CabinChatScreen({ navigation }: Props) {
           onPress={() => void toggleStandUp(myProfile)}
         >
           <Image
-            source={require('../../assets/icons/standing.png')}
+            source={
+              isStanding ? require('../../assets/icons/standing.png') : require('../../assets/icons/seated.png')
+            }
             style={[styles.standButtonIcon, isStanding && styles.standButtonIconActive]}
             resizeMode="contain"
           />
