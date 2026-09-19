@@ -27,14 +27,15 @@ export function CabinChatScreen({ navigation }: Props) {
     container: { flex: 1, backgroundColor: colors.background },
     header: {
       flexDirection: 'row' as const,
-      justifyContent: 'space-between' as const,
-      alignItems: 'flex-start' as const,
+      alignItems: 'center' as const,
       paddingHorizontal: spacing(3),
-      marginBottom: spacing(1),
+      marginBottom: spacing(2),
     },
+    // Both sides take the same share of the row, so the title lands dead
+    // centre even though the two buttons aren't the same width.
+    headerSide: { flex: 1, alignItems: 'flex-start' as const },
+    headerSideRight: { alignItems: 'flex-end' as const },
     title: typography.title,
-    headerSubtitle: { ...typography.subtitle, fontSize: 13, marginTop: spacing(0.5) },
-    headerActions: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: spacing(1), marginTop: spacing(0.5) },
     myProfileButton: {
       backgroundColor: colors.surfaceAlt,
       borderWidth: 1,
@@ -145,14 +146,13 @@ export function CabinChatScreen({ navigation }: Props) {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       <View style={styles.header}>
-        <View>
-          <Text style={styles.title}>Cabina</Text>
-          <Text style={styles.headerSubtitle}>Chat de todo el avión, sin wifi</Text>
-        </View>
-        <View style={styles.headerActions}>
+        <View style={styles.headerSide}>
           <Pressable style={styles.myProfileButton} onPress={() => navigation.navigate('MyProfile')}>
             <Text style={styles.myProfileButtonText}>Mi perfil</Text>
           </Pressable>
+        </View>
+        <Text style={styles.title}>Cabina</Text>
+        <View style={[styles.headerSide, styles.headerSideRight]}>
           <Pressable style={styles.passengersButton} onPress={() => navigation.navigate('Passengers')}>
             <Text style={styles.passengersButtonText}>Pasajeros</Text>
           </Pressable>
