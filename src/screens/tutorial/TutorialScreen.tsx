@@ -3,6 +3,7 @@ import { Pressable, ScrollView, Text, useWindowDimensions, View, type ScrollView
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList, OnboardingStackParamList } from '../../navigation/RootNavigator';
+import { MeshDiagram } from '../../components/MeshDiagram';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 
 interface CarouselProps {
@@ -31,26 +32,7 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
     body: { ...typography.subtitle, lineHeight: 24 },
     bodySpaced: { ...typography.subtitle, lineHeight: 24, marginTop: spacing(2) },
 
-    diagram: {
-      flexDirection: 'row' as const,
-      alignItems: 'center' as const,
-      marginVertical: spacing(4),
-    },
-    node: {
-      width: 58,
-      height: 58,
-      borderRadius: radii.pill,
-      borderWidth: 2,
-      borderColor: colors.border,
-      backgroundColor: colors.surface,
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-    },
-    nodeMine: { borderColor: colors.accent, backgroundColor: colors.accent },
-    nodeText: { color: colors.text, fontWeight: '700' as const, fontSize: 13 },
-    nodeTextMine: { color: '#FFFFFF', fontWeight: '700' as const, fontSize: 13 },
-    hop: { flex: 1, height: 2, backgroundColor: colors.border },
-    diagramCaption: { ...typography.subtitle, fontSize: 13, textAlign: 'center' as const, marginTop: spacing(-2) },
+    diagramCaption: { ...typography.subtitle, fontSize: 13, textAlign: 'center' as const },
 
     callout: {
       backgroundColor: colors.surface,
@@ -107,19 +89,7 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
             directamente con los teléfonos de los pasajeros que tienes cerca.
           </Text>
 
-          <View style={styles.diagram}>
-            <View style={[styles.node, styles.nodeMine]}>
-              <Text style={styles.nodeTextMine}>TÚ</Text>
-            </View>
-            <View style={styles.hop} />
-            <View style={styles.node}>
-              <Text style={styles.nodeText}>14C</Text>
-            </View>
-            <View style={styles.hop} />
-            <View style={styles.node}>
-              <Text style={styles.nodeText}>21F</Text>
-            </View>
-          </View>
+          <MeshDiagram variant="relay" />
           <Text style={styles.diagramCaption}>
             El pasajero de 21F está demasiado lejos para oírte, pero el de 14C repite tu mensaje.
           </Text>
@@ -138,6 +108,11 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
             Tu móvil solo envía y recibe mientras la app está en pantalla. Si la cierras o te
             vas a otra aplicación, dejas de recibir mensajes y también dejas de servir de
             puente para los demás.
+          </Text>
+
+          <MeshDiagram variant="broken" />
+          <Text style={styles.diagramCaption}>
+            14C ha cerrado la app: deja de emitir y el mensaje ya no llega a 21F.
           </Text>
 
           <View style={styles.callout}>
