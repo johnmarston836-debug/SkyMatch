@@ -74,7 +74,7 @@ export function ChatScreen({ route, navigation }: Props) {
       alignItems: 'center' as const,
       justifyContent: 'center' as const,
     },
-    attachButtonText: { fontSize: 18 },
+    attachButtonIcon: { width: 22, height: 22, tintColor: colors.textMuted },
     input: {
       flex: 1,
       backgroundColor: colors.surface,
@@ -112,7 +112,7 @@ export function ChatScreen({ route, navigation }: Props) {
     });
     const asset = result.assets?.[0];
     if (!asset?.base64) return;
-    void sendPrivateChatMessage(myProfile, peerId, draft.trim() || '📷 Foto', asset.base64);
+    void sendPrivateChatMessage(myProfile, peerId, draft.trim() || 'Foto', asset.base64);
     setDraft('');
   };
 
@@ -152,7 +152,7 @@ export function ChatScreen({ route, navigation }: Props) {
       <FlatList data={messages} keyExtractor={(item) => item.id} renderItem={renderItem} contentContainerStyle={styles.list} />
       <View style={[styles.inputRow, { paddingBottom: insets.bottom + theme.spacing(1) }]}>
         <Pressable style={styles.attachButton} onPress={handleAttachImage}>
-          <Text style={styles.attachButtonText}>📷</Text>
+          <Image source={require('../../assets/icons/camera.png')} style={styles.attachButtonIcon} resizeMode="contain" />
         </Pressable>
         <TextInput
           style={styles.input}

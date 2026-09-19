@@ -3,6 +3,7 @@ import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, Text, TextI
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
+import { CabinSeats } from '../../components/CabinSeats';
 import { PresenceBanner } from '../../components/PresenceBanner';
 import { SeatBadge } from '../../components/SeatBadge';
 import { useChatStore } from '../../state/chatStore';
@@ -52,10 +53,9 @@ export function CabinChatScreen({ navigation }: Props) {
     passengersButtonText: { color: '#FFFFFF', fontWeight: '700' as const, fontSize: 13 },
     bannerArea: { paddingHorizontal: spacing(3) },
     list: { padding: spacing(3), flexGrow: 1 },
-    emptyState: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, gap: spacing(1), paddingTop: spacing(8) },
-    emptyEmoji: { fontSize: 48 },
-    emptyTitle: { ...typography.body, fontWeight: '700' as const, textAlign: 'center' as const },
-    emptySubtitle: typography.subtitle,
+    emptyState: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, gap: spacing(1), paddingTop: spacing(6) },
+    emptyTitle: { ...typography.body, fontWeight: '700' as const, textAlign: 'center' as const, marginTop: spacing(2) },
+    emptySubtitle: { ...typography.subtitle, textAlign: 'center' as const },
     bubbleRow: { marginBottom: spacing(1.5) },
     bubbleRowMine: { alignItems: 'flex-end' as const },
     bubble: { maxWidth: '82%' as const, borderRadius: radii.md, paddingHorizontal: spacing(2), paddingVertical: spacing(1.2) },
@@ -170,7 +170,7 @@ export function CabinChatScreen({ navigation }: Props) {
         contentContainerStyle={styles.list}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <Text style={styles.emptyEmoji}>📡</Text>
+            <CabinSeats />
             <Text style={styles.emptyTitle}>Nadie ha hablado todavía</Text>
             <Text style={styles.emptySubtitle}>En cuanto haya pasajeros cerca con la app abierta, aparecerán aquí.</Text>
           </View>

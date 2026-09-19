@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, Text, View } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
@@ -21,8 +21,8 @@ export function ProfileScreen({ route, navigation }: Props) {
     container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing(3) },
     backLink: { color: colors.text, fontWeight: '600' as const, marginBottom: spacing(3) },
     emptyState: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, gap: spacing(1) },
-    emptyEmoji: { fontSize: 48 },
-    emptySubtitle: typography.subtitle,
+    emptyIcon: { width: 56, height: 56, tintColor: colors.textMuted },
+    emptySubtitle: { ...typography.subtitle, textAlign: 'center' as const },
     identity: { alignItems: 'center' as const, gap: spacing(1), marginBottom: spacing(4) },
     avatar: {
       width: 88,
@@ -64,7 +64,7 @@ export function ProfileScreen({ route, navigation }: Props) {
 
       {!profile ? (
         <View style={styles.emptyState}>
-          <Text style={styles.emptyEmoji}>👤</Text>
+          <Image source={require('../../assets/icons/standing.png')} style={styles.emptyIcon} resizeMode="contain" />
           <Text style={styles.emptySubtitle}>Todavía no ha llegado su perfil.</Text>
         </View>
       ) : (

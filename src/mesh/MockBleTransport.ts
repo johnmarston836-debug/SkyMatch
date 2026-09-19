@@ -17,7 +17,7 @@ const SIMULATED_PEERS: SimulatedPeer[] = [
   { peerId: 'sim-max', seat: { row: 9, letter: 'D' }, nickname: 'Max', contact: '+34 600 111 222', rssi: -58 },
 ];
 
-const GROUP_LINES = ['¿Alguien sabe si hay wifi en este vuelo? 😅', 'Menuda turbulencia hace un rato', '¿A qué hora aterrizamos?'];
+const GROUP_LINES = ['¿Alguien sabe si hay wifi en este vuelo?', 'Menuda turbulencia hace un rato', '¿A qué hora aterrizamos?'];
 
 /**
  * Deterministic in-memory simulation so the cabin group chat, private
@@ -115,7 +115,7 @@ export class MockBleTransport implements BleTransport {
             fromSeat: peer.seat,
             fromNickname: peer.nickname,
             toId: this.myPeerId,
-            body: '¡Hola! 👋 (respuesta simulada)',
+            body: '¡Hola! (respuesta simulada)',
             sentAt: Date.now(),
           },
           this.myPeerId,

@@ -3,6 +3,7 @@ import { FlatList, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
+import { CabinSeats } from '../../components/CabinSeats';
 import { SeatBadge } from '../../components/SeatBadge';
 import { useDiscoveryStore } from '../../state/discoveryStore';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
@@ -20,9 +21,8 @@ export function PassengersScreen({ navigation }: Props) {
     title: typography.title,
     backLink: { color: colors.text, fontWeight: '600' as const },
     headerSpacer: { width: 60 },
-    emptyState: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, gap: spacing(1) },
-    emptyEmoji: { fontSize: 48 },
-    emptySubtitle: typography.subtitle,
+    emptyState: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, gap: spacing(2) },
+    emptySubtitle: { ...typography.subtitle, textAlign: 'center' as const },
     list: { gap: spacing(1) },
     row: {
       flexDirection: 'row' as const,
@@ -80,7 +80,7 @@ export function PassengersScreen({ navigation }: Props) {
 
       {list.length === 0 ? (
         <View style={styles.emptyState}>
-          <Text style={styles.emptyEmoji}>📡</Text>
+          <CabinSeats />
           <Text style={styles.emptySubtitle}>Buscando pasajeros cerca…</Text>
         </View>
       ) : (
