@@ -8,12 +8,14 @@ import { CabinChatScreen } from '../screens/cabin/CabinChatScreen';
 import { PassengersScreen } from '../screens/passengers/PassengersScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { MyProfileScreen } from '../screens/profile/MyProfileScreen';
+import { HowItWorksScreen, TutorialScreen } from '../screens/tutorial/TutorialScreen';
 import { ChatScreen } from '../screens/chat/ChatScreen';
 import { useAppTheme } from '../theme/ThemeContext';
 import type { Seat } from '../types';
 
 export type OnboardingStackParamList = {
   Welcome: undefined;
+  Tutorial: undefined;
   SeatPicker: undefined;
   ProfileSetup: { seat: Seat };
 };
@@ -22,6 +24,7 @@ export type MainStackParamList = {
   CabinChat: undefined;
   Passengers: undefined;
   MyProfile: undefined;
+  HowItWorks: undefined;
   Profile: { peerId: string };
   Chat: { peerId: string };
 };
@@ -39,6 +42,7 @@ function OnboardingNavigator() {
   return (
     <OnboardingStack.Navigator screenOptions={{ headerShown: false }}>
       <OnboardingStack.Screen name="Welcome" component={WelcomeScreen} />
+      <OnboardingStack.Screen name="Tutorial" component={TutorialScreen} />
       <OnboardingStack.Screen name="SeatPicker" component={SeatPickerScreen} />
       <OnboardingStack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
     </OnboardingStack.Navigator>
@@ -51,6 +55,7 @@ function MainNavigator() {
       <MainStack.Screen name="CabinChat" component={CabinChatScreen} />
       <MainStack.Screen name="Passengers" component={PassengersScreen} />
       <MainStack.Screen name="MyProfile" component={MyProfileScreen} />
+      <MainStack.Screen name="HowItWorks" component={HowItWorksScreen} />
       <MainStack.Screen name="Profile" component={ProfileScreen} />
       <MainStack.Screen name="Chat" component={ChatScreen} options={{ headerShown: true, title: '' }} />
     </MainStack.Navigator>

@@ -42,6 +42,12 @@ export function MyProfileScreen({ navigation }: Props) {
       fontSize: 15,
     },
     hint: { ...typography.subtitle, fontSize: 12, marginTop: spacing(1) },
+    secondaryLink: {
+      marginTop: spacing(3),
+      paddingVertical: spacing(1.5),
+      alignItems: 'center' as const,
+    },
+    secondaryLinkText: { ...typography.body, fontWeight: '700' as const },
     cta: {
       backgroundColor: colors.accent,
       borderRadius: radii.pill,
@@ -112,6 +118,10 @@ export function MyProfileScreen({ navigation }: Props) {
 
         <Pressable style={[styles.cta, !canSave && styles.ctaDisabled]} disabled={!canSave} onPress={handleSave}>
           <Text style={styles.ctaText}>Guardar cambios</Text>
+        </Pressable>
+
+        <Pressable style={styles.secondaryLink} onPress={() => navigation.navigate('HowItWorks')}>
+          <Text style={styles.secondaryLinkText}>Cómo funciona SkyMatch</Text>
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>

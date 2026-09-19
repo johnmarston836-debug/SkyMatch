@@ -53,7 +53,7 @@ export function WelcomeScreen({ navigation }: Props) {
       </View>
 
       <View style={styles.footer}>
-        <Pressable style={styles.cta} onPress={() => navigation.navigate('SeatPicker')}>
+        <Pressable style={styles.cta} onPress={() => navigation.navigate('Tutorial')}>
           <Text style={styles.ctaText}>Empezar</Text>
         </Pressable>
         <Text style={styles.disclaimer}>Nada sale del avión: todo viaja de móvil a móvil por Bluetooth.</Text>
