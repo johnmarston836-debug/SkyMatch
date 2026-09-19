@@ -35,7 +35,10 @@ export function CabinChatScreen({ navigation }: Props) {
     // centre even though the two buttons aren't the same width.
     headerSide: { flex: 1, alignItems: 'flex-start' as const },
     headerSideRight: { alignItems: 'flex-end' as const },
-    title: typography.title,
+    // Smaller than a screen title: it has to share the row with two buttons,
+    // and it is the piece that gives way when the text is scaled up, so the
+    // buttons never get squeezed into a vertical strip of letters.
+    title: { ...typography.title, fontSize: 22, flexShrink: 1 },
     myProfileButton: {
       backgroundColor: colors.surfaceAlt,
       borderWidth: 1,
@@ -43,6 +46,7 @@ export function CabinChatScreen({ navigation }: Props) {
       borderRadius: radii.pill,
       paddingHorizontal: spacing(2),
       paddingVertical: spacing(1),
+      flexShrink: 0,
     },
     myProfileButtonText: { color: colors.text, fontWeight: '700' as const, fontSize: 13 },
     passengersButton: {
@@ -50,11 +54,12 @@ export function CabinChatScreen({ navigation }: Props) {
       borderRadius: radii.pill,
       paddingHorizontal: spacing(2),
       paddingVertical: spacing(1),
+      flexShrink: 0,
     },
     passengersButtonText: { color: '#FFFFFF', fontWeight: '700' as const, fontSize: 13 },
     bannerArea: { paddingHorizontal: spacing(3) },
     list: { padding: spacing(3), flexGrow: 1 },
-    emptyState: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, gap: spacing(1), paddingTop: spacing(6) },
+    emptyState: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, gap: spacing(1) },
     emptyTitle: { ...typography.body, fontWeight: '700' as const, textAlign: 'center' as const, marginTop: spacing(2) },
     emptySubtitle: { ...typography.subtitle, textAlign: 'center' as const },
     bubbleRow: { marginBottom: spacing(1.5) },
@@ -148,13 +153,19 @@ export function CabinChatScreen({ navigation }: Props) {
       <View style={styles.header}>
         <View style={styles.headerSide}>
           <Pressable style={styles.myProfileButton} onPress={() => navigation.navigate('MyProfile')}>
-            <Text style={styles.myProfileButtonText}>Mi perfil</Text>
+            <Text style={styles.myProfileButtonText} numberOfLines={1}>
+              Mi perfil
+            </Text>
           </Pressable>
         </View>
-        <Text style={styles.title}>Cabina</Text>
+        <Text style={styles.title} numberOfLines={1}>
+          Cabina
+        </Text>
         <View style={[styles.headerSide, styles.headerSideRight]}>
           <Pressable style={styles.passengersButton} onPress={() => navigation.navigate('Passengers')}>
-            <Text style={styles.passengersButtonText}>Pasajeros</Text>
+            <Text style={styles.passengersButtonText} numberOfLines={1}>
+              Pasajeros
+            </Text>
           </Pressable>
         </View>
       </View>
