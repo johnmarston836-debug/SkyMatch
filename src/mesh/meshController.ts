@@ -4,6 +4,7 @@ import { RealBleTransport } from './RealBleTransport';
 import { useDiscoveryStore } from '../state/discoveryStore';
 import { useChatStore } from '../state/chatStore';
 import { usePresenceStore } from '../state/presenceStore';
+import { useProfileStore } from '../state/profileStore';
 import { requestBlePermissions } from '../utils/permissions';
 import { newId } from '../utils/id';
 import type { ChatMessage, PresenceAlert, PresenceReaction, Profile, ReactionKind } from '../types';
@@ -15,7 +16,13 @@ import type { ChatMessage, PresenceAlert, PresenceReaction, Profile, ReactionKin
  */
 export const USE_MOCK_MESH = false;
 
+/** How often we re-announce who we are, so latecomers and stale lists heal themselves. */
+const PROFILE_ANNOUNCE_MS = 10_000;
+
 let service: MeshService | null = null;
+let announceTimer: ReturnType<typeof setInterval> | null = null;
+/** Bluetooth device ids already greeted, so the duplicate scan hits don't re-announce endlessly. */
+const greeted = new Set<string>();
 
 /** Wires mesh events into the zustand stores. Call once, after the local profile is ready. */
 export async function startMesh(myProfile: Profile): Promise<MeshService> {
@@ -26,19 +33,25 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   const transport = USE_MOCK_MESH ? new MockBleTransport() : new RealBleTransport();
   service = new MeshService(transport, myProfile.id);
 
-  service.on('peerSeen', (peerId, seat) => {
-    const isNewPeer = !useDiscoveryStore.getState().peers[peerId];
-    useDiscoveryStore.getState().upsertPeer(peerId, seat);
-    // Broadcast (not targeted) so every newcomer picks it up too, not just this one peer.
-    if (isNewPeer) void service?.broadcastProfile(myProfile);
+  service.on('peerSeen', (peerId) => {
+    // Greet each newly spotted phone once. This is only a fast path: the
+    // advert arrives before the GATT link is up, so this first attempt
+    // usually reaches nobody and the periodic announcement below is what
+    // actually gets our profile across.
+    if (greeted.has(peerId)) return;
+    greeted.add(peerId);
+    void service?.broadcastProfile(myProfile);
   });
 
   service.on('peerLost', (peerId) => {
-    useDiscoveryStore.getState().removePeer(peerId);
+    greeted.delete(peerId);
   });
 
-  service.on('profile', (peerId, profile) => {
-    useDiscoveryStore.getState().setProfile(peerId, profile);
+  // Keyed by the profile's own id, not the Bluetooth device id: the latter
+  // is assigned per scanning phone, so the two never matched and profiles
+  // landed under an id nothing else in the app ever looked up.
+  service.on('profile', (_peerId, profile) => {
+    useDiscoveryStore.getState().setProfile(profile);
   });
 
   service.on('message', (message) => {
@@ -60,6 +73,19 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
 
   await service.start(myProfile.seat);
   await service.broadcastProfile(myProfile);
+
+  // The announcements above and on `peerSeen` both fire before any GATT
+  // link exists, so they reach nobody and nothing ever retried them: that
+  // is why the group chat worked (its messages carry the sender's name and
+  // seat inside) while the passenger list stayed empty. Re-announcing on a
+  // timer fixes that, and keeps the list fresh for people who join later
+  // or who edit their profile.
+  if (announceTimer) clearInterval(announceTimer);
+  announceTimer = setInterval(() => {
+    void service?.broadcastProfile(useProfileStore.getState().profile ?? myProfile);
+    useDiscoveryStore.getState().pruneStale();
+  }, PROFILE_ANNOUNCE_MS);
+
   return service;
 }
 

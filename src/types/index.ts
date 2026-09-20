@@ -57,11 +57,14 @@ export interface PresenceReaction {
   sentAt: number;
 }
 
-/** Discovered peer, kept fresh by repeated BLE adverts; pruned when it goes stale. */
+/**
+ * Someone else in the cabin, identified by their profile id - the same id
+ * private messages are addressed to. Deliberately not the Bluetooth device
+ * id, which differs depending on which phone is doing the scanning.
+ */
 export interface DiscoveredPeer {
   peerId: string;
-  profile?: Profile; // populated once the lightweight profile broadcast is received
-  seat?: Seat; // available immediately from the advertisement, before the profile arrives
-  rssi: number;
+  profile: Profile;
+  /** When their last profile announcement arrived; they're dropped once it goes stale. */
   lastSeenAt: number;
 }
