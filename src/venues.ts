@@ -1,5 +1,5 @@
 import type { ImageSourcePropType } from 'react-native';
-import type { VenueKind } from './types';
+import type { PresenceStatus, VenueKind } from './types';
 
 /**
  * Everything that changes between an aeroplane, a train, a gym and a bar.
@@ -30,9 +30,11 @@ export interface Venue {
   /** How your own badge is introduced on the name step. */
   identityNote: string;
   enterCta: string;
-  /** The stand-up banner, in the first person and about someone else. */
-  standingSelf: string;
-  standingOther: string;
+  /** What the one-tap button announces here. */
+  alertStatus: PresenceStatus;
+  /** The button's glyph, off and on. */
+  alertIcon: ImageSourcePropType;
+  alertIconActive: ImageSourcePropType;
   /** Whether the empty state draws the seat map illustration (only places with seats). */
   hasSeats: boolean;
 }
@@ -53,8 +55,9 @@ export const VENUES: Record<VenueKind, Venue> = {
     locationSubtitle: 'Así te identificarán en el chat de la cabina.',
     identityNote: 'En el chat de la cabina te verán como',
     enterCta: 'Entrar a la cabina',
-    standingSelf: 'Estás de pie',
-    standingOther: 'está de pie',
+    alertStatus: 'standing',
+    alertIcon: require('./assets/icons/seated.png'),
+    alertIconActive: require('./assets/icons/standing.png'),
     hasSeats: true,
   },
   train: {
@@ -72,8 +75,9 @@ export const VENUES: Record<VenueKind, Venue> = {
     locationSubtitle: 'Vagón y asiento: con eso te encuentran.',
     identityNote: 'En el chat del tren te verán como',
     enterCta: 'Entrar al tren',
-    standingSelf: 'Estás de pie',
-    standingOther: 'está de pie',
+    alertStatus: 'standing',
+    alertIcon: require('./assets/icons/seated.png'),
+    alertIconActive: require('./assets/icons/standing.png'),
     hasSeats: true,
   },
   gym: {
@@ -91,8 +95,12 @@ export const VENUES: Record<VenueKind, Venue> = {
     locationSubtitle: 'Es lo que te sitúa en la sala: quien entrene lo mismo te encuentra.',
     identityNote: 'En el chat de la sala te verán como',
     enterCta: 'Entrar a la sala',
-    standingSelf: 'Estás libre',
-    standingOther: 'está libre entre series',
+    // Nobody in a gym cares that you are standing up. What the room wants
+    // to know is which machine is about to be free - and that is already
+    // implied by the muscle group you announced, so it costs no extra tap.
+    alertStatus: 'leavingMachine',
+    alertIcon: require('./assets/icons/dumbbell.png'),
+    alertIconActive: require('./assets/icons/dumbbell.png'),
     hasSeats: false,
   },
   public: {
@@ -111,10 +119,25 @@ export const VENUES: Record<VenueKind, Venue> = {
       'Sin asientos ni números, lo que usa la gente para señalar a alguien es la ropa. Añade dónde estás si quieres afinar.',
     identityNote: 'Aquí te verán como',
     enterCta: 'Entrar',
-    standingSelf: 'Estás de pie',
-    standingOther: 'está de pie',
+    alertStatus: 'standing',
+    alertIcon: require('./assets/icons/seated.png'),
+    alertIconActive: require('./assets/icons/standing.png'),
     hasSeats: false,
   },
+};
+
+/**
+ * How each announcement reads. Keyed by the status the alert itself carries,
+ * never by the venue of whoever is reading it: in a room where one person
+ * chose gym and another chose bar, each alert has to keep the meaning its
+ * sender gave it.
+ */
+export const PRESENCE_COPY: Record<
+  PresenceStatus,
+  { self: string; other: string; /** Appends the minutes left, which is the whole point of this one. */ countdown: boolean }
+> = {
+  standing: { self: 'Estás de pie', other: 'está de pie', countdown: false },
+  leavingMachine: { self: 'Dejas la máquina', other: 'deja la máquina', countdown: true },
 };
 
 export const VENUE_ORDER: VenueKind[] = ['plane', 'train', 'gym', 'public'];

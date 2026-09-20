@@ -72,7 +72,13 @@ export interface ChatMessage {
   viaMesh?: boolean;
 }
 
-export type PresenceStatus = 'standing';
+/**
+ * What the one-tap button announces. It differs by venue because the useful
+ * thing to say differs: in a seat it is "I'm up, come over"; in a gym nobody
+ * cares that you are standing, but everybody cares that a machine is about
+ * to be free.
+ */
+export type PresenceStatus = 'standing' | 'leavingMachine';
 
 export interface PresenceAlert {
   id: string; // same id reused for the "back" broadcast that cancels this alert

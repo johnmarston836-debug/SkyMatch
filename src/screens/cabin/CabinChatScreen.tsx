@@ -13,7 +13,7 @@ import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useProfileStore } from '../../state/profileStore';
 import { usePresenceStore } from '../../state/presenceStore';
-import { sendGroupChatMessage, startMesh, toggleStandUp } from '../../mesh/meshController';
+import { sendGroupChatMessage, startMesh, togglePresence } from '../../mesh/meshController';
 import { ensureNotificationPermission, initNotifications } from '../../notifications/notifier';
 import { colorForPeer } from '../../theme';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
@@ -32,7 +32,7 @@ export function CabinChatScreen({ navigation }: Props) {
   const unreadTotal = useChatStore((state) =>
     Object.values(state.unreadByPeer).reduce((total, count) => total + count, 0),
   );
-  const isStanding = usePresenceStore((state) => state.myActiveAlertId !== null);
+  const alertActive = usePresenceStore((state) => state.myActiveAlertId !== null);
   // Every word on this screen belongs to the place the user said they were
   // in; the machinery underneath is identical in all of them.
   const venue = VENUES[myProfile?.location.kind ?? 'plane'];
@@ -239,14 +239,12 @@ export function CabinChatScreen({ navigation }: Props) {
 
       <View style={styles.inputRow}>
         <Pressable
-          style={[styles.standButton, isStanding && styles.standButtonActive]}
-          onPress={() => void toggleStandUp(myProfile)}
+          style={[styles.standButton, alertActive && styles.standButtonActive]}
+          onPress={() => void togglePresence(myProfile)}
         >
           <Image
-            source={
-              isStanding ? require('../../assets/icons/standing.png') : require('../../assets/icons/seated.png')
-            }
-            style={[styles.standButtonIcon, isStanding && styles.standButtonIconActive]}
+            source={alertActive ? venue.alertIconActive : venue.alertIcon}
+            style={[styles.standButtonIcon, alertActive && styles.standButtonIconActive]}
             resizeMode="contain"
           />
         </Pressable>

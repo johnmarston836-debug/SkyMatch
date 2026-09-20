@@ -1,17 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import { Image, Pressable, Text, View, type ImageSourcePropType } from 'react-native';
 import { ReactionsSheet } from './ReactionsSheet';
 import { REACTION_ICONS, REACTION_ORDER } from './reactionIcons';
 import { usePresenceStore } from '../state/presenceStore';
 import { useProfileStore } from '../state/profileStore';
-import { VENUES } from '../venues';
+import { PRESENCE_COPY } from '../venues';
 import { sendPresenceReaction } from '../mesh/meshController';
 import { useThemedStyles } from '../theme/ThemeContext';
-import type { PresenceReaction, ReactionKind } from '../types';
+import type { PresenceReaction, PresenceStatus, ReactionKind } from '../types';
 
 // Stable reference for alerts nobody has reacted to: a fresh [] here would
 // make zustand think the snapshot changed on every read and spin forever.
 const NO_REACTIONS: PresenceReaction[] = [];
+
+/** The glyph beside the sentence, chosen by what the alert means rather than by where the reader is. */
+const ALERT_ICONS: Record<PresenceStatus, ImageSourcePropType> = {
+  standing: require('../assets/icons/standing.png'),
+  leavingMachine: require('../assets/icons/dumbbell.png'),
+};
 
 interface Props {
   /** Opens a private chat with whoever was tapped in the reactions list. */
@@ -24,10 +30,10 @@ export function PresenceBanner({ onOpenChat }: Props) {
   const reactionsByAlert = usePresenceStore((state) => state.reactionsByAlert);
   const pruneExpired = usePresenceStore((state) => state.pruneExpired);
   const myProfile = useProfileStore((state) => state.profile);
-  // The wording follows the place you are in: standing up in a cabin is
-  // being free between sets in a gym.
-  const venue = VENUES[myProfile?.location.kind ?? 'plane'];
   const [pickerFor, setPickerFor] = useState<string | null>(null);
+  // Only "a machine frees up in N minutes" needs it, and there it is the
+  // whole message: "in 5 minutes" is a lie four minutes later.
+  const [now, setNow] = useState(() => Date.now());
   const [reactionsFor, setReactionsFor] = useState<string | null>(null);
   const styles = useThemedStyles(({ colors, radii, spacing }) => ({
     container: { gap: spacing(1) },
@@ -85,7 +91,10 @@ export function PresenceBanner({ onOpenChat }: Props) {
   }));
 
   useEffect(() => {
-    const timer = setInterval(pruneExpired, 10_000);
+    const timer = setInterval(() => {
+      pruneExpired();
+      setNow(Date.now());
+    }, 10_000);
     return () => clearInterval(timer);
   }, [pruneExpired]);
 
@@ -104,6 +113,11 @@ export function PresenceBanner({ onOpenChat }: Props) {
         const reactions = reactionsByAlert[alert.id] ?? NO_REACTIONS;
         const mine = reactions.find((reaction) => reaction.fromId === myProfile?.id);
         const isOwnAlert = alert.fromId === myProfile?.id;
+        // An alert renders by the meaning its sender gave it, not by the
+        // venue of whoever is reading: a gym and a bar can share a room.
+        const copy = PRESENCE_COPY[alert.status] ?? PRESENCE_COPY.standing;
+        const minutesLeft = Math.max(1, Math.ceil((alert.expiresAt - now) / 60_000));
+        const countdown = copy.countdown ? ` en ${minutesLeft} min` : '';
         const counts = REACTION_ORDER.map((kind) => ({
           kind,
           count: reactions.filter((reaction) => reaction.kind === kind).length,
@@ -119,13 +133,17 @@ export function PresenceBanner({ onOpenChat }: Props) {
             onPress={() => setPickerFor(pickerFor === alert.id ? null : alert.id)}
           >
             <View style={styles.headline}>
-              <Image source={require('../assets/icons/standing.png')} style={styles.icon} resizeMode="contain" />
+              <Image source={ALERT_ICONS[alert.status]} style={styles.icon} resizeMode="contain" />
               <Text style={styles.text}>
                 {isOwnAlert ? (
-                  <Text style={styles.seat}>{venue.standingSelf}</Text>
+                  <>
+                    <Text style={styles.seat}>{copy.self}</Text>
+                    {countdown}
+                  </>
                 ) : (
                   <>
-                    <Text style={styles.seat}>{alert.label}</Text> {venue.standingOther}
+                    <Text style={styles.seat}>{alert.label}</Text> {copy.other}
+                    {countdown}
                   </>
                 )}
               </Text>

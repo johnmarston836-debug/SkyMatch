@@ -10,6 +10,7 @@ import { notifyPrivateMessage } from '../notifications/notifier';
 import { requestBlePermissions } from '../utils/permissions';
 import { newId } from '../utils/id';
 import { formatLocation } from '../utils/location';
+import { VENUES } from '../venues';
 import type { ChatMessage, PresenceAlert, PresenceReaction, Profile, ReactionKind } from '../types';
 
 /**
@@ -177,22 +178,27 @@ export async function sendPrivateChatMessage(myProfile: Profile, toId: string, b
 }
 
 /**
- * Toggles the stand-up button: first press announces "I'm standing up"
- * (active alert, shown to everyone); pressing it again broadcasts "I'm back
- * in my seat" with the *same* alert id, which clears it everywhere - not
- * just on this phone. If that never arrives (app closed, out of range), the
- * alert's own `expiresAt` clears it after a while regardless.
+ * Toggles the one-tap announcement: the first press broadcasts it (an active
+ * alert, shown to everyone); pressing it again broadcasts the cancellation
+ * with the *same* alert id, which clears it everywhere - not just on this
+ * phone. If that never arrives (app closed, out of range), the alert's own
+ * `expiresAt` clears it after a while regardless.
+ *
+ * What it announces depends on the venue: being out of your seat on a plane,
+ * or a machine about to be free in a gym. The status travels with the alert,
+ * so it keeps that meaning on a phone whose owner chose a different venue.
  */
-export async function toggleStandUp(myProfile: Profile) {
+export async function togglePresence(myProfile: Profile) {
   if (!service) return;
   const currentId = usePresenceStore.getState().myActiveAlertId;
+  const status = VENUES[myProfile.location.kind].alertStatus;
 
   if (currentId) {
     const alert: PresenceAlert = {
       id: currentId,
       fromId: myProfile.id,
       label: formatLocation(myProfile.location),
-      status: 'standing',
+      status,
       active: false,
       startedAt: Date.now(),
       expiresAt: Date.now(),
@@ -206,7 +212,7 @@ export async function toggleStandUp(myProfile: Profile) {
     id: newId(),
     fromId: myProfile.id,
     label: formatLocation(myProfile.location),
-    status: 'standing',
+    status,
     active: true,
     startedAt: Date.now(),
     expiresAt: Date.now() + 5 * 60_000,

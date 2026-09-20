@@ -1,5 +1,5 @@
 import { formatLocation, describeLocation, packLocation, unpackLocation, defaultLocation } from '../src/utils/location';
-import { VENUE_ORDER } from '../src/venues';
+import { PRESENCE_COPY, VENUES, VENUE_ORDER } from '../src/venues';
 import type { UserLocation } from '../src/types';
 
 const CASES: UserLocation[] = [
@@ -50,5 +50,21 @@ describe('locations', () => {
   it('rejects an advertisement it cannot read', () => {
     expect(unpackLocation('')).toBeNull();
     expect(unpackLocation('Z99')).toBeNull();
+  });
+});
+
+describe('the one-tap announcement', () => {
+  it('says the useful thing for each kind of place', () => {
+    // A gym does not care that someone stood up; it cares that a machine is
+    // about to be free.
+    expect(VENUES.plane.alertStatus).toBe('standing');
+    expect(VENUES.train.alertStatus).toBe('standing');
+    expect(VENUES.public.alertStatus).toBe('standing');
+    expect(VENUES.gym.alertStatus).toBe('leavingMachine');
+  });
+
+  it('only counts down where the minutes are the message', () => {
+    expect(PRESENCE_COPY.leavingMachine.countdown).toBe(true);
+    expect(PRESENCE_COPY.standing.countdown).toBe(false);
   });
 });
