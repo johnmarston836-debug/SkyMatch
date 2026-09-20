@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { WelcomeScreen } from '../screens/onboarding/WelcomeScreen';
 import { VenuePickerScreen } from '../screens/onboarding/VenuePickerScreen';
 import { LocationPickerScreen } from '../screens/onboarding/LocationPickerScreen';
+import { SessionStartScreen } from '../screens/onboarding/SessionStartScreen';
 import { ProfileSetupScreen } from '../screens/onboarding/ProfileSetupScreen';
 import { CabinChatScreen } from '../screens/cabin/CabinChatScreen';
 import { PassengersScreen } from '../screens/passengers/PassengersScreen';
@@ -33,6 +34,8 @@ export type MainStackParamList = {
 
 export type RootStackParamList = {
   Onboarding: undefined;
+  /** Asked on every launch once a profile exists - see SessionStartScreen. */
+  SessionStart: undefined;
   Main: undefined;
 };
 
@@ -72,8 +75,14 @@ export function RootNavigator({ hasProfile }: { hasProfile: boolean }) {
 
   return (
     <NavigationContainer theme={navTheme}>
-      <RootStack.Navigator screenOptions={{ headerShown: false }} initialRouteName={hasProfile ? 'Main' : 'Onboarding'}>
+      <RootStack.Navigator
+        screenOptions={{ headerShown: false }}
+        // A fresh install goes through onboarding, which ends by entering
+        // Main directly; everyone else is only asked where they are today.
+        initialRouteName={hasProfile ? 'SessionStart' : 'Onboarding'}
+      >
         <RootStack.Screen name="Onboarding" component={OnboardingNavigator} />
+        <RootStack.Screen name="SessionStart" component={SessionStartScreen} />
         <RootStack.Screen name="Main" component={MainNavigator} />
       </RootStack.Navigator>
     </NavigationContainer>

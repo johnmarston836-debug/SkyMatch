@@ -1,7 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import {
   Alert,
-  Image,
   KeyboardAvoidingView,
   Linking,
   Platform,
@@ -17,7 +16,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
-import { LocationPicker } from '../../components/LocationPicker';
+import { VenueLocationChooser } from '../../components/VenueLocationChooser';
 import { useProfileStore } from '../../state/profileStore';
 import { useAvatarStore } from '../../state/avatarStore';
 import { announceAvatarChange, announceProfileUpdate } from '../../mesh/meshController';
@@ -28,9 +27,9 @@ import {
   type NotificationPermission,
 } from '../../notifications/notifier';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
-import { defaultLocation, formatLocation } from '../../utils/location';
-import { VENUES, VENUE_ORDER } from '../../venues';
-import type { UserLocation, VenueKind } from '../../types';
+import { defaultLocation } from '../../utils/location';
+
+import type { UserLocation } from '../../types';
 
 /** ~12 KB of base64 is already ~150 Bluetooth frames; past that the cabin notices. */
 const MAX_AVATAR_CHARS = 12_000;
@@ -59,29 +58,6 @@ export function MyProfileScreen({ navigation }: Props) {
     photoBlock: { alignItems: 'center' as const, gap: spacing(1), marginTop: spacing(3) },
     photoAction: { color: colors.accent, fontWeight: '700' as const },
     photoRemove: { ...typography.subtitle, fontSize: 13 },
-    seatReadout: { alignItems: 'center' as const, marginTop: spacing(2), marginBottom: spacing(2) },
-    seatReadoutText: {
-      color: colors.text,
-      fontSize: 38,
-      fontWeight: '800' as const,
-      letterSpacing: 1,
-      textAlign: 'center' as const,
-    },
-    venueRow: { flexDirection: 'row' as const, gap: spacing(1), marginTop: spacing(3) },
-    venueChip: {
-      flex: 1,
-      alignItems: 'center' as const,
-      gap: spacing(0.5),
-      backgroundColor: colors.surface,
-      borderWidth: 1,
-      borderColor: colors.border,
-      borderRadius: radii.md,
-      paddingVertical: spacing(1.5),
-    },
-    venueChipSelected: { borderColor: colors.accent, backgroundColor: colors.surfaceAlt },
-    venueIcon: { width: 22, height: 22, tintColor: colors.text },
-    venueName: { color: colors.textMuted, fontSize: 11, fontWeight: '700' as const, textAlign: 'center' as const },
-    venueNameSelected: { color: colors.text },
     fieldLabel: { ...typography.label, marginTop: spacing(2), marginBottom: spacing(1) },
     input: {
       backgroundColor: colors.surface,
@@ -205,32 +181,7 @@ export function MyProfileScreen({ navigation }: Props) {
           )}
         </View>
 
-        <View style={styles.venueRow}>
-          {VENUE_ORDER.map((kind: VenueKind) => {
-            const selected = kind === location.kind;
-            return (
-              <Pressable
-                key={kind}
-                style={[styles.venueChip, selected && styles.venueChipSelected]}
-                // Changing place starts its location from scratch: a seat
-                // means nothing in a gym, and a muscle group means nothing
-                // on a train.
-                onPress={() => setLocation(defaultLocation(kind))}
-              >
-                <Image source={VENUES[kind].icon} style={styles.venueIcon} resizeMode="contain" />
-                <Text style={[styles.venueName, selected && styles.venueNameSelected]} numberOfLines={1}>
-                  {VENUES[kind].name}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
-
-        <View style={styles.seatReadout}>
-          <Text style={styles.seatReadoutText}>{formatLocation(location)}</Text>
-        </View>
-
-        <LocationPicker location={location} onChange={setLocation} />
+        <VenueLocationChooser location={location} onChange={setLocation} />
 
         <Text style={styles.fieldLabel}>NOMBRE</Text>
         <TextInput
