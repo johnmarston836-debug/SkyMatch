@@ -44,6 +44,19 @@ export interface PresenceAlert {
   expiresAt: number;
 }
 
+/** Deliberately a short fixed list: each one is a hand-drawn icon, because emoji render as tofu boxes on some devices. */
+export type ReactionKind = 'ok' | 'heart' | 'laugh';
+
+export interface PresenceReaction {
+  id: string;
+  /** The alert being reacted to. */
+  alertId: string;
+  fromId: string;
+  fromSeat: Seat;
+  kind: ReactionKind;
+  sentAt: number;
+}
+
 /** Discovered peer, kept fresh by repeated BLE adverts; pruned when it goes stale. */
 export interface DiscoveredPeer {
   peerId: string;

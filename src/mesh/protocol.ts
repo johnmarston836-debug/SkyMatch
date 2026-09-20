@@ -32,7 +32,7 @@ export const DEFAULT_TTL = 6; // max hops a packet will travel before being drop
 export const SEEN_CACHE_SIZE = 512; // recently-relayed message ids kept to stop flood loops
 export const PEER_STALE_MS = 15_000; // an advert not refreshed within this window is considered out of range
 
-export type PacketKind = 'profile' | 'chat' | 'presence';
+export type PacketKind = 'profile' | 'chat' | 'presence' | 'reaction';
 
 export interface MeshEnvelope<TPayload = unknown> {
   id: string; // uuid; used for dedup across the whole mesh

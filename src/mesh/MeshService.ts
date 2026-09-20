@@ -1,7 +1,7 @@
 import type { BleTransport } from './BleTransport';
 import { MeshRouter } from './MeshRouter';
 import { BROADCAST_ID, type MeshEnvelope } from './protocol';
-import type { ChatMessage, PresenceAlert, Profile, Seat } from '../types';
+import type { ChatMessage, PresenceAlert, PresenceReaction, Profile, Seat } from '../types';
 import { newId } from '../utils/id';
 
 type Listeners = {
@@ -10,6 +10,7 @@ type Listeners = {
   profile: (peerId: string, profile: Profile) => void;
   message: (message: ChatMessage) => void;
   presence: (alert: PresenceAlert) => void;
+  reaction: (reaction: PresenceReaction) => void;
 };
 
 /**
@@ -32,6 +33,7 @@ export class MeshService {
     profile: new Set(),
     message: new Set(),
     presence: new Set(),
+    reaction: new Set(),
   };
 
   constructor(
@@ -78,8 +80,19 @@ export class MeshService {
     await this.router.send({ id: message.id, kind: 'chat', fromId: this.myPeerId, toId: message.toId, payload: message });
   }
 
+  /**
+   * The envelope gets its own fresh id rather than reusing the alert's: an
+   * alert and the "I'm back" that cancels it deliberately share an id, so
+   * reusing it would make every other phone's dedup cache discard the
+   * cancellation as a message it had already seen, and the banner would
+   * never clear anywhere but here.
+   */
   async sendPresenceAlert(alert: PresenceAlert) {
-    await this.router.send({ id: alert.id, kind: 'presence', fromId: this.myPeerId, toId: BROADCAST_ID, payload: alert });
+    await this.router.send({ id: newId(), kind: 'presence', fromId: this.myPeerId, toId: BROADCAST_ID, payload: alert });
+  }
+
+  async sendPresenceReaction(reaction: PresenceReaction) {
+    await this.router.send({ id: reaction.id, kind: 'reaction', fromId: this.myPeerId, toId: BROADCAST_ID, payload: reaction });
   }
 
   private emit<K extends keyof Listeners>(event: K, ...args: Parameters<Listeners[K]>) {
@@ -96,6 +109,9 @@ export class MeshService {
         break;
       case 'presence':
         this.emit('presence', envelope.payload as PresenceAlert);
+        break;
+      case 'reaction':
+        this.emit('reaction', envelope.payload as PresenceReaction);
         break;
       default:
         break;

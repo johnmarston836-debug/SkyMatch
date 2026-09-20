@@ -6,7 +6,7 @@ import { useChatStore } from '../state/chatStore';
 import { usePresenceStore } from '../state/presenceStore';
 import { requestBlePermissions } from '../utils/permissions';
 import { newId } from '../utils/id';
-import type { ChatMessage, PresenceAlert, Profile } from '../types';
+import type { ChatMessage, PresenceAlert, PresenceReaction, Profile, ReactionKind } from '../types';
 
 /**
  * Real BLE. Set back to true to get the simulated cabin (fake passengers,
@@ -52,6 +52,10 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
 
   service.on('presence', (alert) => {
     usePresenceStore.getState().applyAlert(alert);
+  });
+
+  service.on('reaction', (reaction) => {
+    usePresenceStore.getState().applyReaction(reaction);
   });
 
   await service.start(myProfile.seat);
@@ -131,6 +135,21 @@ export async function toggleStandUp(myProfile: Profile) {
   usePresenceStore.getState().applyAlert(alert);
   usePresenceStore.getState().setMyActiveAlertId(alert.id);
   await service.sendPresenceAlert(alert);
+}
+
+/** Reacts to someone else's stand-up alert. Broadcasts don't loop back, so it lands locally first. */
+export async function sendPresenceReaction(myProfile: Profile, alertId: string, kind: ReactionKind) {
+  if (!service) return;
+  const reaction: PresenceReaction = {
+    id: newId(),
+    alertId,
+    fromId: myProfile.id,
+    fromSeat: myProfile.seat,
+    kind,
+    sentAt: Date.now(),
+  };
+  usePresenceStore.getState().applyReaction(reaction);
+  await service.sendPresenceReaction(reaction);
 }
 
 /**
