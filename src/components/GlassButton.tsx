@@ -9,10 +9,7 @@ import {
 } from 'react-native';
 import { GlassView } from 'skymatch-peripheral/glass';
 import { radii } from '../theme';
-import { useAppTheme, useThemedStyles } from '../theme/ThemeContext';
-
-/** True where the app is drawing the system's glass rather than imitating it. */
-const HAS_GLASS = GlassView !== null;
+import { useThemedStyles } from '../theme/ThemeContext';
 
 interface Props {
   onPress: () => void;
@@ -56,16 +53,6 @@ export function GlassButton({
   accessibilityLabel,
 }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
-  const { scheme } = useAppTheme();
-  // Cast over the glass, not painted over it: enough colour to read as the
-  // primary action, little enough that the material still works.
-  const tints: Record<'plain' | 'accent' | 'active', string | undefined> = {
-    plain: undefined,
-    accent:
-      scheme === 'light' ? 'rgba(37,99,235,0.72)' : 'rgba(37,99,235,0.62)',
-    active:
-      scheme === 'light' ? 'rgba(8,145,178,0.72)' : 'rgba(8,145,178,0.62)',
-  };
   const styles = useThemedStyles((theme) => {
     const { colors, spacing } = theme;
     const light = theme.scheme === 'light';
@@ -90,22 +77,17 @@ export function GlassButton({
       // With glass behind, the fill is only there to keep the label
       // legible over whatever the material picks up; without it, the fill
       // is the whole button.
+      // Always drawn, glass or no glass. A colour laid on at partial
+      // strength so the material shows through comes out washed: over a flat
+      // white background there is nothing behind it to darken it back, and a
+      // primary action ends up looking disabled. The fill carries the
+      // colour; the pane on top of it adds the material's own light.
       plain: {
-        backgroundColor: HAS_GLASS
-          ? 'transparent'
-          : light
-          ? 'rgba(118,118,128,0.12)'
-          : 'rgba(118,118,128,0.28)',
+        backgroundColor: light ? 'rgba(118,118,128,0.12)' : 'rgba(118,118,128,0.28)',
         borderColor: light ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.10)',
       },
-      accent: {
-        backgroundColor: HAS_GLASS ? 'transparent' : colors.accent,
-        borderColor: 'rgba(255,255,255,0.22)',
-      },
-      active: {
-        backgroundColor: HAS_GLASS ? 'transparent' : colors.accentAlt,
-        borderColor: 'rgba(255,255,255,0.22)',
-      },
+      accent: { backgroundColor: colors.accent, borderColor: 'rgba(255,255,255,0.22)' },
+      active: { backgroundColor: colors.accentAlt, borderColor: 'rgba(255,255,255,0.22)' },
       disabled: { opacity: 0.4 },
       rim: {
         position: 'absolute' as const,
@@ -169,25 +151,14 @@ export function GlassButton({
           disabled && styles.disabled,
         ]}
       >
-        {GlassView !== null ? (
-          <GlassView
-            style={StyleSheet.absoluteFill}
-            cornerRadius={radii.pill}
-            tint={tints[variant]}
-            pointerEvents="none"
-          />
-        ) : (
-          <>
-            <View
-              style={[
-                styles.sheen,
-                variant === 'plain' ? styles.sheenPlain : styles.sheenFilled,
-              ]}
-              pointerEvents="none"
-            />
-            <View style={styles.rim} pointerEvents="none" />
-          </>
+        {GlassView !== null && (
+          <GlassView style={StyleSheet.absoluteFill} cornerRadius={radii.pill} pointerEvents="none" />
         )}
+        <View
+          style={[styles.sheen, variant === 'plain' ? styles.sheenPlain : styles.sheenFilled]}
+          pointerEvents="none"
+        />
+        <View style={styles.rim} pointerEvents="none" />
         {children}
       </Pressable>
     </Animated.View>

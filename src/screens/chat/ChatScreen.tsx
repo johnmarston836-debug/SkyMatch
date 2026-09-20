@@ -9,6 +9,7 @@ import { useKeyboardPadding } from '../../hooks/useKeyboardPadding';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
+import { GlassBar } from '../../components/GlassBar';
 import { GlassButton } from '../../components/GlassButton';
 import { PhotoViewer } from '../../components/PhotoViewer';
 import { QuotedMessage } from '../../components/QuotedMessage';
@@ -48,6 +49,10 @@ export function ChatScreen({ route, navigation }: Props) {
   const autoScroll = useChatAutoScroll<ChatMessage>();
   const [zoomedPhoto, setZoomedPhoto] = useState<string | null>(null);
   const [replyTo, setReplyTo] = useState<ReplyQuote | null>(null);
+  // The composer floats over the conversation, so the list has to end above
+  // it rather than behind it - and the strip's height depends on the text
+  // size the reader chose, so it is measured rather than guessed.
+  const [composerHeight, setComposerHeight] = useState(64);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
     peerHeader: {
@@ -73,14 +78,13 @@ export function ChatScreen({ route, navigation }: Props) {
     bubbleTextMine: { ...typography.body, color: colors.background },
     bubbleTextTheirs: { ...typography.body },
     image: { width: 220, height: 220, borderRadius: radii.sm, marginBottom: spacing(1) },
+    composer: { position: 'absolute' as const, left: 0, right: 0, bottom: 0 },
     inputRow: {
       flexDirection: 'row' as const,
       alignItems: 'center' as const,
       gap: spacing(1),
       paddingHorizontal: spacing(2),
       paddingVertical: spacing(1),
-      borderTopWidth: 1,
-      borderTopColor: colors.border,
     },
     attachButtonIcon: { width: 22, height: 22, tintColor: colors.textMuted },
     input: {
@@ -181,7 +185,7 @@ export function ChatScreen({ route, navigation }: Props) {
         data={messages}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingBottom: composerHeight + theme.spacing(2) }]}
         onScroll={autoScroll.handleScroll}
         onContentSizeChange={autoScroll.handleContentSizeChange}
         onLayout={autoScroll.handleLayout}
@@ -189,24 +193,26 @@ export function ChatScreen({ route, navigation }: Props) {
       />
       <PhotoViewer imageBase64={zoomedPhoto} onClose={() => setZoomedPhoto(null)} />
 
-      <ReplyComposerBar quote={replyTo} onCancel={() => setReplyTo(null)} />
+      <GlassBar style={styles.composer} onLayout={(event) => setComposerHeight(event.nativeEvent.layout.height)}>
+        <ReplyComposerBar quote={replyTo} onCancel={() => setReplyTo(null)} />
 
-      <View style={styles.inputRow}>
-        <GlassButton round onPress={handleAttachImage} accessibilityLabel="Enviar una foto">
-          <Image source={require('../../assets/icons/camera.png')} style={styles.attachButtonIcon} resizeMode="contain" />
-        </GlassButton>
-        <TextInput
-          style={styles.input}
-          value={draft}
-          onChangeText={setDraft}
-          placeholder="Escribe un mensaje…"
-          placeholderTextColor={theme.colors.textMuted}
-          onSubmitEditing={handleSend}
-        />
-        <GlassButton variant="accent" onPress={handleSend}>
-          <Text style={styles.sendButtonText}>Enviar</Text>
-        </GlassButton>
-      </View>
+        <View style={styles.inputRow}>
+          <GlassButton round onPress={handleAttachImage} accessibilityLabel="Enviar una foto">
+            <Image source={require('../../assets/icons/camera.png')} style={styles.attachButtonIcon} resizeMode="contain" />
+          </GlassButton>
+          <TextInput
+            style={styles.input}
+            value={draft}
+            onChangeText={setDraft}
+            placeholder="Escribe un mensaje…"
+            placeholderTextColor={theme.colors.textMuted}
+            onSubmitEditing={handleSend}
+          />
+          <GlassButton variant="accent" onPress={handleSend}>
+            <Text style={styles.sendButtonText}>Enviar</Text>
+          </GlassButton>
+        </View>
+      </GlassBar>
     </Animated.View>
   );
 }

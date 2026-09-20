@@ -7,6 +7,7 @@ import { useKeyboardPadding } from '../../hooks/useKeyboardPadding';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { CabinSeats } from '../../components/CabinSeats';
+import { GlassBar } from '../../components/GlassBar';
 import { GlassButton } from '../../components/GlassButton';
 import { MeshStatus } from '../../components/MeshStatus';
 import { PresenceBanner } from '../../components/PresenceBanner';
@@ -44,6 +45,10 @@ export function CabinChatScreen({ navigation }: Props) {
   const venue = VENUES[myProfile?.location.kind ?? 'plane'];
   const [draft, setDraft] = useState('');
   const [replyTo, setReplyTo] = useState<ReplyQuote | null>(null);
+  // The composer floats over the conversation, so the list has to end above
+  // it rather than behind it - and the strip's height depends on the text
+  // size the reader chose, so it is measured rather than guessed.
+  const [composerHeight, setComposerHeight] = useState(64);
   const keyboardPadding = useKeyboardPadding(insets.bottom);
   const autoScroll = useChatAutoScroll<ChatMessage>();
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
@@ -92,14 +97,13 @@ export function CabinChatScreen({ navigation }: Props) {
     senderNameMine: { fontSize: 12, fontWeight: '700' as const, color: colors.background },
     bodyText: { ...typography.body },
     bodyTextMine: { ...typography.body, color: colors.background },
+    composer: { position: 'absolute' as const, left: 0, right: 0, bottom: 0 },
     inputRow: {
       flexDirection: 'row' as const,
       alignItems: 'center' as const,
       gap: spacing(1),
       paddingHorizontal: spacing(2),
       paddingVertical: spacing(1),
-      borderTopWidth: 1,
-      borderTopColor: colors.border,
     },
     standButtonIcon: { width: 22, height: 22, tintColor: colors.textMuted },
     standButtonIconActive: { tintColor: '#FFFFFF' },
@@ -202,7 +206,7 @@ export function CabinChatScreen({ navigation }: Props) {
         data={groupMessages}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingBottom: composerHeight + theme.spacing(2) }]}
         onScroll={autoScroll.handleScroll}
         onContentSizeChange={autoScroll.handleContentSizeChange}
         onLayout={autoScroll.handleLayout}
@@ -217,28 +221,30 @@ export function CabinChatScreen({ navigation }: Props) {
         }
       />
 
-      <ReplyComposerBar quote={replyTo} onCancel={() => setReplyTo(null)} />
+      <GlassBar style={styles.composer} onLayout={(event) => setComposerHeight(event.nativeEvent.layout.height)}>
+        <ReplyComposerBar quote={replyTo} onCancel={() => setReplyTo(null)} />
 
-      <View style={styles.inputRow}>
-        <GlassButton round variant={alertActive ? 'active' : 'plain'} onPress={() => void togglePresence(myProfile)}>
-          <Image
-            source={alertActive ? venue.alertIconActive : venue.alertIcon}
-            style={[styles.standButtonIcon, alertActive && styles.standButtonIconActive]}
-            resizeMode="contain"
+        <View style={styles.inputRow}>
+          <GlassButton round variant={alertActive ? 'active' : 'plain'} onPress={() => void togglePresence(myProfile)}>
+            <Image
+              source={alertActive ? venue.alertIconActive : venue.alertIcon}
+              style={[styles.standButtonIcon, alertActive && styles.standButtonIconActive]}
+              resizeMode="contain"
+            />
+          </GlassButton>
+          <TextInput
+            style={styles.input}
+            value={draft}
+            onChangeText={setDraft}
+            placeholder={venue.composerPlaceholder}
+            placeholderTextColor={theme.colors.textMuted}
+            onSubmitEditing={handleSend}
           />
-        </GlassButton>
-        <TextInput
-          style={styles.input}
-          value={draft}
-          onChangeText={setDraft}
-          placeholder={venue.composerPlaceholder}
-          placeholderTextColor={theme.colors.textMuted}
-          onSubmitEditing={handleSend}
-        />
-        <GlassButton variant="accent" onPress={handleSend}>
-          <Text style={styles.sendButtonText}>Enviar</Text>
-        </GlassButton>
-      </View>
+          <GlassButton variant="accent" onPress={handleSend}>
+            <Text style={styles.sendButtonText}>Enviar</Text>
+          </GlassButton>
+        </View>
+      </GlassBar>
     </Animated.View>
   );
 }
