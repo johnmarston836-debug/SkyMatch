@@ -1,26 +1,23 @@
 import React, { useRef } from 'react';
-import { Animated, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  Animated,
+  Pressable,
+  StyleSheet,
+  View,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 import { GlassView } from 'skymatch-peripheral/glass';
 import { radii } from '../theme';
-import { useThemedStyles } from '../theme/ThemeContext';
+import { useAppTheme, useThemedStyles } from '../theme/ThemeContext';
 
-/**
- * A button in the system's glass idiom: a real pane of system glass behind
- * it where the phone has one, a hairline that catches the light along the
- * top edge, a soft shadow that lifts it off the page, and a springy squash
- * when pressed.
- *
- * The drawn surface underneath is not a leftover. The native pane blurs and
- * refracts what is behind the button, which is exactly nothing on a flat
- * background; the tint, the rim and the sheen are what make a button read as
- * a button. And if the native side is missing - an older phone, a build
- * where it didn't register - the button still looks like itself instead of
- * disappearing.
- */
+/** True where the app is drawing the system's glass rather than imitating it. */
+const HAS_GLASS = GlassView !== null;
+
 interface Props {
   onPress: () => void;
   children: React.ReactNode;
-  /** 'plain' borrows the background; 'accent' is the filled blue one. */
+  /** 'plain' borrows the background; 'accent' is the primary action; 'active' marks a toggle that is on. */
   variant?: 'plain' | 'accent' | 'active';
   /** A circular icon button rather than a pill with a label. */
   round?: boolean;
@@ -33,6 +30,20 @@ interface Props {
   accessibilityLabel?: string;
 }
 
+/**
+ * A button on a pane of the system's own glass, with a springy squash when
+ * pressed.
+ *
+ * The coloured variants are tinted glass rather than paint, which is what
+ * makes a prominent glass button prominent: the material still shows what is
+ * behind it, coloured. Paint over glass is just paint, and the glass under it
+ * is wasted.
+ *
+ * The drawn fill, rim and sheen are what a phone without the material falls
+ * back to. They are deliberately near-invisible when the real thing is
+ * present: a painted highlight on top of a material that already has one
+ * reads as a mistake, and that is what made the first version look wrong.
+ */
 export function GlassButton({
   onPress,
   children,
@@ -45,8 +56,19 @@ export function GlassButton({
   accessibilityLabel,
 }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
-  const styles = useThemedStyles(({ colors, radii, spacing, scheme }) => {
-    const light = scheme === 'light';
+  const { scheme } = useAppTheme();
+  // Cast over the glass, not painted over it: enough colour to read as the
+  // primary action, little enough that the material still works.
+  const tints: Record<'plain' | 'accent' | 'active', string | undefined> = {
+    plain: undefined,
+    accent:
+      scheme === 'light' ? 'rgba(37,99,235,0.72)' : 'rgba(37,99,235,0.62)',
+    active:
+      scheme === 'light' ? 'rgba(8,145,178,0.72)' : 'rgba(8,145,178,0.62)',
+  };
+  const styles = useThemedStyles((theme) => {
+    const { colors, spacing } = theme;
+    const light = theme.scheme === 'light';
     return {
       surface: {
         flexDirection: 'row' as const,
@@ -59,37 +81,41 @@ export function GlassButton({
       },
       pill: { paddingHorizontal: spacing(2), paddingVertical: spacing(1) },
       pillLarge: { paddingHorizontal: spacing(3), paddingVertical: spacing(2) },
-      round: { width: 44, height: 44, paddingHorizontal: 0, paddingVertical: 0 },
-      // A translucent grey is what the system uses for a button that has no
-      // colour of its own: it darkens what is under it without picking a
-      // side between the two themes.
+      round: {
+        width: 44,
+        height: 44,
+        paddingHorizontal: 0,
+        paddingVertical: 0,
+      },
+      // With glass behind, the fill is only there to keep the label
+      // legible over whatever the material picks up; without it, the fill
+      // is the whole button.
       plain: {
-        // Lighter when there is real glass behind it: the pane already
-        // darkens what it covers, and both together turn muddy.
-        backgroundColor: GlassView
-          ? light
-            ? 'rgba(118,118,128,0.04)'
-            : 'rgba(118,118,128,0.10)'
+        backgroundColor: HAS_GLASS
+          ? 'transparent'
           : light
-            ? 'rgba(118,118,128,0.12)'
-            : 'rgba(118,118,128,0.28)',
+          ? 'rgba(118,118,128,0.12)'
+          : 'rgba(118,118,128,0.28)',
         borderColor: light ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.10)',
       },
-      accent: { backgroundColor: colors.accent, borderColor: 'rgba(255,255,255,0.22)' },
-      active: { backgroundColor: colors.accentAlt, borderColor: 'rgba(255,255,255,0.22)' },
+      accent: {
+        backgroundColor: HAS_GLASS ? 'transparent' : colors.accent,
+        borderColor: 'rgba(255,255,255,0.22)',
+      },
+      active: {
+        backgroundColor: HAS_GLASS ? 'transparent' : colors.accentAlt,
+        borderColor: 'rgba(255,255,255,0.22)',
+      },
       disabled: { opacity: 0.4 },
-      // The light along the top edge, which is what makes glass legible -
-      // not the blur. Two pieces, because a single flat band over a
-      // saturated fill reads as a button split in half rather than as a
-      // highlight: a hairline rim right at the edge, and a much fainter
-      // sheen fading under it.
       rim: {
         position: 'absolute' as const,
         left: 0,
         right: 0,
         top: 0,
         height: 1,
-        backgroundColor: light ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.28)',
+        backgroundColor: light
+          ? 'rgba(255,255,255,0.85)'
+          : 'rgba(255,255,255,0.28)',
       },
       sheen: {
         position: 'absolute' as const,
@@ -98,10 +124,16 @@ export function GlassButton({
         top: 0,
         height: '45%' as const,
       },
-      // A translucent grey pill can take a bright sheen; a saturated blue
-      // one cannot, and washes out long before it starts to look like glass.
-      sheenPlain: { backgroundColor: light ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.08)' },
-      sheenFilled: { backgroundColor: light ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.09)' },
+      sheenPlain: {
+        backgroundColor: light
+          ? 'rgba(255,255,255,0.45)'
+          : 'rgba(255,255,255,0.08)',
+      },
+      sheenFilled: {
+        backgroundColor: light
+          ? 'rgba(255,255,255,0.14)'
+          : 'rgba(255,255,255,0.09)',
+      },
       shadow: {
         shadowColor: '#000000',
         shadowOpacity: light ? 0.1 : 0.4,
@@ -113,7 +145,12 @@ export function GlassButton({
   });
 
   const spring = (toValue: number) =>
-    Animated.spring(scale, { toValue, useNativeDriver: true, speed: 40, bounciness: 6 }).start();
+    Animated.spring(scale, {
+      toValue,
+      useNativeDriver: true,
+      speed: 40,
+      bounciness: 6,
+    }).start();
 
   return (
     <Animated.View style={[styles.shadow, { transform: [{ scale }] }, style]}>
@@ -132,16 +169,25 @@ export function GlassButton({
           disabled && styles.disabled,
         ]}
       >
-        {/* Only under the plain variant: the filled ones are opaque, and
-            glass behind paint is glass nobody sees. */}
-        {GlassView !== null && variant === 'plain' && (
-          <GlassView style={StyleSheet.absoluteFill} cornerRadius={radii.pill} pointerEvents="none" />
+        {GlassView !== null ? (
+          <GlassView
+            style={StyleSheet.absoluteFill}
+            cornerRadius={radii.pill}
+            tint={tints[variant]}
+            pointerEvents="none"
+          />
+        ) : (
+          <>
+            <View
+              style={[
+                styles.sheen,
+                variant === 'plain' ? styles.sheenPlain : styles.sheenFilled,
+              ]}
+              pointerEvents="none"
+            />
+            <View style={styles.rim} pointerEvents="none" />
+          </>
         )}
-        <View
-          style={[styles.sheen, variant === 'plain' ? styles.sheenPlain : styles.sheenFilled]}
-          pointerEvents="none"
-        />
-        <View style={styles.rim} pointerEvents="none" />
         {children}
       </Pressable>
     </Animated.View>
