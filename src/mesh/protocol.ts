@@ -32,7 +32,7 @@ export const DEFAULT_TTL = 6; // max hops a packet will travel before being drop
 export const SEEN_CACHE_SIZE = 512; // recently-relayed message ids kept to stop flood loops
 export const PEER_STALE_MS = 15_000; // an advert not refreshed within this window is considered out of range
 
-export type PacketKind = 'profile' | 'chat' | 'presence' | 'reaction';
+export type PacketKind = 'profile' | 'chat' | 'presence' | 'reaction' | 'avatar';
 
 export interface MeshEnvelope<TPayload = unknown> {
   id: string; // uuid; used for dedup across the whole mesh
@@ -74,7 +74,21 @@ export function decodeEnvelope(raw: string): MeshEnvelope | null {
  * earlier version of this file did) is what lets two messages be in flight
  * over the same characteristic at once without corrupting each other.
  */
-const CHUNK_SIZE = 180; // bytes; stays under the smallest MTU we negotiate for on older Android devices
+/**
+ * Sized so a whole encoded frame survives a BLE *notification*, which is the
+ * tightest path we have: a notification cannot exceed the connection's MTU,
+ * unlike a write with response, which the stack will split for us. Budgeting
+ * 180 bytes on the wire and working backwards - base64 costs a third on top,
+ * and the frame's own JSON wrapper about 46 characters - leaves roughly 80
+ * for the payload. Oversized notifications are silently truncated, so being
+ * conservative here is what keeps the peripheral-to-central direction alive.
+ */
+const CHUNK_SIZE = 80;
+
+/** Short on purpose: the id is repeated in every chunk and eats the budget above. */
+export function newFrameId(): string {
+  return Math.random().toString(36).slice(2, 10);
+}
 
 export interface Frame {
   id: string; // groups every chunk of one send together; unrelated to the envelope's own id

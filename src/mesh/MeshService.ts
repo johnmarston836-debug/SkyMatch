@@ -1,7 +1,7 @@
 import type { BleTransport } from './BleTransport';
 import { MeshRouter } from './MeshRouter';
 import { BROADCAST_ID, type MeshEnvelope } from './protocol';
-import type { ChatMessage, PresenceAlert, PresenceReaction, Profile, Seat } from '../types';
+import type { AvatarPacket, ChatMessage, PresenceAlert, PresenceReaction, Profile, Seat } from '../types';
 import { newId } from '../utils/id';
 
 type Listeners = {
@@ -11,6 +11,7 @@ type Listeners = {
   message: (message: ChatMessage) => void;
   presence: (alert: PresenceAlert) => void;
   reaction: (reaction: PresenceReaction) => void;
+  avatar: (avatar: AvatarPacket) => void;
 };
 
 /**
@@ -34,6 +35,7 @@ export class MeshService {
     message: new Set(),
     presence: new Set(),
     reaction: new Set(),
+    avatar: new Set(),
   };
 
   constructor(
@@ -91,6 +93,11 @@ export class MeshService {
     await this.router.send({ id: newId(), kind: 'presence', fromId: this.myPeerId, toId: BROADCAST_ID, payload: alert });
   }
 
+  /** Photos are broadcast rarely and never on the profile timer: one is worth hundreds of ordinary packets. */
+  async sendAvatar(avatar: AvatarPacket) {
+    await this.router.send({ id: newId(), kind: 'avatar', fromId: this.myPeerId, toId: BROADCAST_ID, payload: avatar });
+  }
+
   async sendPresenceReaction(reaction: PresenceReaction) {
     await this.router.send({ id: reaction.id, kind: 'reaction', fromId: this.myPeerId, toId: BROADCAST_ID, payload: reaction });
   }
@@ -112,6 +119,9 @@ export class MeshService {
         break;
       case 'reaction':
         this.emit('reaction', envelope.payload as PresenceReaction);
+        break;
+      case 'avatar':
+        this.emit('avatar', envelope.payload as AvatarPacket);
         break;
       default:
         break;

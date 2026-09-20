@@ -3,6 +3,7 @@ import { Image, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
+import { Avatar } from '../../components/Avatar';
 import { SeatBadge } from '../../components/SeatBadge';
 import { useDiscoveryStore } from '../../state/discoveryStore';
 import { colorForPeer } from '../../theme';
@@ -24,16 +25,6 @@ export function ProfileScreen({ route, navigation }: Props) {
     emptyIcon: { width: 56, height: 56, tintColor: colors.textMuted },
     emptySubtitle: { ...typography.subtitle, textAlign: 'center' as const },
     identity: { alignItems: 'center' as const, gap: spacing(1), marginBottom: spacing(4) },
-    avatar: {
-      width: 88,
-      height: 88,
-      borderRadius: radii.pill,
-      backgroundColor: colors.surfaceAlt,
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-      marginBottom: spacing(1),
-    },
-    avatarText: { color: colors.text, fontWeight: '700' as const, fontSize: 32 },
     name: { ...typography.title, fontSize: 22 },
     label: typography.label,
     contactCard: {
@@ -70,9 +61,7 @@ export function ProfileScreen({ route, navigation }: Props) {
       ) : (
         <>
           <View style={styles.identity}>
-            <View style={styles.avatar}>
-              <Text style={styles.avatarText}>{profile.nickname.charAt(0).toUpperCase()}</Text>
-            </View>
+            <Avatar peerId={peerId} nickname={profile.nickname} size={88} />
             <Text style={[styles.name, { color: colorForPeer(peerId) }]}>{profile.nickname}</Text>
             <SeatBadge seat={profile.seat} />
           </View>

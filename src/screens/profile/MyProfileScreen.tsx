@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
+import { Avatar } from '../../components/Avatar';
 import { SeatMap } from '../../components/SeatMap';
 import { useProfileStore } from '../../state/profileStore';
-import { announceProfileUpdate } from '../../mesh/meshController';
+import { useAvatarStore } from '../../state/avatarStore';
+import { announceProfileUpdate, sendMyAvatar } from '../../mesh/meshController';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import { formatSeat } from '../../utils/seat';
 import type { Seat } from '../../types';
+
+/** ~12 KB of base64 is already ~150 Bluetooth frames; past that the cabin notices. */
+const MAX_AVATAR_CHARS = 12_000;
 
 type Props = NativeStackScreenProps<MainStackParamList, 'MyProfile'>;
 
@@ -18,6 +24,8 @@ export function MyProfileScreen({ navigation }: Props) {
   const theme = useAppTheme();
   const profile = useProfileStore((state) => state.profile);
   const save = useProfileStore((state) => state.save);
+  const myAvatar = useAvatarStore((state) => state.myAvatar);
+  const setMyAvatar = useAvatarStore((state) => state.setMyAvatar);
   const [nickname, setNickname] = useState(profile?.nickname ?? '');
   const [contact, setContact] = useState(profile?.contact ?? '');
   const [seat, setSeat] = useState<Seat>(profile?.seat ?? { row: 14, letter: 'A' });
@@ -28,6 +36,9 @@ export function MyProfileScreen({ navigation }: Props) {
     backLink: { color: colors.text, fontWeight: '600' as const },
     headerSpacer: { width: 60 },
     title: typography.title,
+    photoBlock: { alignItems: 'center' as const, gap: spacing(1), marginTop: spacing(3) },
+    photoAction: { color: colors.accent, fontWeight: '700' as const },
+    photoRemove: { ...typography.subtitle, fontSize: 13 },
     seatReadout: { alignItems: 'center' as const, marginTop: spacing(2), marginBottom: spacing(2) },
     seatReadoutText: { color: colors.text, fontSize: 44, fontWeight: '800' as const, letterSpacing: 1 },
     fieldLabel: { ...typography.label, marginTop: spacing(2), marginBottom: spacing(1) },
@@ -61,6 +72,30 @@ export function MyProfileScreen({ navigation }: Props) {
 
   const canSave = nickname.trim().length > 0;
 
+  const handlePickPhoto = async () => {
+    const result = await launchImageLibrary({
+      mediaType: 'photo',
+      includeBase64: true,
+      // Tiny on purpose: the photo crosses the cabin in ~80-byte Bluetooth
+      // frames, so every kilobyte is hundreds of them.
+      maxWidth: 128,
+      maxHeight: 128,
+      quality: 0.4,
+    });
+    const asset = result.assets?.[0];
+    if (!asset?.base64) return;
+    if (asset.base64.length > MAX_AVATAR_CHARS) {
+      Alert.alert('Foto demasiado grande', 'Prueba con otra imagen: por Bluetooth solo caben fotos muy pequeñas.');
+      return;
+    }
+    await setMyAvatar(asset.base64);
+    void sendMyAvatar();
+  };
+
+  const handleRemovePhoto = async () => {
+    await setMyAvatar(null);
+  };
+
   const handleSave = async () => {
     if (!canSave) return;
     const updated = { nickname: nickname.trim(), seat, contact: contact.trim() || undefined };
@@ -85,6 +120,18 @@ export function MyProfileScreen({ navigation }: Props) {
           </Pressable>
           <Text style={styles.title}>Mi perfil</Text>
           <View style={styles.headerSpacer} />
+        </View>
+
+        <View style={styles.photoBlock}>
+          <Avatar nickname={nickname} size={88} />
+          <Pressable onPress={handlePickPhoto}>
+            <Text style={styles.photoAction}>{myAvatar ? 'Cambiar foto' : 'Añadir foto'}</Text>
+          </Pressable>
+          {myAvatar !== null && (
+            <Pressable onPress={handleRemovePhoto}>
+              <Text style={styles.photoRemove}>Quitar</Text>
+            </Pressable>
+          )}
         </View>
 
         <View style={styles.seatReadout}>

@@ -44,6 +44,14 @@ export interface PresenceAlert {
   expiresAt: number;
 }
 
+/** A profile photo, sent on its own because it is orders of magnitude bigger than everything else on the mesh. */
+export interface AvatarPacket {
+  fromId: string;
+  /** Small base64 JPEG - see sendAvatar for the size ceiling and why it exists. */
+  imageBase64: string;
+  sentAt: number;
+}
+
 /** Deliberately a short fixed list: each one is a hand-drawn icon, because emoji render as tofu boxes on some devices. */
 export type ReactionKind = 'ok' | 'heart' | 'laugh';
 

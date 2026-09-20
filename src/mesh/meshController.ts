@@ -5,6 +5,7 @@ import { useDiscoveryStore } from '../state/discoveryStore';
 import { useChatStore } from '../state/chatStore';
 import { usePresenceStore } from '../state/presenceStore';
 import { useProfileStore } from '../state/profileStore';
+import { useAvatarStore } from '../state/avatarStore';
 import { requestBlePermissions } from '../utils/permissions';
 import { newId } from '../utils/id';
 import type { ChatMessage, PresenceAlert, PresenceReaction, Profile, ReactionKind } from '../types';
@@ -51,7 +52,17 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   // is assigned per scanning phone, so the two never matched and profiles
   // landed under an id nothing else in the app ever looked up.
   service.on('profile', (_peerId, profile) => {
+    const isNew = !useDiscoveryStore.getState().peers[profile.id];
     useDiscoveryStore.getState().setProfile(profile);
+    // Their profile just arrived, so the link is definitely up - the one
+    // moment worth spending a photo on. Never on the profile timer: at
+    // hundreds of frames each, re-sending photos every few seconds would
+    // leave no bandwidth for anything else.
+    if (isNew) void sendMyAvatar();
+  });
+
+  service.on('avatar', (avatar) => {
+    useAvatarStore.getState().setPeerAvatar(avatar.fromId, avatar.imageBase64);
   });
 
   service.on('message', (message) => {
@@ -161,6 +172,18 @@ export async function toggleStandUp(myProfile: Profile) {
   usePresenceStore.getState().applyAlert(alert);
   usePresenceStore.getState().setMyActiveAlertId(alert.id);
   await service.sendPresenceAlert(alert);
+}
+
+/**
+ * Sends our profile photo, if we have one. A photo is orders of magnitude
+ * bigger than anything else on the mesh, so this is called sparingly: when a
+ * new passenger appears, and when the photo itself changes.
+ */
+export async function sendMyAvatar() {
+  const myAvatar = useAvatarStore.getState().myAvatar;
+  const myProfile = useProfileStore.getState().profile;
+  if (!service || !myAvatar || !myProfile) return;
+  await service.sendAvatar({ fromId: myProfile.id, imageBase64: myAvatar, sentAt: Date.now() });
 }
 
 /** Reacts to someone else's stand-up alert. Broadcasts don't loop back, so it lands locally first. */

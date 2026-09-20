@@ -3,6 +3,7 @@ import { FlatList, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
+import { Avatar } from '../../components/Avatar';
 import { CabinSeats } from '../../components/CabinSeats';
 import { SeatBadge } from '../../components/SeatBadge';
 import { useDiscoveryStore } from '../../state/discoveryStore';
@@ -35,15 +36,6 @@ export function PassengersScreen({ navigation }: Props) {
       padding: spacing(2),
       marginBottom: spacing(1),
     },
-    avatar: {
-      width: 48,
-      height: 48,
-      borderRadius: radii.pill,
-      backgroundColor: colors.surfaceAlt,
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-    },
-    avatarText: { color: colors.text, fontWeight: '700' as const, fontSize: 18 },
     rowInfo: { flex: 1, flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'space-between' as const },
     rowName: { ...typography.body, fontWeight: '700' as const },
   }));
@@ -58,9 +50,7 @@ export function PassengersScreen({ navigation }: Props) {
 
   const renderItem = ({ item }: { item: DiscoveredPeer }) => (
     <Pressable style={styles.row} onPress={() => navigation.navigate('Chat', { peerId: item.peerId })}>
-      <View style={styles.avatar}>
-        <Text style={styles.avatarText}>{(item.profile?.nickname ?? '?').charAt(0).toUpperCase()}</Text>
-      </View>
+      <Avatar peerId={item.peerId} nickname={item.profile?.nickname ?? '?'} size={48} />
       <View style={styles.rowInfo}>
         <Text style={styles.rowName}>{item.profile?.nickname}</Text>
         {item.profile && <SeatBadge seat={item.profile.seat} />}

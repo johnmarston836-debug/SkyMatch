@@ -4,6 +4,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { useProfileStore } from './src/state/profileStore';
+import { useAvatarStore } from './src/state/avatarStore';
 import { ThemeProvider, useAppTheme } from './src/theme/ThemeContext';
 
 function App() {
@@ -23,10 +24,12 @@ function AppContent() {
   const hydrate = useProfileStore((state) => state.hydrate);
   const hydrated = useProfileStore((state) => state.hydrated);
   const profile = useProfileStore((state) => state.profile);
+  const hydrateAvatar = useAvatarStore((state) => state.hydrate);
 
   useEffect(() => {
     void hydrate();
-  }, [hydrate]);
+    void hydrateAvatar();
+  }, [hydrate, hydrateAvatar]);
 
   if (!hydrated) {
     return (

@@ -118,7 +118,13 @@ export function PresenceBanner() {
             <View style={styles.headline}>
               <Image source={require('../assets/icons/standing.png')} style={styles.icon} resizeMode="contain" />
               <Text style={styles.text}>
-                <Text style={styles.seat}>{formatSeat(alert.seat)}</Text> está de pie
+                {isOwnAlert ? (
+                  <Text style={styles.seat}>Estás de pie</Text>
+                ) : (
+                  <>
+                    <Text style={styles.seat}>{formatSeat(alert.seat)}</Text> está de pie
+                  </>
+                )}
               </Text>
               {counts.length > 0 && (
                 <View style={styles.chips}>

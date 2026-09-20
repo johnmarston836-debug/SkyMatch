@@ -6,9 +6,16 @@ import { Buffer } from 'buffer';
 import type { Seat } from '../types';
 import type { BleTransport } from './BleTransport';
 import { useMeshStatusStore } from '../state/meshStatusStore';
-import { frameChunks, encodeFrame, decodeFrame, reassembleFrames, SERVICE_UUID, PROFILE_CHAR_UUID } from './protocol';
+import {
+  frameChunks,
+  encodeFrame,
+  decodeFrame,
+  reassembleFrames,
+  newFrameId,
+  SERVICE_UUID,
+  PROFILE_CHAR_UUID,
+} from './protocol';
 import { packSeat, unpackSeat } from '../utils/seat';
-import { newId } from '../utils/id';
 
 // react-native-ble-advertiser injects these as runtime constants on its native
 // module, but its type declarations don't expose them - values match the
@@ -121,25 +128,22 @@ export class RealBleTransport implements BleTransport {
   }
 
   /**
-   * Writes to the peer over our outgoing connection when we have one. When we
-   * don't, the peer is someone who connected to *us*, so the only way back is
-   * notifying our subscribers - which reaches them along with everyone else
-   * subscribed. The mesh router dedups the extra copies.
+   * Only ever writes over a connection we opened ourselves, and says so
+   * honestly when it can't.
+   *
+   * The router addresses private messages by profile id, while this map is
+   * keyed by Bluetooth device id, so those lookups always miss. Falling back
+   * to notifying our subscribers here used to report success anyway - but a
+   * notification only reaches phones that connected to *us*, which need not
+   * include the intended recipient, and the router took that as delivered
+   * and skipped the flood. Private messages were quietly lost. Returning
+   * false instead lets the router flood, which does reach them.
    */
   async sendToPeer(peerId: string, raw: string): Promise<boolean> {
     const device = this.connectedDevices.get(peerId);
-    const frames = frameChunks(raw, newId());
+    if (!device) return false;
 
-    if (!device) {
-      if (!Peripheral.isSupported) return false;
-      let sent = false;
-      for (const frame of frames) {
-        sent = await Peripheral.notify(Buffer.from(encodeFrame(frame), 'utf8').toString('base64'));
-      }
-      return sent;
-    }
-
-    for (const frame of frames) {
+    for (const frame of frameChunks(raw, newFrameId())) {
       await device.writeCharacteristicWithResponseForService(
         SERVICE_UUID,
         PROFILE_CHAR_UUID,
@@ -157,7 +161,7 @@ export class RealBleTransport implements BleTransport {
     // round: they never appear in connectedDevices, so without this they'd
     // only ever hear from us when they happen to write first.
     if (Peripheral.isSupported) {
-      for (const frame of frameChunks(raw, newId())) {
+      for (const frame of frameChunks(raw, newFrameId())) {
         await Peripheral.notify(Buffer.from(encodeFrame(frame), 'utf8').toString('base64'));
       }
     }
