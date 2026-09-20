@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Profile, Seat } from '../types';
 import { newId } from '../utils/id';
+import { defaultLocation, normalizeLocation } from '../utils/location';
 
 const STORAGE_KEY = '@skymatch/profile';
 
@@ -15,13 +16,17 @@ interface LegacyProfile {
 
 /**
  * Turns a stored profile into the current shape. Someone who set up the app
- * when it only did flights has a bare seat on disk; they are, by
- * definition, on a plane.
+ * when it only did flights has a bare seat on disk; they are, by definition,
+ * on a plane.
+ *
+ * A location it can't read at all falls back to a default rather than being
+ * passed through: this value is read on every screen, so a corrupt one would
+ * crash the app on launch, every launch, with reinstalling as the only way
+ * out. The launch screen asks where you are anyway.
  */
 function migrate(stored: Profile | LegacyProfile): Profile {
-  if ('location' in stored) return stored;
-  const { seat, ...rest } = stored;
-  return { ...rest, location: { kind: 'plane', seat } };
+  const raw = 'location' in stored ? stored.location : stored.seat;
+  return { ...stored, location: normalizeLocation(raw) ?? defaultLocation('plane') };
 }
 
 interface ProfileState {

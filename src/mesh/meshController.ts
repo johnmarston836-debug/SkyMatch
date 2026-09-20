@@ -9,9 +9,17 @@ import { useAvatarStore } from '../state/avatarStore';
 import { notifyPrivateMessage } from '../notifications/notifier';
 import { requestBlePermissions } from '../utils/permissions';
 import { newId } from '../utils/id';
-import { formatLocation } from '../utils/location';
+import { formatLocation, normalizeLocation } from '../utils/location';
 import { VENUES } from '../venues';
-import type { ChatMessage, PresenceAlert, PresenceReaction, Profile, ReactionKind, ReplyQuote } from '../types';
+import type {
+  ChatMessage,
+  PresenceAlert,
+  PresenceReaction,
+  Profile,
+  ProfilePacket,
+  ReactionKind,
+  ReplyQuote,
+} from '../types';
 
 /**
  * Real BLE. Set back to true to get the simulated cabin (fake passengers,
@@ -36,6 +44,38 @@ const AVATAR_SEND_COOLDOWN_MS = 20_000;
 
 let service: MeshService | null = null;
 let announceTimer: ReturnType<typeof setInterval> | null = null;
+/**
+ * Reads a profile announcement defensively, upgrading one from an older
+ * build (bare seat, no venue) and rejecting anything we can't render.
+ */
+function normalizeProfile(packet: ProfilePacket): Profile | null {
+  if (typeof packet?.id !== 'string' || packet.id.length === 0) return null;
+  if (typeof packet.nickname !== 'string' || packet.nickname.length === 0) return null;
+
+  // An older peer put its seat at the top level of the profile; a current
+  // one sends a location. Either shape is readable.
+  const location = normalizeLocation(packet.location ?? (packet as { seat?: unknown }).seat);
+  if (!location) return null;
+
+  return {
+    id: packet.id,
+    nickname: packet.nickname.slice(0, 24),
+    location,
+    contact: typeof packet.contact === 'string' ? packet.contact.slice(0, 40) : undefined,
+  };
+}
+
+/**
+ * The label to show for something that came off the radio. Current peers
+ * send it ready to draw; older ones send the seat it was made from.
+ */
+function labelOf(packet: { fromLabel?: string; label?: string; fromSeat?: unknown; seat?: unknown }): string {
+  const sent = packet.fromLabel ?? packet.label;
+  if (typeof sent === 'string' && sent.length > 0) return sent;
+  const location = normalizeLocation(packet.fromSeat ?? packet.seat);
+  return location ? formatLocation(location) : '·';
+}
+
 /** Bluetooth device ids already greeted, so the duplicate scan hits don't re-announce endlessly. */
 const greeted = new Set<string>();
 /** profile id -> when we last asked them for their photo / last sent them ours. */
@@ -69,10 +109,18 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   // is assigned per scanning phone, so the two never matched and profiles
   // landed under an id nothing else in the app ever looked up.
   service.on('profile', (_peerId, packet) => {
+    // Everything past this line is untyped input from another phone, which
+    // may be running an older build (a profile was a bare seat then) or a
+    // newer one. A profile we can't read is dropped rather than stored:
+    // downstream it would be a badge calling `.kind` on undefined, and that
+    // took down the whole passenger list.
+    const profile = normalizeProfile(packet);
+    if (!profile) return;
+
     // The fingerprint rides along with the profile but isn't part of it:
     // the passenger list stores who someone is, not what their photo looks
     // like.
-    const { avatarHash, ...profile } = packet;
+    const { avatarHash } = packet;
     useDiscoveryStore.getState().setProfile(profile);
     // Their announcement carries the fingerprint of the photo they are
     // showing. If it isn't the one we hold, ask for it - now, and again on
@@ -104,24 +152,30 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
     useAvatarStore.getState().setPeerAvatar(avatar.fromId, avatar.imageBase64);
   });
 
-  service.on('message', (message) => {
+  service.on('message', (packet) => {
+    // Same boundary as the profile above: an older peer labels its messages
+    // with the seat they were sent from rather than a label ready to draw,
+    // which would otherwise show as an empty badge.
+    const message: ChatMessage = { ...packet, fromLabel: labelOf(packet), viaMesh: true };
+
     if (message.scope === 'group') {
-      useChatStore.getState().addGroupMessage({ ...message, viaMesh: true });
-    } else {
-      const incoming = message.fromId !== myProfile.id;
-      const peerId = incoming ? message.fromId : message.toId!;
-      useChatStore.getState().addPrivateMessage(peerId, { ...message, viaMesh: true }, incoming);
-      // Nothing on screen is going to show it if the phone is in a pocket.
-      if (incoming) void notifyPrivateMessage(message);
+      useChatStore.getState().addGroupMessage(message);
+      return;
     }
+
+    const incoming = message.fromId !== myProfile.id;
+    const peerId = incoming ? message.fromId : message.toId!;
+    useChatStore.getState().addPrivateMessage(peerId, message, incoming);
+    // Nothing on screen is going to show it if the phone is in a pocket.
+    if (incoming) void notifyPrivateMessage(message);
   });
 
   service.on('presence', (alert) => {
-    usePresenceStore.getState().applyAlert(alert);
+    usePresenceStore.getState().applyAlert({ ...alert, label: labelOf(alert) });
   });
 
   service.on('reaction', (reaction) => {
-    usePresenceStore.getState().applyReaction(reaction);
+    usePresenceStore.getState().applyReaction({ ...reaction, fromLabel: labelOf(reaction) });
   });
 
   await service.start(myProfile.location);

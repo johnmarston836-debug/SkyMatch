@@ -1,5 +1,5 @@
-import { formatSeat, packSeat, unpackSeat } from './seat';
-import type { MuscleGroup, OutfitColor, Seat, UserLocation, VenueKind } from '../types';
+import { formatSeat, packSeat, unpackSeat, MAX_ROW, SEAT_LETTERS } from './seat';
+import type { MuscleGroup, OutfitColor, Seat, SeatLetter, UserLocation, VenueKind } from '../types';
 
 export const MAX_COACH = 20;
 
@@ -139,6 +139,64 @@ export function unpackLocation(packed: string): UserLocation | null {
       return color ? { kind: 'public', color } : null;
     }
     default:
+      return null;
+  }
+}
+
+/** Reads a seat out of untyped data, rejecting anything that isn't a real one. */
+function normalizeSeat(value: unknown): Seat | null {
+  if (typeof value !== 'object' || value === null) return null;
+  const { row, letter } = value as { row?: unknown; letter?: unknown };
+  if (typeof row !== 'number' || !Number.isFinite(row) || row < 1 || row > MAX_ROW) return null;
+  if (typeof letter !== 'string' || !SEAT_LETTERS.includes(letter as SeatLetter)) return null;
+  return { row, letter: letter as SeatLetter };
+}
+
+/**
+ * Turns whatever arrived over the radio into a location this build can
+ * render, or null when it can't.
+ *
+ * A packet is untyped input no matter what the types here say: it may come
+ * from a phone still running the build where a profile was a bare seat, or
+ * from a newer one announcing a kind of place this build has never heard of.
+ * Reading `.kind` off that without asking first is what crashes the whole
+ * passenger list on the phone that did update.
+ */
+export function normalizeLocation(value: unknown): UserLocation | null {
+  if (typeof value !== 'object' || value === null) return null;
+  const raw = value as Record<string, unknown>;
+
+  // A profile from before this app knew about anywhere but an aeroplane:
+  // the seat sat at the top level, with no kind beside it.
+  if (raw.kind === undefined) {
+    const seat = normalizeSeat(raw);
+    return seat ? { kind: 'plane', seat } : null;
+  }
+
+  switch (raw.kind) {
+    case 'plane': {
+      const seat = normalizeSeat(raw.seat);
+      return seat ? { kind: 'plane', seat } : null;
+    }
+    case 'train': {
+      const seat = normalizeSeat(raw.seat);
+      const coach = raw.coach;
+      if (!seat || typeof coach !== 'number' || !Number.isFinite(coach) || coach < 1) return null;
+      return { kind: 'train', coach, seat };
+    }
+    case 'gym': {
+      const muscle = raw.muscle;
+      if (typeof muscle !== 'string' || !MUSCLE_GROUPS.includes(muscle as MuscleGroup)) return null;
+      return { kind: 'gym', muscle: muscle as MuscleGroup };
+    }
+    case 'public': {
+      const color = raw.color;
+      if (typeof color !== 'string' || !OUTFIT_COLORS.includes(color as OutfitColor)) return null;
+      const spot = typeof raw.spot === 'string' && raw.spot.length > 0 ? raw.spot.slice(0, 40) : undefined;
+      return { kind: 'public', color: color as OutfitColor, spot };
+    }
+    default:
+      // Some future venue this build doesn't have. Better no badge than a crash.
       return null;
   }
 }
