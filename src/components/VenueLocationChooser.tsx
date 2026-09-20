@@ -41,6 +41,15 @@ export function VenueLocationChooser({ location, onChange }: Props) {
       letterSpacing: 1,
       textAlign: 'center' as const,
     },
+    helpCard: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radii.md,
+      padding: spacing(2),
+      marginBottom: spacing(3),
+    },
+    helpText: { color: colors.textMuted, fontSize: 13, lineHeight: 19 },
   }));
 
   return (
@@ -67,6 +76,10 @@ export function VenueLocationChooser({ location, onChange }: Props) {
 
       <View style={styles.readout}>
         <Text style={styles.readoutText}>{formatLocation(location)}</Text>
+      </View>
+
+      <View style={styles.helpCard}>
+        <Text style={styles.helpText}>{VENUES[location.kind].locationHelp}</Text>
       </View>
 
       <LocationPicker location={location} onChange={onChange} />

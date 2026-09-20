@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Animated, FlatList, Image, Pressable, Text, TextInput, View } from 'react-native';
+import { FlatList, Image, Pressable, Text, TextInput, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useChatAutoScroll } from '../../hooks/useChatAutoScroll';
 import { useKeyboardPadding } from '../../hooks/useKeyboardPadding';
@@ -193,7 +194,7 @@ export function CabinChatScreen({ navigation }: Props) {
 
   return (
     <Animated.View
-      style={[styles.container, { paddingTop: insets.top + theme.spacing(2), paddingBottom: keyboardPadding }]}
+      style={[styles.container, { paddingTop: insets.top + theme.spacing(2) }, keyboardPadding]}
     >
       <View style={styles.header}>
         <View style={styles.headerSide}>

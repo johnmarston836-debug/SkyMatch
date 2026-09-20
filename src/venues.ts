@@ -27,6 +27,10 @@ export interface Venue {
   /** Step 1 of onboarding, once this venue is picked. */
   locationTitle: string;
   locationSubtitle: string;
+  /** Why this has to be answered at all: it is the name everyone here knows you by. */
+  locationHelp: string;
+  /** Heading over the actual control, so it is never ambiguous what is being asked. */
+  locationFieldLabel: string;
   /** How your own badge is introduced on the name step. */
   identityNote: string;
   enterCta: string;
@@ -53,6 +57,9 @@ export const VENUES: Record<VenueKind, Venue> = {
     emptySubtitle: 'En cuanto haya pasajeros cerca con la app abierta, aparecerán aquí.',
     locationTitle: '¿En qué asiento vas?',
     locationSubtitle: 'Así te identificarán en el chat de la cabina.',
+    locationHelp:
+      'Aquí nadie sabe tu nombre: tu asiento es lo que sale junto a cada mensaje tuyo y lo que usan los demás para ubicarte en la cabina.',
+    locationFieldLabel: 'TU ASIENTO',
     identityNote: 'En el chat de la cabina te verán como',
     enterCta: 'Entrar a la cabina',
     alertStatus: 'standing',
@@ -73,6 +80,9 @@ export const VENUES: Record<VenueKind, Venue> = {
     emptySubtitle: 'En cuanto haya viajeros cerca con la app abierta, aparecerán aquí.',
     locationTitle: '¿Dónde vas sentado?',
     locationSubtitle: 'Vagón y asiento: con eso te encuentran.',
+    locationHelp:
+      'Un tren es largo y los asientos se repiten en cada vagón. Los dos juntos salen junto a tus mensajes y son lo que permite que alguien sepa dónde estás.',
+    locationFieldLabel: 'TU VAGÓN Y ASIENTO',
     identityNote: 'En el chat del tren te verán como',
     enterCta: 'Entrar al tren',
     alertStatus: 'standing',
@@ -93,6 +103,9 @@ export const VENUES: Record<VenueKind, Venue> = {
     emptySubtitle: 'En cuanto haya alguien cerca con la app abierta, aparecerá aquí.',
     locationTitle: '¿Qué entrenas hoy?',
     locationSubtitle: 'Es lo que te sitúa en la sala: quien entrene lo mismo te encuentra.',
+    locationHelp:
+      'En una sala sin asientos ni números, lo que te sitúa es la zona en la que estás, y eso lo dice lo que entrenas. Sale junto a tus mensajes y es lo que te empareja con quien está en las mismas máquinas.',
+    locationFieldLabel: 'LO QUE ENTRENAS HOY',
     identityNote: 'En el chat de la sala te verán como',
     enterCta: 'Entrar a la sala',
     // Nobody in a gym cares that you are standing up. What the room wants
@@ -114,9 +127,11 @@ export const VENUES: Record<VenueKind, Venue> = {
     composerPlaceholder: 'Escribe a la gente de aquí…',
     emptyTitle: 'Nadie ha hablado todavía',
     emptySubtitle: 'En cuanto haya alguien cerca con la app abierta, aparecerá aquí.',
-    locationTitle: '¿De qué color vas?',
-    locationSubtitle:
-      'Sin asientos ni números, lo que usa la gente para señalar a alguien es la ropa. Añade dónde estás si quieres afinar.',
+    locationTitle: '¿De qué color vas vestido?',
+    locationSubtitle: 'El color de la ropa que llevas puesta ahora mismo.',
+    locationHelp:
+      'Aquí no hay asientos ni números, así que se señala a alguien como se hace siempre: por la ropa, "el de la camiseta roja". El color que elijas sale junto a tus mensajes y es lo que permite que te reconozcan entre la gente. Si te cambias de ropa o de sitio, cámbialo en Mi perfil.',
+    locationFieldLabel: 'COLOR DE TU ROPA',
     identityNote: 'Aquí te verán como',
     enterCta: 'Entrar',
     alertStatus: 'standing',

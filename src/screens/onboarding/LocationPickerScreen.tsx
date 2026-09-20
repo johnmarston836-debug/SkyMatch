@@ -22,7 +22,16 @@ export function LocationPickerScreen({ route, navigation }: Props) {
     backLink: { color: colors.text, fontWeight: '600' as const, marginBottom: spacing(2) },
     label: typography.label,
     title: { ...typography.title, marginTop: spacing(1) },
-    subtitle: { ...typography.subtitle, marginTop: spacing(1), marginBottom: spacing(3), lineHeight: 22 },
+    subtitle: { ...typography.subtitle, marginTop: spacing(1), marginBottom: spacing(2), lineHeight: 22 },
+    helpCard: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radii.md,
+      padding: spacing(2),
+      marginBottom: spacing(3),
+    },
+    helpText: { ...typography.subtitle, fontSize: 13, lineHeight: 19 },
     readout: { alignItems: 'center' as const, marginBottom: spacing(3) },
     readoutText: { color: colors.text, fontSize: 40, fontWeight: '800' as const, letterSpacing: 1, textAlign: 'center' as const },
     cta: {
@@ -51,6 +60,10 @@ export function LocationPickerScreen({ route, navigation }: Props) {
         <Text style={styles.label}>PASO 2 DE 3</Text>
         <Text style={styles.title}>{venue.locationTitle}</Text>
         <Text style={styles.subtitle}>{venue.locationSubtitle}</Text>
+
+        <View style={styles.helpCard}>
+          <Text style={styles.helpText}>{venue.locationHelp}</Text>
+        </View>
 
         <View style={styles.readout}>
           <Text style={styles.readoutText}>{formatLocation(location)}</Text>

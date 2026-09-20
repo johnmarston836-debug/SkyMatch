@@ -1,5 +1,6 @@
 import React, { useCallback, useLayoutEffect, useState } from 'react';
-import { Animated, FlatList, Image, Pressable, Text, TextInput, View } from 'react-native';
+import { FlatList, Image, Pressable, Text, TextInput, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -170,7 +171,7 @@ export function ChatScreen({ route, navigation }: Props) {
   };
 
   return (
-    <Animated.View style={[styles.container, { paddingBottom: keyboardPadding }]}>
+    <Animated.View style={[styles.container, keyboardPadding]}>
       {peer?.profile && (
         <View style={styles.peerHeader}>
           <View style={styles.peerHeaderRow}>
