@@ -1,9 +1,11 @@
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
+import { Avatar } from '../../components/Avatar';
 import { SeatBadge } from '../../components/SeatBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
@@ -29,6 +31,8 @@ export function ChatScreen({ route, navigation }: Props) {
   const peerNickname = peer?.profile?.nickname;
   const messages = useChatStore((state) => state.privateMessagesByPeer[peerId] ?? EMPTY_MESSAGES);
   const myProfile = useProfileStore((state) => state.profile);
+  const setActivePeer = useChatStore((state) => state.setActivePeer);
+  const markRead = useChatStore((state) => state.markRead);
   const [draft, setDraft] = useState('');
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
@@ -93,6 +97,16 @@ export function ChatScreen({ route, navigation }: Props) {
     navigation.setOptions({ title: peerNickname ?? 'Privado' });
   }, [navigation, peerNickname]);
 
+  // While this conversation is on screen its messages are read as they land,
+  // so they neither raise the badge nor pop up a banner over the cabin chat.
+  useFocusEffect(
+    useCallback(() => {
+      setActivePeer(peerId);
+      markRead(peerId);
+      return () => setActivePeer(null);
+    }, [peerId, setActivePeer, markRead]),
+  );
+
   if (!myProfile) return null;
 
   const handleSend = () => {
@@ -139,6 +153,7 @@ export function ChatScreen({ route, navigation }: Props) {
       {peer?.profile && (
         <View style={styles.peerHeader}>
           <View style={styles.peerHeaderRow}>
+            <Avatar peerId={peerId} nickname={peer.profile.nickname} size={40} zoomable />
             <SeatBadge seat={peer.profile.seat} />
             <Text style={[styles.peerName, { color: colorForPeer(peerId) }]}>{peer.profile.nickname}</Text>
           </View>

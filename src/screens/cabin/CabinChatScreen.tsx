@@ -6,6 +6,7 @@ import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { CabinSeats } from '../../components/CabinSeats';
 import { MeshStatus } from '../../components/MeshStatus';
 import { PresenceBanner } from '../../components/PresenceBanner';
+import { PrivateMessageToast } from '../../components/PrivateMessageToast';
 import { SeatBadge } from '../../components/SeatBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useProfileStore } from '../../state/profileStore';
@@ -22,6 +23,11 @@ export function CabinChatScreen({ navigation }: Props) {
   const theme = useAppTheme();
   const myProfile = useProfileStore((state) => state.profile);
   const groupMessages = useChatStore((state) => state.groupMessages);
+  // A count, not an object: a primitive selector can't break the snapshot
+  // identity check the way a freshly built array or record would.
+  const unreadTotal = useChatStore((state) =>
+    Object.values(state.unreadByPeer).reduce((total, count) => total + count, 0),
+  );
   const isStanding = usePresenceStore((state) => state.myActiveAlertId !== null);
   const [draft, setDraft] = useState('');
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
@@ -51,6 +57,9 @@ export function CabinChatScreen({ navigation }: Props) {
     },
     myProfileButtonText: { color: colors.text, fontWeight: '700' as const, fontSize: 13 },
     passengersButton: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: spacing(0.75),
       backgroundColor: colors.accent,
       borderRadius: radii.pill,
       paddingHorizontal: spacing(2),
@@ -58,6 +67,16 @@ export function CabinChatScreen({ navigation }: Props) {
       flexShrink: 0,
     },
     passengersButtonText: { color: '#FFFFFF', fontWeight: '700' as const, fontSize: 13 },
+    unreadBadge: {
+      minWidth: 18,
+      height: 18,
+      borderRadius: 9,
+      paddingHorizontal: 5,
+      backgroundColor: '#FFFFFF',
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    unreadBadgeText: { color: colors.accent, fontSize: 11, fontWeight: '800' as const },
     bannerArea: { paddingHorizontal: spacing(3) },
     list: { padding: spacing(3), flexGrow: 1 },
     emptyState: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, gap: spacing(1) },
@@ -167,9 +186,16 @@ export function CabinChatScreen({ navigation }: Props) {
             <Text style={styles.passengersButtonText} numberOfLines={1}>
               Pasajeros
             </Text>
+            {unreadTotal > 0 && (
+              <View style={styles.unreadBadge}>
+                <Text style={styles.unreadBadgeText}>{unreadTotal > 9 ? '9+' : unreadTotal}</Text>
+              </View>
+            )}
           </Pressable>
         </View>
       </View>
+
+      <PrivateMessageToast onOpen={(peerId) => navigation.navigate('Chat', { peerId })} />
 
       <View style={styles.bannerArea}>
         <PresenceBanner />

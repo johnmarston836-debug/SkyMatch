@@ -69,8 +69,9 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
     if (message.scope === 'group') {
       useChatStore.getState().addGroupMessage({ ...message, viaMesh: true });
     } else {
-      const peerId = message.fromId === myProfile.id ? message.toId! : message.fromId;
-      useChatStore.getState().addPrivateMessage(peerId, { ...message, viaMesh: true });
+      const incoming = message.fromId !== myProfile.id;
+      const peerId = incoming ? message.fromId : message.toId!;
+      useChatStore.getState().addPrivateMessage(peerId, { ...message, viaMesh: true }, incoming);
     }
   });
 

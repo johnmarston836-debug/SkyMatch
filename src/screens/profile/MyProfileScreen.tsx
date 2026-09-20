@@ -123,7 +123,7 @@ export function MyProfileScreen({ navigation }: Props) {
         </View>
 
         <View style={styles.photoBlock}>
-          <Avatar nickname={nickname} size={88} />
+          <Avatar nickname={nickname} size={88} zoomable />
           <Pressable onPress={handlePickPhoto}>
             <Text style={styles.photoAction}>{myAvatar ? 'Cambiar foto' : 'Añadir foto'}</Text>
           </Pressable>
