@@ -16,6 +16,8 @@ import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
+import { BackLink } from '../../components/BackLink';
+import { GlassButton } from '../../components/GlassButton';
 import { VenueLocationChooser } from '../../components/VenueLocationChooser';
 import { useProfileStore } from '../../state/profileStore';
 import { useAvatarStore } from '../../state/avatarStore';
@@ -52,7 +54,7 @@ export function MyProfileScreen({ navigation }: Props) {
     container: { flex: 1, backgroundColor: colors.background },
     scroll: { paddingHorizontal: spacing(3) },
     header: { flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'space-between' as const },
-    backLink: { color: colors.text, fontWeight: '600' as const },
+
     headerSpacer: { width: 60 },
     title: typography.title,
     photoBlock: {
@@ -98,14 +100,7 @@ export function MyProfileScreen({ navigation }: Props) {
       alignItems: 'center' as const,
     },
     secondaryLinkText: { ...typography.body, fontWeight: '700' as const },
-    cta: {
-      backgroundColor: colors.accent,
-      borderRadius: radii.pill,
-      paddingVertical: spacing(2),
-      alignItems: 'center' as const,
-      marginTop: spacing(3),
-    },
-    ctaDisabled: { opacity: 0.4 },
+    cta: { marginTop: spacing(3) },
     ctaText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700' as const },
   }));
 
@@ -172,9 +167,7 @@ export function MyProfileScreen({ navigation }: Props) {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <Pressable onPress={() => navigation.goBack()}>
-            <Text style={styles.backLink}>← Volver</Text>
-          </Pressable>
+          <BackLink onPress={() => navigation.goBack()} />
           <Text style={styles.title}>Mi perfil</Text>
           <View style={styles.headerSpacer} />
         </View>
@@ -239,9 +232,9 @@ export function MyProfileScreen({ navigation }: Props) {
           </View>
         )}
 
-        <Pressable style={[styles.cta, !canSave && styles.ctaDisabled]} disabled={!canSave} onPress={handleSave}>
+        <GlassButton variant="accent" style={styles.cta} disabled={!canSave} onPress={handleSave}>
           <Text style={styles.ctaText}>Guardar cambios</Text>
-        </Pressable>
+        </GlassButton>
 
         <Pressable style={styles.secondaryLink} onPress={() => navigation.navigate('HowItWorks')}>
           <Text style={styles.secondaryLinkText}>Cómo funciona SkyMatch</Text>

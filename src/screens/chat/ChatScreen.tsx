@@ -9,6 +9,7 @@ import { useKeyboardPadding } from '../../hooks/useKeyboardPadding';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
+import { GlassButton } from '../../components/GlassButton';
 import { PhotoViewer } from '../../components/PhotoViewer';
 import { QuotedMessage } from '../../components/QuotedMessage';
 import { ReplyComposerBar } from '../../components/ReplyComposerBar';
@@ -81,16 +82,6 @@ export function ChatScreen({ route, navigation }: Props) {
       borderTopWidth: 1,
       borderTopColor: colors.border,
     },
-    attachButton: {
-      width: 44,
-      height: 44,
-      borderRadius: radii.pill,
-      backgroundColor: colors.surfaceAlt,
-      borderWidth: 1,
-      borderColor: colors.border,
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-    },
     attachButtonIcon: { width: 22, height: 22, tintColor: colors.textMuted },
     input: {
       flex: 1,
@@ -102,7 +93,6 @@ export function ChatScreen({ route, navigation }: Props) {
       paddingVertical: spacing(1.2),
       color: colors.text,
     },
-    sendButton: { backgroundColor: colors.accent, borderRadius: radii.pill, paddingHorizontal: spacing(2), paddingVertical: spacing(1.2) },
     sendButtonText: { color: '#FFFFFF', fontWeight: '700' as const },
   }));
 
@@ -202,9 +192,9 @@ export function ChatScreen({ route, navigation }: Props) {
       <ReplyComposerBar quote={replyTo} onCancel={() => setReplyTo(null)} />
 
       <View style={styles.inputRow}>
-        <Pressable style={styles.attachButton} onPress={handleAttachImage}>
+        <GlassButton round onPress={handleAttachImage} accessibilityLabel="Enviar una foto">
           <Image source={require('../../assets/icons/camera.png')} style={styles.attachButtonIcon} resizeMode="contain" />
-        </Pressable>
+        </GlassButton>
         <TextInput
           style={styles.input}
           value={draft}
@@ -213,9 +203,9 @@ export function ChatScreen({ route, navigation }: Props) {
           placeholderTextColor={theme.colors.textMuted}
           onSubmitEditing={handleSend}
         />
-        <Pressable style={styles.sendButton} onPress={handleSend}>
+        <GlassButton variant="accent" onPress={handleSend}>
           <Text style={styles.sendButtonText}>Enviar</Text>
-        </Pressable>
+        </GlassButton>
       </View>
     </Animated.View>
   );

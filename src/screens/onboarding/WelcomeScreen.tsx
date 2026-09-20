@@ -1,8 +1,9 @@
 import React from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import { Image, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/RootNavigator';
+import { GlassButton } from '../../components/GlassButton';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'Welcome'>;
@@ -10,7 +11,7 @@ type Props = NativeStackScreenProps<OnboardingStackParamList, 'Welcome'>;
 export function WelcomeScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { spacing: themeSpacing } = useAppTheme();
-  const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
+  const styles = useThemedStyles(({ colors, spacing, typography }) => ({
     container: {
       flex: 1,
       backgroundColor: colors.background,
@@ -27,12 +28,6 @@ export function WelcomeScreen({ navigation }: Props) {
     title: { ...typography.title, marginBottom: spacing(2) },
     subtitle: { ...typography.subtitle, lineHeight: 22 },
     footer: { gap: spacing(2) },
-    cta: {
-      backgroundColor: colors.accent,
-      borderRadius: radii.pill,
-      paddingVertical: spacing(2),
-      alignItems: 'center' as const,
-    },
     ctaText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700' as const },
     disclaimer: { ...typography.subtitle, fontSize: 12, textAlign: 'center' as const },
   }));
@@ -56,9 +51,9 @@ export function WelcomeScreen({ navigation }: Props) {
       </View>
 
       <View style={styles.footer}>
-        <Pressable style={styles.cta} onPress={() => navigation.navigate('Tutorial')}>
+        <GlassButton variant="accent" size="lg" onPress={() => navigation.navigate('Tutorial')}>
           <Text style={styles.ctaText}>Empezar</Text>
-        </Pressable>
+        </GlassButton>
         <Text style={styles.disclaimer}>Nada sale de la sala: todo viaja de móvil a móvil por Bluetooth.</Text>
       </View>
     </View>
