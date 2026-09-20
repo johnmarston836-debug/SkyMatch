@@ -143,14 +143,40 @@ export class RealBleTransport implements BleTransport {
     const device = this.connectedDevices.get(peerId);
     if (!device) return false;
 
-    for (const frame of frameChunks(raw, newFrameId())) {
-      await device.writeCharacteristicWithResponseForService(
-        SERVICE_UUID,
-        PROFILE_CHAR_UUID,
-        Buffer.from(encodeFrame(frame), 'utf8').toString('base64'),
-      );
+    try {
+      for (const frame of frameChunks(raw, newFrameId())) {
+        await device.writeCharacteristicWithResponseForService(
+          SERVICE_UUID,
+          PROFILE_CHAR_UUID,
+          Buffer.from(encodeFrame(frame), 'utf8').toString('base64'),
+        );
+      }
+      return true;
+    } catch {
+      // A link can die mid-write, and the failure used to escape as an
+      // unhandled rejection that also aborted the broadcast to everyone
+      // else. Drop the peer and report failure so the router floods instead.
+      this.dropDevice(peerId);
+      return false;
     }
-    return true;
+  }
+
+  /** UUIDs come back in whatever case the platform feels like, so compare them folded. */
+  private async hasOurCharacteristic(device: Device): Promise<boolean> {
+    try {
+      const services = await device.services();
+      const service = services.find((candidate) => candidate.uuid.toLowerCase() === SERVICE_UUID.toLowerCase());
+      if (!service) return false;
+      const characteristics = await service.characteristics();
+      return characteristics.some((candidate) => candidate.uuid.toLowerCase() === PROFILE_CHAR_UUID.toLowerCase());
+    } catch {
+      return false;
+    }
+  }
+
+  private dropDevice(peerId: string) {
+    this.connectedDevices.delete(peerId);
+    useMeshStatusStore.getState().setConnected(this.connectedDevices.size);
   }
 
   async broadcast(raw: string, excludePeerId?: string): Promise<void> {
@@ -239,6 +265,18 @@ export class RealBleTransport implements BleTransport {
   private async connectAndSubscribe(device: Device) {
     const connected = await device.connect();
     await connected.discoverAllServicesAndCharacteristics();
+
+    // Confirm the characteristic is really there before treating this as a
+    // usable link. CoreBluetooth caches a peripheral's GATT database, so a
+    // phone that once ran a build without our service keeps answering from
+    // that stale, empty cache: it advertises, it connects, and every write
+    // then fails with "characteristic not found". Holding on to such a
+    // connection means retrying against it forever.
+    if (!(await this.hasOurCharacteristic(connected))) {
+      await connected.cancelConnection().catch(() => {});
+      return;
+    }
+
     this.connectedDevices.set(device.id, connected);
     useMeshStatusStore.getState().setConnected(this.connectedDevices.size);
 
@@ -247,10 +285,7 @@ export class RealBleTransport implements BleTransport {
       this.handleIncomingFrame(Buffer.from(characteristic.value, 'base64').toString('utf8'), device.id);
     });
 
-    connected.onDisconnected(() => {
-      this.connectedDevices.delete(device.id);
-      useMeshStatusStore.getState().setConnected(this.connectedDevices.size);
-    });
+    connected.onDisconnected(() => this.dropDevice(device.id));
   }
 
   /** Buffers one frame and emits the envelope once every chunk of that send has arrived. */
