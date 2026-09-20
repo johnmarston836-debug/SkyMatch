@@ -1,5 +1,6 @@
 import { formatLocation, describeLocation, packLocation, unpackLocation, defaultLocation } from '../src/utils/location';
 import { PRESENCE_COPY, VENUES, VENUE_ORDER } from '../src/venues';
+import { quoteOf } from '../src/utils/id';
 import type { UserLocation } from '../src/types';
 
 const CASES: UserLocation[] = [
@@ -66,5 +67,20 @@ describe('the one-tap announcement', () => {
   it('only counts down where the minutes are the message', () => {
     expect(PRESENCE_COPY.leavingMachine.countdown).toBe(true);
     expect(PRESENCE_COPY.standing.countdown).toBe(false);
+  });
+});
+
+describe('reply quotes', () => {
+  it('keeps a quote short enough to stay cheap on the radio', () => {
+    const long = 'a'.repeat(400);
+    const quote = quoteOf({ fromNickname: 'Ana', body: long });
+    expect(quote.excerpt.length).toBeLessThanOrEqual(70);
+    expect(quote.excerpt.endsWith('…')).toBe(true);
+  });
+
+  it('quotes a photo by what it is, not by an empty line', () => {
+    expect(quoteOf({ fromNickname: 'Ana', body: '', imageBase64: 'xx' }).excerpt).toBe('Foto');
+    // A photo sent with a caption quotes the caption.
+    expect(quoteOf({ fromNickname: 'Ana', body: 'mira esto', imageBase64: 'xx' }).excerpt).toBe('mira esto');
   });
 });

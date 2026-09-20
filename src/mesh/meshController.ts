@@ -11,7 +11,7 @@ import { requestBlePermissions } from '../utils/permissions';
 import { newId } from '../utils/id';
 import { formatLocation } from '../utils/location';
 import { VENUES } from '../venues';
-import type { ChatMessage, PresenceAlert, PresenceReaction, Profile, ReactionKind } from '../types';
+import type { ChatMessage, PresenceAlert, PresenceReaction, Profile, ReactionKind, ReplyQuote } from '../types';
 
 /**
  * Real BLE. Set back to true to get the simulated cabin (fake passengers,
@@ -145,7 +145,7 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   return service;
 }
 
-export async function sendGroupChatMessage(myProfile: Profile, body: string) {
+export async function sendGroupChatMessage(myProfile: Profile, body: string, replyTo?: ReplyQuote) {
   if (!service) return;
   const message: ChatMessage = {
     id: newId(),
@@ -154,13 +154,20 @@ export async function sendGroupChatMessage(myProfile: Profile, body: string) {
     fromLabel: formatLocation(myProfile.location),
     fromNickname: myProfile.nickname,
     body,
+    replyTo,
     sentAt: Date.now(),
   };
   useChatStore.getState().addGroupMessage(message);
   await service.sendGroupMessage(message);
 }
 
-export async function sendPrivateChatMessage(myProfile: Profile, toId: string, body: string, imageBase64?: string) {
+export async function sendPrivateChatMessage(
+  myProfile: Profile,
+  toId: string,
+  body: string,
+  imageBase64?: string,
+  replyTo?: ReplyQuote,
+) {
   if (!service) return;
   const message: ChatMessage = {
     id: newId(),
@@ -171,6 +178,7 @@ export async function sendPrivateChatMessage(myProfile: Profile, toId: string, b
     toId,
     body,
     imageBase64,
+    replyTo,
     sentAt: Date.now(),
   };
   useChatStore.getState().addPrivateMessage(toId, message);

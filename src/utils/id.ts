@@ -10,3 +10,15 @@ export function newId(): string {
   const hex = Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
   return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
 }
+
+/** Longest a quoted line may be: enough to recognise the message, short enough to stay one Bluetooth frame. */
+const EXCERPT_CHARS = 70;
+
+/** Builds the quote a reply carries, from the message being answered. */
+export function quoteOf(message: { fromNickname: string; body: string; imageBase64?: string }) {
+  const text = message.imageBase64 && !message.body ? 'Foto' : message.body;
+  return {
+    nickname: message.fromNickname,
+    excerpt: text.length > EXCERPT_CHARS ? `${text.slice(0, EXCERPT_CHARS - 1)}…` : text,
+  };
+}

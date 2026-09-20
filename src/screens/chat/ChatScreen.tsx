@@ -9,6 +9,9 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
 import { PhotoViewer } from '../../components/PhotoViewer';
+import { QuotedMessage } from '../../components/QuotedMessage';
+import { ReplyComposerBar } from '../../components/ReplyComposerBar';
+import { SwipeToReply } from '../../components/SwipeToReply';
 import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
@@ -16,8 +19,9 @@ import { useProfileStore } from '../../state/profileStore';
 import { sendPrivateChatMessage } from '../../mesh/meshController';
 import { colorForPeer } from '../../theme';
 import { formatLocation } from '../../utils/location';
+import { quoteOf } from '../../utils/id';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
-import type { ChatMessage } from '../../types';
+import type { ChatMessage, ReplyQuote } from '../../types';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Chat'>;
 
@@ -41,6 +45,7 @@ export function ChatScreen({ route, navigation }: Props) {
   const keyboardPadding = useKeyboardPadding(insets.bottom);
   const autoScroll = useChatAutoScroll<ChatMessage>();
   const [zoomedPhoto, setZoomedPhoto] = useState<string | null>(null);
+  const [replyTo, setReplyTo] = useState<ReplyQuote | null>(null);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
     peerHeader: {
@@ -120,8 +125,9 @@ export function ChatScreen({ route, navigation }: Props) {
     const body = draft.trim();
     if (!body) return;
     setDraft('');
+    setReplyTo(null);
     autoScroll.stickToEnd();
-    void sendPrivateChatMessage(myProfile, peerId, body);
+    void sendPrivateChatMessage(myProfile, peerId, body, undefined, replyTo ?? undefined);
   };
 
   const handleAttachImage = async () => {
@@ -135,23 +141,31 @@ export function ChatScreen({ route, navigation }: Props) {
     const asset = result.assets?.[0];
     if (!asset?.base64) return;
     autoScroll.stickToEnd();
-    void sendPrivateChatMessage(myProfile, peerId, draft.trim() || 'Foto', asset.base64);
+    void sendPrivateChatMessage(myProfile, peerId, draft.trim() || 'Foto', asset.base64, replyTo ?? undefined);
     setDraft('');
+    setReplyTo(null);
   };
 
   const renderItem = ({ item }: { item: ChatMessage }) => {
     const mine = item.fromId === myProfile.id;
     return (
-      <View style={[styles.bubbleRow, mine && styles.bubbleRowMine]}>
-        <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>
-          {item.imageBase64 && (
-            <Pressable onPress={() => setZoomedPhoto(item.imageBase64 ?? null)}>
-              <Image source={{ uri: `data:image/jpeg;base64,${item.imageBase64}` }} style={styles.image} resizeMode="cover" />
-            </Pressable>
-          )}
-          <Text style={mine ? styles.bubbleTextMine : styles.bubbleTextTheirs}>{item.body}</Text>
+      <SwipeToReply onReply={() => setReplyTo(quoteOf(item))}>
+        <View style={[styles.bubbleRow, mine && styles.bubbleRowMine]}>
+          <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>
+            {item.replyTo && <QuotedMessage quote={item.replyTo} inverted={mine} />}
+            {item.imageBase64 && (
+              <Pressable onPress={() => setZoomedPhoto(item.imageBase64 ?? null)}>
+                <Image
+                  source={{ uri: `data:image/jpeg;base64,${item.imageBase64}` }}
+                  style={styles.image}
+                  resizeMode="cover"
+                />
+              </Pressable>
+            )}
+            <Text style={mine ? styles.bubbleTextMine : styles.bubbleTextTheirs}>{item.body}</Text>
+          </View>
         </View>
-      </View>
+      </SwipeToReply>
     );
   };
 
@@ -183,6 +197,8 @@ export function ChatScreen({ route, navigation }: Props) {
         scrollEventThrottle={16}
       />
       <PhotoViewer imageBase64={zoomedPhoto} onClose={() => setZoomedPhoto(null)} />
+
+      <ReplyComposerBar quote={replyTo} onCancel={() => setReplyTo(null)} />
 
       <View style={styles.inputRow}>
         <Pressable style={styles.attachButton} onPress={handleAttachImage}>

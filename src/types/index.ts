@@ -51,6 +51,22 @@ export interface ProfilePacket extends Profile {
 
 export type MessageScope = 'group' | 'private';
 
+/**
+ * The message being answered, carried inside the reply itself rather than
+ * looked up by id. The phone reading it may never have received the
+ * original - it joined later, or that packet was one of the ones the radio
+ * lost - and a quote that renders as a blank is worse than no quote.
+ *
+ * Deliberately without the original's id: a uuid is 36 characters, half a
+ * Bluetooth frame, and nothing reads it. It belongs here the day a quote
+ * becomes tappable, not before.
+ */
+export interface ReplyQuote {
+  nickname: string;
+  /** The first line or so of what was said; photos quote as "Foto". */
+  excerpt: string;
+}
+
 export interface ChatMessage {
   id: string; // uuid, used for mesh dedup
   scope: MessageScope;
@@ -67,6 +83,8 @@ export interface ChatMessage {
   body: string;
   /** Small (<20KB) JPEG, base64-encoded. Private messages only - see MeshService docs on why group messages never carry images. */
   imageBase64?: string;
+  /** Set when this message is an answer to another one. */
+  replyTo?: ReplyQuote;
   sentAt: number;
   /** true when this bubble was relayed to us over the mesh rather than received directly */
   viaMesh?: boolean;

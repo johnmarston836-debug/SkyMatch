@@ -9,6 +9,9 @@ import { CabinSeats } from '../../components/CabinSeats';
 import { MeshStatus } from '../../components/MeshStatus';
 import { PresenceBanner } from '../../components/PresenceBanner';
 import { PrivateMessageToast } from '../../components/PrivateMessageToast';
+import { QuotedMessage } from '../../components/QuotedMessage';
+import { ReplyComposerBar } from '../../components/ReplyComposerBar';
+import { SwipeToReply } from '../../components/SwipeToReply';
 import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useProfileStore } from '../../state/profileStore';
@@ -17,8 +20,9 @@ import { sendGroupChatMessage, startMesh, togglePresence } from '../../mesh/mesh
 import { ensureNotificationPermission, initNotifications } from '../../notifications/notifier';
 import { colorForPeer } from '../../theme';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
+import { quoteOf } from '../../utils/id';
 import { VENUES } from '../../venues';
-import type { ChatMessage } from '../../types';
+import type { ChatMessage, ReplyQuote } from '../../types';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'CabinChat'>;
 
@@ -37,6 +41,7 @@ export function CabinChatScreen({ navigation }: Props) {
   // in; the machinery underneath is identical in all of them.
   const venue = VENUES[myProfile?.location.kind ?? 'plane'];
   const [draft, setDraft] = useState('');
+  const [replyTo, setReplyTo] = useState<ReplyQuote | null>(null);
   const keyboardPadding = useKeyboardPadding(insets.bottom);
   const autoScroll = useChatAutoScroll<ChatMessage>();
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
@@ -157,28 +162,32 @@ export function CabinChatScreen({ navigation }: Props) {
     const body = draft.trim();
     if (!body) return;
     setDraft('');
+    setReplyTo(null);
     autoScroll.stickToEnd();
-    void sendGroupChatMessage(myProfile, body);
+    void sendGroupChatMessage(myProfile, body, replyTo ?? undefined);
   };
 
   const renderItem = ({ item }: { item: ChatMessage }) => {
     const mine = item.fromId === myProfile.id;
     return (
-      <Pressable
-        style={[styles.bubbleRow, mine && styles.bubbleRowMine]}
-        onPress={() => !mine && navigation.navigate('Profile', { peerId: item.fromId })}
-        disabled={mine}
-      >
-        <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>
-          <View style={[styles.senderRow, mine && styles.senderRowMine]}>
-            <LocationBadge label={item.fromLabel} />
-            <Text style={mine ? styles.senderNameMine : [styles.senderName, { color: colorForPeer(item.fromId) }]}>
-              {item.fromNickname}
-            </Text>
+      <SwipeToReply onReply={() => setReplyTo(quoteOf(item))}>
+        <Pressable
+          style={[styles.bubbleRow, mine && styles.bubbleRowMine]}
+          onPress={() => !mine && navigation.navigate('Profile', { peerId: item.fromId })}
+          disabled={mine}
+        >
+          <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>
+            <View style={[styles.senderRow, mine && styles.senderRowMine]}>
+              <LocationBadge label={item.fromLabel} />
+              <Text style={mine ? styles.senderNameMine : [styles.senderName, { color: colorForPeer(item.fromId) }]}>
+                {item.fromNickname}
+              </Text>
+            </View>
+            {item.replyTo && <QuotedMessage quote={item.replyTo} inverted={mine} />}
+            <Text style={mine ? styles.bodyTextMine : styles.bodyText}>{item.body}</Text>
           </View>
-          <Text style={mine ? styles.bodyTextMine : styles.bodyText}>{item.body}</Text>
-        </View>
-      </Pressable>
+        </Pressable>
+      </SwipeToReply>
     );
   };
 
@@ -236,6 +245,8 @@ export function CabinChatScreen({ navigation }: Props) {
           </View>
         }
       />
+
+      <ReplyComposerBar quote={replyTo} onCancel={() => setReplyTo(null)} />
 
       <View style={styles.inputRow}>
         <Pressable
