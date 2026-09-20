@@ -123,3 +123,14 @@ describe('reading what arrived over the radio', () => {
     expect(normalizeLocation({ kind: 'train', seat: { row: 4, letter: 'A' } })).toBeNull();
   });
 });
+
+describe('the four-across venue chips', () => {
+  it('keeps every name short enough to fit in a quarter of the screen', () => {
+    // A label that overflows is rendered as "Espacio públ…", which names
+    // nothing. Nine characters is what fits at this size on the narrowest
+    // phone the app supports.
+    for (const kind of VENUE_ORDER) {
+      expect(VENUES[kind].shortName.length).toBeLessThanOrEqual(9);
+    }
+  });
+});

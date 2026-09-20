@@ -12,8 +12,10 @@ import type { PresenceStatus, VenueKind } from './types';
  */
 export interface Venue {
   kind: VenueKind;
-  /** Name of the mode in the picker. */
+  /** Name of the mode in the picker, where there is a whole row for it. */
   name: string;
+  /** Same name for the four-across chips, where a quarter of the screen is all there is. */
+  shortName: string;
   tagline: string;
   icon: ImageSourcePropType;
   /** What the shared chat is called: the cabin, the coach, the gym floor... */
@@ -47,6 +49,7 @@ export const VENUES: Record<VenueKind, Venue> = {
   plane: {
     kind: 'plane',
     name: 'Avión',
+    shortName: 'Avión',
     tagline: 'Tu asiento es tu identidad',
     icon: require('./assets/icons/plane.png'),
     spaceTitle: 'Cabina',
@@ -70,6 +73,7 @@ export const VENUES: Record<VenueKind, Venue> = {
   train: {
     kind: 'train',
     name: 'Tren',
+    shortName: 'Tren',
     tagline: 'Vagón y asiento',
     icon: require('./assets/icons/train.png'),
     spaceTitle: 'Tren',
@@ -93,6 +97,7 @@ export const VENUES: Record<VenueKind, Venue> = {
   gym: {
     kind: 'gym',
     name: 'Gimnasio',
+    shortName: 'Gimnasio',
     tagline: 'Por lo que entrenas hoy',
     icon: require('./assets/icons/dumbbell.png'),
     spaceTitle: 'Sala',
@@ -119,6 +124,9 @@ export const VENUES: Record<VenueKind, Venue> = {
   public: {
     kind: 'public',
     name: 'Espacio público',
+    // "Espacio público" doesn't fit in a quarter of the screen, and a
+    // truncated label names nothing.
+    shortName: 'Público',
     tagline: 'Por lo que llevas puesto',
     icon: require('./assets/icons/people.png'),
     spaceTitle: 'Aquí cerca',

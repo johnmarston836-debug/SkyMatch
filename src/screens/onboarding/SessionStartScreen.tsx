@@ -34,7 +34,7 @@ export function SessionStartScreen({ navigation }: Props) {
     content: { paddingHorizontal: spacing(3), flexGrow: 1 },
     greeting: typography.label,
     title: { ...typography.title, marginTop: spacing(1) },
-    subtitle: { ...typography.subtitle, marginTop: spacing(1), marginBottom: spacing(2), lineHeight: 22 },
+    subtitle: { ...typography.subtitle, marginTop: spacing(1), lineHeight: 22 },
     cta: {
       marginTop: spacing(3),
       backgroundColor: colors.accent,

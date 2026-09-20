@@ -18,7 +18,7 @@ interface Props {
  */
 export function VenueLocationChooser({ location, onChange }: Props) {
   const styles = useThemedStyles(({ colors, radii, spacing }) => ({
-    venueRow: { flexDirection: 'row' as const, gap: spacing(1) },
+    venueRow: { flexDirection: 'row' as const, gap: spacing(1), marginTop: spacing(2) },
     venueChip: {
       flex: 1,
       alignItems: 'center' as const,
@@ -67,7 +67,7 @@ export function VenueLocationChooser({ location, onChange }: Props) {
             >
               <Image source={VENUES[kind].icon} style={styles.venueIcon} resizeMode="contain" />
               <Text style={[styles.venueName, selected && styles.venueNameSelected]} numberOfLines={1}>
-                {VENUES[kind].name}
+                {VENUES[kind].shortName}
               </Text>
             </Pressable>
           );
