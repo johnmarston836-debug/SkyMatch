@@ -34,7 +34,14 @@ function AppContent() {
   if (!hydrated) {
     return (
       <View style={[styles.loading, { backgroundColor: colors.background }]}>
-        <Image source={require('./src/assets/branding/logo.png')} style={styles.logo} resizeMode="contain" />
+        <Image
+          source={require('./src/assets/branding/logo.png')}
+          // One transparent mark for both themes: the file is a solid shape,
+          // so tinting it to the theme's text colour is lossless and saves
+          // shipping a second copy that could drift from the first.
+          style={[styles.logo, { tintColor: colors.text }]}
+          resizeMode="contain"
+        />
         <Text style={[styles.byline, { color: colors.textMuted }]}>by EFS</Text>
         <ActivityIndicator color={colors.accent} style={styles.spinner} />
       </View>
