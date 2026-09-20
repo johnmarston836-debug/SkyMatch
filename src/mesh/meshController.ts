@@ -9,6 +9,7 @@ import { useAvatarStore } from '../state/avatarStore';
 import { notifyPrivateMessage } from '../notifications/notifier';
 import { requestBlePermissions } from '../utils/permissions';
 import { newId } from '../utils/id';
+import { formatLocation } from '../utils/location';
 import type { ChatMessage, PresenceAlert, PresenceReaction, Profile, ReactionKind } from '../types';
 
 /**
@@ -122,7 +123,7 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
     usePresenceStore.getState().applyReaction(reaction);
   });
 
-  await service.start(myProfile.seat);
+  await service.start(myProfile.location);
   await service.broadcastProfile(myProfile, useAvatarStore.getState().myAvatarHash());
 
   // The announcements above and on `peerSeen` both fire before any GATT
@@ -149,7 +150,7 @@ export async function sendGroupChatMessage(myProfile: Profile, body: string) {
     id: newId(),
     scope: 'group',
     fromId: myProfile.id,
-    fromSeat: myProfile.seat,
+    fromLabel: formatLocation(myProfile.location),
     fromNickname: myProfile.nickname,
     body,
     sentAt: Date.now(),
@@ -164,7 +165,7 @@ export async function sendPrivateChatMessage(myProfile: Profile, toId: string, b
     id: newId(),
     scope: 'private',
     fromId: myProfile.id,
-    fromSeat: myProfile.seat,
+    fromLabel: formatLocation(myProfile.location),
     fromNickname: myProfile.nickname,
     toId,
     body,
@@ -190,7 +191,7 @@ export async function toggleStandUp(myProfile: Profile) {
     const alert: PresenceAlert = {
       id: currentId,
       fromId: myProfile.id,
-      seat: myProfile.seat,
+      label: formatLocation(myProfile.location),
       status: 'standing',
       active: false,
       startedAt: Date.now(),
@@ -204,7 +205,7 @@ export async function toggleStandUp(myProfile: Profile) {
   const alert: PresenceAlert = {
     id: newId(),
     fromId: myProfile.id,
-    seat: myProfile.seat,
+    label: formatLocation(myProfile.location),
     status: 'standing',
     active: true,
     startedAt: Date.now(),
@@ -247,7 +248,7 @@ export async function sendPresenceReaction(myProfile: Profile, alertId: string, 
     id: newId(),
     alertId,
     fromId: myProfile.id,
-    fromSeat: myProfile.seat,
+    fromLabel: formatLocation(myProfile.location),
     kind,
     sentAt: Date.now(),
   };

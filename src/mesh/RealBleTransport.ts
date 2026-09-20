@@ -3,7 +3,7 @@ import BLEAdvertiser from 'react-native-ble-advertiser';
 import * as Peripheral from 'skymatch-peripheral';
 import { Platform } from 'react-native';
 import { Buffer } from 'buffer';
-import type { Seat } from '../types';
+import type { UserLocation } from '../types';
 import type { BleTransport } from './BleTransport';
 import { useMeshStatusStore } from '../state/meshStatusStore';
 import {
@@ -15,7 +15,8 @@ import {
   SERVICE_UUID,
   PROFILE_CHAR_UUID,
 } from './protocol';
-import { packSeat, unpackSeat } from '../utils/seat';
+import { packLocation, unpackLocation } from '../utils/location';
+import { packSeat } from '../utils/seat';
 
 // react-native-ble-advertiser injects these as runtime constants on its native
 // module, but its type declarations don't expose them - values match the
@@ -31,19 +32,22 @@ const ADVERTISE_TX_POWER_MEDIUM = 2;
  */
 const INCOMPLETE_FRAME_TTL_MS = 60_000;
 
-/** Prefix that marks one of our advertisements in an iOS local name, followed by the seat byte in hex. */
+/**
+ * Prefix that marks one of our advertisements in an iOS local name, followed
+ * by the packed location (see packLocation): a venue letter and one or two
+ * bytes in hex, seven characters at most. An advertisement carrying a
+ * 128-bit service UUID has almost nothing left over, so this is the whole
+ * budget.
+ */
 const LOCAL_NAME_PREFIX = 'SM';
 
-function encodeLocalName(seat: Seat | null): string {
-  const seatByte = seat ? packSeat(seat) : 0xff;
-  return LOCAL_NAME_PREFIX + seatByte.toString(16).padStart(2, '0');
+function encodeLocalName(location: UserLocation | null): string {
+  return LOCAL_NAME_PREFIX + (location ? packLocation(location) : '');
 }
 
-function seatFromLocalName(localName: string | null): Seat | null {
+function locationFromLocalName(localName: string | null): UserLocation | null {
   if (!localName || !localName.startsWith(LOCAL_NAME_PREFIX)) return null;
-  const seatByte = parseInt(localName.slice(LOCAL_NAME_PREFIX.length, LOCAL_NAME_PREFIX.length + 2), 16);
-  if (Number.isNaN(seatByte)) return null;
-  return unpackSeat(seatByte);
+  return unpackLocation(localName.slice(LOCAL_NAME_PREFIX.length));
 }
 
 /**
@@ -81,7 +85,7 @@ export class RealBleTransport implements BleTransport {
   /** Device ids with a connection attempt in flight, so duplicate scan hits don't pile up more. */
   private connecting = new Set<string>();
   private connectedDevices = new Map<string, Device>();
-  private peerSeenListeners = new Set<(peerId: string, rssi: number, seat: Seat | null) => void>();
+  private peerSeenListeners = new Set<(peerId: string, rssi: number, location: UserLocation | null) => void>();
   private peerLostListeners = new Set<(peerId: string) => void>();
   private envelopeListeners = new Set<(raw: string, fromPeerId: string) => void>();
   private staleCheckTimer: ReturnType<typeof setInterval> | null = null;
@@ -91,8 +95,8 @@ export class RealBleTransport implements BleTransport {
   /** profile id -> the Bluetooth device id we reach that person through. */
   private identities = new Map<string, string>();
 
-  async start(myPeerId: string, seat: Seat | null): Promise<void> {
-    await this.startAdvertising(seat);
+  async start(myPeerId: string, location: UserLocation | null): Promise<void> {
+    await this.startAdvertising(location);
     this.startScanning();
     this.staleCheckTimer = setInterval(() => {
       this.pruneStalePeers();
@@ -127,7 +131,7 @@ export class RealBleTransport implements BleTransport {
     this.pendingFrames.clear();
   }
 
-  onPeerSeen(listener: (peerId: string, rssi: number, seat: Seat | null) => void) {
+  onPeerSeen(listener: (peerId: string, rssi: number, location: UserLocation | null) => void) {
     this.peerSeenListeners.add(listener);
     return () => this.peerSeenListeners.delete(listener);
   }
@@ -224,9 +228,13 @@ export class RealBleTransport implements BleTransport {
     }
   }
 
-  private async startAdvertising(seat: Seat | null) {
+  private async startAdvertising(location: UserLocation | null) {
     if (Platform.OS === 'android') {
-      const seatByte = seat ? packSeat(seat) : 0xff;
+      // Android's manufacturer-data slot only has room for the seat byte,
+      // and only a plane or a train has one; elsewhere peers fall back to
+      // the profile, which arrives seconds later anyway.
+      const seatByte =
+        location && (location.kind === 'plane' || location.kind === 'train') ? packSeat(location.seat) : 0xff;
       await BLEAdvertiser.setCompanyId(0xffff);
       await BLEAdvertiser.broadcast(SERVICE_UUID, [seatByte], {
         advertiseMode: ADVERTISE_MODE_LOW_LATENCY,
@@ -248,7 +256,7 @@ export class RealBleTransport implements BleTransport {
     this.removeWriteListener = Peripheral.addWriteListener(({ value, centralId }) => {
       this.handleIncomingFrame(Buffer.from(value, 'base64').toString('utf8'), centralId);
     });
-    await Peripheral.start(SERVICE_UUID, PROFILE_CHAR_UUID, encodeLocalName(seat));
+    await Peripheral.start(SERVICE_UUID, PROFILE_CHAR_UUID, encodeLocalName(location));
     useMeshStatusStore.getState().setAdvertising(Peripheral.isSupported);
   }
 
@@ -264,19 +272,15 @@ export class RealBleTransport implements BleTransport {
   }
 
   private handleDeviceSeen(device: Device) {
-    // Android peers put the seat in manufacturer data; iOS peers can't (see
-    // SkyMatchPeripheral.m) and put it in the local name instead.
-    const manufacturerByte = device.manufacturerData
-      ? Buffer.from(device.manufacturerData, 'base64')[0]
-      : undefined;
-    const seat =
-      manufacturerByte !== undefined && manufacturerByte !== 0xff
-        ? unpackSeat(manufacturerByte)
-        : seatFromLocalName(device.localName);
+    // iOS peers pack their whole location into the local name (see
+    // SkyMatchPeripheral.m on why manufacturer data is not an option there);
+    // Android peers can only fit a seat byte, which the local name covers
+    // too when they have one.
+    const location = locationFromLocalName(device.localName);
 
     this.lastSeenAt.set(device.id, Date.now());
     useMeshStatusStore.getState().noteScanHit(device.id);
-    this.peerSeenListeners.forEach((listener) => listener(device.id, device.rssi ?? -100, seat));
+    this.peerSeenListeners.forEach((listener) => listener(device.id, device.rssi ?? -100, location));
 
     // Scanning with allowDuplicates fires many times a second, and a device
     // only lands in connectedDevices once its connection has fully settled.

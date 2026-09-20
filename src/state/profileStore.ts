@@ -1,9 +1,28 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { Profile } from '../types';
+import type { Profile, Seat } from '../types';
 import { newId } from '../utils/id';
 
 const STORAGE_KEY = '@skymatch/profile';
+
+/** What profiles looked like before the app knew about anywhere but an aeroplane. */
+interface LegacyProfile {
+  id: string;
+  seat: Seat;
+  nickname: string;
+  contact?: string;
+}
+
+/**
+ * Turns a stored profile into the current shape. Someone who set up the app
+ * when it only did flights has a bare seat on disk; they are, by
+ * definition, on a plane.
+ */
+function migrate(stored: Profile | LegacyProfile): Profile {
+  if ('location' in stored) return stored;
+  const { seat, ...rest } = stored;
+  return { ...rest, location: { kind: 'plane', seat } };
+}
 
 interface ProfileState {
   profile: Profile | null;
@@ -19,7 +38,14 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
   hydrate: async () => {
     const raw = await AsyncStorage.getItem(STORAGE_KEY);
-    set({ profile: raw ? (JSON.parse(raw) as Profile) : null, hydrated: true });
+    if (!raw) {
+      set({ profile: null, hydrated: true });
+      return;
+    }
+    const profile = migrate(JSON.parse(raw) as Profile | LegacyProfile);
+    // Write the migrated shape back, so this only ever happens once.
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+    set({ profile, hydrated: true });
   },
 
   save: async (partial) => {

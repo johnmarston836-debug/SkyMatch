@@ -4,9 +4,9 @@ import { ReactionsSheet } from './ReactionsSheet';
 import { REACTION_ICONS, REACTION_ORDER } from './reactionIcons';
 import { usePresenceStore } from '../state/presenceStore';
 import { useProfileStore } from '../state/profileStore';
+import { VENUES } from '../venues';
 import { sendPresenceReaction } from '../mesh/meshController';
 import { useThemedStyles } from '../theme/ThemeContext';
-import { formatSeat } from '../utils/seat';
 import type { PresenceReaction, ReactionKind } from '../types';
 
 // Stable reference for alerts nobody has reacted to: a fresh [] here would
@@ -24,6 +24,9 @@ export function PresenceBanner({ onOpenChat }: Props) {
   const reactionsByAlert = usePresenceStore((state) => state.reactionsByAlert);
   const pruneExpired = usePresenceStore((state) => state.pruneExpired);
   const myProfile = useProfileStore((state) => state.profile);
+  // The wording follows the place you are in: standing up in a cabin is
+  // being free between sets in a gym.
+  const venue = VENUES[myProfile?.location.kind ?? 'plane'];
   const [pickerFor, setPickerFor] = useState<string | null>(null);
   const [reactionsFor, setReactionsFor] = useState<string | null>(null);
   const styles = useThemedStyles(({ colors, radii, spacing }) => ({
@@ -119,10 +122,10 @@ export function PresenceBanner({ onOpenChat }: Props) {
               <Image source={require('../assets/icons/standing.png')} style={styles.icon} resizeMode="contain" />
               <Text style={styles.text}>
                 {isOwnAlert ? (
-                  <Text style={styles.seat}>Estás de pie</Text>
+                  <Text style={styles.seat}>{venue.standingSelf}</Text>
                 ) : (
                   <>
-                    <Text style={styles.seat}>{formatSeat(alert.seat)}</Text> está de pie
+                    <Text style={styles.seat}>{alert.label}</Text> {venue.standingOther}
                   </>
                 )}
               </Text>

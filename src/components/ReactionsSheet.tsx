@@ -2,13 +2,12 @@ import React from 'react';
 import { FlatList, Image, Modal, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Avatar } from './Avatar';
-import { SeatBadge } from './SeatBadge';
+import { LocationBadge } from './LocationBadge';
 import { REACTION_ICONS } from './reactionIcons';
 import { useDiscoveryStore } from '../state/discoveryStore';
 import { usePresenceStore } from '../state/presenceStore';
 import { useProfileStore } from '../state/profileStore';
 import { useThemedStyles } from '../theme/ThemeContext';
-import { formatSeat } from '../utils/seat';
 import type { PresenceReaction } from '../types';
 
 // Same trick as everywhere else: a fresh [] from a selector would make
@@ -65,7 +64,7 @@ export function ReactionsSheet({ alertId, onClose, onOpenChat }: Props) {
     // Someone can react before their profile announcement has come round
     // again, so the seat - which travels inside the reaction itself - is the
     // fallback name.
-    const name = profile?.nickname ?? formatSeat(item.fromSeat);
+    const name = profile?.nickname ?? item.fromLabel;
     const mine = item.fromId === myId;
 
     return (
@@ -83,7 +82,7 @@ export function ReactionsSheet({ alertId, onClose, onOpenChat }: Props) {
             <Text style={styles.rowName} numberOfLines={1}>
               {mine ? 'Tú' : name}
             </Text>
-            <SeatBadge seat={item.fromSeat} />
+            <LocationBadge label={item.fromLabel} location={profile?.location} />
           </View>
           {!mine && <Text style={styles.rowHint}>Toca para escribirle</Text>}
         </View>

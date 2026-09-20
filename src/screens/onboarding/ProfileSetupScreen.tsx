@@ -5,7 +5,8 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/RootNavigator';
 import { useProfileStore } from '../../state/profileStore';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
-import { formatSeat } from '../../utils/seat';
+import { formatLocation } from '../../utils/location';
+import { VENUES } from '../../venues';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'ProfileSetup'>;
 
@@ -15,12 +16,14 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
   const save = useProfileStore((state) => state.save);
   const [nickname, setNickname] = useState('');
   const [contact, setContact] = useState('');
+  const { location } = route.params;
+  const venue = VENUES[location.kind];
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing(3) },
     label: typography.label,
     title: { ...typography.title, marginTop: spacing(1) },
     subtitle: { ...typography.subtitle, marginTop: spacing(1), marginBottom: spacing(4), lineHeight: 22 },
-    previewSeat: { color: colors.text, fontWeight: '700' as const },
+    previewLabel: { color: colors.text, fontWeight: '700' as const },
     fieldLabel: { ...typography.label, marginTop: spacing(3), marginBottom: spacing(1) },
     hint: { ...typography.subtitle, fontSize: 12, marginTop: spacing(1) },
     input: {
@@ -48,17 +51,17 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
 
   const handleContinue = async () => {
     if (!canContinue) return;
-    await save({ nickname: nickname.trim(), seat: route.params.seat, contact: contact.trim() || undefined });
+    await save({ nickname: nickname.trim(), location, contact: contact.trim() || undefined });
     navigation.getParent()?.navigate('Main');
   };
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + theme.spacing(4), paddingBottom: insets.bottom + theme.spacing(4) }]}>
-      <Text style={styles.label}>PASO 2 DE 2</Text>
+      <Text style={styles.label}>PASO 3 DE 3</Text>
       <Text style={styles.title}>¿Cómo te llamamos?</Text>
       <Text style={styles.subtitle}>
-        En el chat de la cabina te verán como <Text style={styles.previewSeat}>{formatSeat(route.params.seat)}</Text> — el
-        nombre es solo para acompañarlo.
+        {venue.identityNote} <Text style={styles.previewLabel}>{formatLocation(location)}</Text> — el nombre es solo
+        para acompañarlo.
       </Text>
 
       <TextInput
@@ -86,7 +89,7 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
       </Text>
 
       <Pressable style={[styles.cta, !canContinue && styles.ctaDisabled]} disabled={!canContinue} onPress={handleContinue}>
-        <Text style={styles.ctaText}>Entrar a la cabina</Text>
+        <Text style={styles.ctaText}>{venue.enterCta}</Text>
       </Pressable>
     </View>
   );

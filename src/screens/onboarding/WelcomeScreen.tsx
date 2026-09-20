@@ -42,13 +42,16 @@ export function WelcomeScreen({ navigation }: Props) {
       <View>
         <View style={styles.badgeRow}>
           <Image source={require('../../assets/icons/plane.png')} style={styles.badgeIcon} resizeMode="contain" />
-          <Text style={styles.badge}>MODO AVIÓN</Text>
+          <Image source={require('../../assets/icons/train.png')} style={styles.badgeIcon} resizeMode="contain" />
+          <Image source={require('../../assets/icons/dumbbell.png')} style={styles.badgeIcon} resizeMode="contain" />
+          <Image source={require('../../assets/icons/people.png')} style={styles.badgeIcon} resizeMode="contain" />
+          <Text style={styles.badge}>SIN WIFI NI DATOS</Text>
         </View>
-        <Text style={styles.title}>El chat de todo tu vuelo</Text>
+        <Text style={styles.title}>El chat de la gente que tienes al lado</Text>
         <Text style={styles.subtitle}>
-          SkyMatch funciona sin wifi ni datos: un chat común con todos los pasajeros cerca de ti,
-          identificados por su asiento, usando el Bluetooth de tu propio móvil para conectar
-          directamente con los demás.
+          Un avión, un tren, el gimnasio o un bar: un chat común con quien está cerca de ti,
+          identificado por dónde está o qué lleva puesto, usando el Bluetooth de tu propio móvil
+          para conectar directamente con los demás.
         </Text>
       </View>
 
@@ -56,7 +59,7 @@ export function WelcomeScreen({ navigation }: Props) {
         <Pressable style={styles.cta} onPress={() => navigation.navigate('Tutorial')}>
           <Text style={styles.ctaText}>Empezar</Text>
         </Pressable>
-        <Text style={styles.disclaimer}>Nada sale del avión: todo viaja de móvil a móvil por Bluetooth.</Text>
+        <Text style={styles.disclaimer}>Nada sale de la sala: todo viaja de móvil a móvil por Bluetooth.</Text>
       </View>
     </View>
   );

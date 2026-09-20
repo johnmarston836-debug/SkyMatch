@@ -5,11 +5,13 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
 import { CabinSeats } from '../../components/CabinSeats';
-import { SeatBadge } from '../../components/SeatBadge';
+import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
 import { useProfileStore } from '../../state/profileStore';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
+import { formatLocation } from '../../utils/location';
+import { VENUES } from '../../venues';
 import type { ChatMessage, DiscoveredPeer } from '../../types';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Passengers'>;
@@ -38,6 +40,8 @@ export function PassengersScreen({ navigation }: Props) {
   const messagesByPeer = useChatStore((state) => state.privateMessagesByPeer);
   const unreadByPeer = useChatStore((state) => state.unreadByPeer);
   const myId = useProfileStore((state) => state.profile?.id);
+  const myVenue = useProfileStore((state) => state.profile?.location.kind) ?? 'plane';
+  const venue = VENUES[myVenue];
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing(3) },
     header: { flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'space-between' as const, marginBottom: spacing(2) },
@@ -113,7 +117,9 @@ export function PassengersScreen({ navigation }: Props) {
             <Text style={styles.rowName} numberOfLines={1}>
               {nickname}
             </Text>
-            {peer.profile && <SeatBadge seat={peer.profile.seat} />}
+            {peer.profile && (
+              <LocationBadge label={formatLocation(peer.profile.location)} location={peer.profile.location} />
+            )}
             {lastMessage && <Text style={styles.rowTime}>{formatTime(lastMessage.sentAt)}</Text>}
           </View>
           {lastMessage ? (
@@ -139,14 +145,14 @@ export function PassengersScreen({ navigation }: Props) {
         <Pressable onPress={() => navigation.goBack()}>
           <Text style={styles.backLink}>← Volver</Text>
         </Pressable>
-        <Text style={styles.title}>Pasajeros</Text>
+        <Text style={styles.title}>{venue.peopleLabel}</Text>
         <View style={styles.headerSpacer} />
       </View>
 
       {list.length === 0 ? (
         <View style={styles.emptyState}>
-          <CabinSeats />
-          <Text style={styles.emptySubtitle}>Buscando pasajeros cerca…</Text>
+          {venue.hasSeats && <CabinSeats />}
+          <Text style={styles.emptySubtitle}>{venue.peopleSearching}</Text>
         </View>
       ) : (
         <FlatList data={list} keyExtractor={(item) => item.peer.peerId} renderItem={renderItem} contentContainerStyle={styles.list} />

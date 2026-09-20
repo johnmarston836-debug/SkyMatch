@@ -4,10 +4,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
-import { SeatBadge } from '../../components/SeatBadge';
+import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
 import { colorForPeer } from '../../theme';
+import { describeLocation, formatLocation } from '../../utils/location';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Profile'>;
@@ -31,6 +32,7 @@ export function ProfileScreen({ route, navigation }: Props) {
     identity: { alignItems: 'center' as const, gap: spacing(1), marginBottom: spacing(4) },
     name: { ...typography.title, fontSize: 22 },
     label: typography.label,
+    locationDetail: { ...typography.subtitle, fontSize: 13 },
     contactCard: {
       backgroundColor: colors.surface,
       borderRadius: radii.md,
@@ -69,7 +71,8 @@ export function ProfileScreen({ route, navigation }: Props) {
           <View style={styles.identity}>
             <Avatar peerId={peerId} nickname={profile.nickname} size={88} zoomable />
             <Text style={[styles.name, { color: colorForPeer(peerId) }]}>{profile.nickname}</Text>
-            <SeatBadge seat={profile.seat} />
+            <LocationBadge label={formatLocation(profile.location)} location={profile.location} />
+            <Text style={styles.locationDetail}>{describeLocation(profile.location)}</Text>
           </View>
 
           <View style={styles.contactCard}>

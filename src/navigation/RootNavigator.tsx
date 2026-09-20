@@ -2,7 +2,8 @@ import React from 'react';
 import { NavigationContainer, DarkTheme, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { WelcomeScreen } from '../screens/onboarding/WelcomeScreen';
-import { SeatPickerScreen } from '../screens/onboarding/SeatPickerScreen';
+import { VenuePickerScreen } from '../screens/onboarding/VenuePickerScreen';
+import { LocationPickerScreen } from '../screens/onboarding/LocationPickerScreen';
 import { ProfileSetupScreen } from '../screens/onboarding/ProfileSetupScreen';
 import { CabinChatScreen } from '../screens/cabin/CabinChatScreen';
 import { PassengersScreen } from '../screens/passengers/PassengersScreen';
@@ -11,13 +12,14 @@ import { MyProfileScreen } from '../screens/profile/MyProfileScreen';
 import { HowItWorksScreen, TutorialScreen } from '../screens/tutorial/TutorialScreen';
 import { ChatScreen } from '../screens/chat/ChatScreen';
 import { useAppTheme } from '../theme/ThemeContext';
-import type { Seat } from '../types';
+import type { UserLocation, VenueKind } from '../types';
 
 export type OnboardingStackParamList = {
   Welcome: undefined;
   Tutorial: undefined;
-  SeatPicker: undefined;
-  ProfileSetup: { seat: Seat };
+  VenuePicker: undefined;
+  LocationPicker: { venue: VenueKind };
+  ProfileSetup: { location: UserLocation };
 };
 
 export type MainStackParamList = {
@@ -43,7 +45,8 @@ function OnboardingNavigator() {
     <OnboardingStack.Navigator screenOptions={{ headerShown: false }}>
       <OnboardingStack.Screen name="Welcome" component={WelcomeScreen} />
       <OnboardingStack.Screen name="Tutorial" component={TutorialScreen} />
-      <OnboardingStack.Screen name="SeatPicker" component={SeatPickerScreen} />
+      <OnboardingStack.Screen name="VenuePicker" component={VenuePickerScreen} />
+      <OnboardingStack.Screen name="LocationPicker" component={LocationPickerScreen} />
       <OnboardingStack.Screen name="ProfileSetup" component={ProfileSetupScreen} />
     </OnboardingStack.Navigator>
   );

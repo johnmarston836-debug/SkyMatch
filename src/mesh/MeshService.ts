@@ -1,11 +1,11 @@
 import type { BleTransport } from './BleTransport';
 import { MeshRouter } from './MeshRouter';
 import { BROADCAST_ID, type MeshEnvelope } from './protocol';
-import type { AvatarPacket, ChatMessage, PresenceAlert, PresenceReaction, Profile, ProfilePacket, Seat } from '../types';
+import type { AvatarPacket, ChatMessage, PresenceAlert, PresenceReaction, Profile, ProfilePacket, UserLocation } from '../types';
 import { newId } from '../utils/id';
 
 type Listeners = {
-  peerSeen: (peerId: string, seat: Seat | null) => void;
+  peerSeen: (peerId: string, location: UserLocation | null) => void;
   peerLost: (peerId: string) => void;
   profile: (peerId: string, profile: ProfilePacket) => void;
   message: (message: ChatMessage) => void;
@@ -47,12 +47,12 @@ export class MeshService {
   ) {
     this.router = new MeshRouter(transport, myPeerId);
     this.router.onDeliver((envelope) => this.handleEnvelope(envelope));
-    transport.onPeerSeen((peerId, _rssi, seat) => this.emit('peerSeen', peerId, seat));
+    transport.onPeerSeen((peerId, _rssi, location) => this.emit('peerSeen', peerId, location));
     transport.onPeerLost((peerId) => this.emit('peerLost', peerId));
   }
 
-  async start(seat: Seat | null) {
-    await this.transport.start(this.myPeerId, seat);
+  async start(location: UserLocation | null) {
+    await this.transport.start(this.myPeerId, location);
   }
 
   async stop() {

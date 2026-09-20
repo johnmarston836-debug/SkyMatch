@@ -1,7 +1,6 @@
 import { AppState, type AppStateStatus } from 'react-native';
 import * as Native from 'skymatch-peripheral/notifications';
 import { useChatStore } from '../state/chatStore';
-import { formatSeat } from '../utils/seat';
 import type { ChatMessage } from '../types';
 
 export type { NotificationPermission } from 'skymatch-peripheral/notifications';
@@ -67,7 +66,7 @@ export async function notifyPrivateMessage(message: ChatMessage) {
   if (status !== 'granted') return;
 
   const body = message.imageBase64 && !message.body ? 'Te ha enviado una foto' : message.body;
-  await Native.present(`${message.fromNickname} · ${formatSeat(message.fromSeat)}`, body, message.fromId);
+  await Native.present(`${message.fromNickname} · ${message.fromLabel}`, body, message.fromId);
 
   const unread = useChatStore.getState().unreadByPeer;
   await Native.setBadge(Object.values(unread).reduce((total, count) => total + count, 0));

@@ -5,10 +5,35 @@ export interface Seat {
   letter: SeatLetter;
 }
 
+/**
+ * The kind of place you are in. It is chosen once, when the app opens, and
+ * decides the only thing that really differs between them: how a person is
+ * pointed at without knowing their name.
+ */
+export type VenueKind = 'plane' | 'train' | 'gym' | 'public';
+
+export type MuscleGroup = 'chest' | 'back' | 'legs' | 'shoulders' | 'arms' | 'core' | 'cardio' | 'fullbody';
+
+/**
+ * In a room with no seats and no numbers, what people actually use to point
+ * someone out is what they are wearing - "el de la camiseta roja" - so that
+ * is what identifies you here, optionally narrowed by where in the place you
+ * are ("en la barra").
+ */
+export type OutfitColor = 'black' | 'white' | 'grey' | 'red' | 'blue' | 'green' | 'yellow' | 'pink';
+
+/** Where you are, in whatever terms the place you are in actually uses. */
+export type UserLocation =
+  | { kind: 'plane'; seat: Seat }
+  | { kind: 'train'; coach: number; seat: Seat }
+  | { kind: 'gym'; muscle: MuscleGroup }
+  | { kind: 'public'; color: OutfitColor; spot?: string };
+
 export interface Profile {
   id: string; // stable local UUID, regenerated per install (not tied to BLE MAC)
-  seat: Seat;
-  nickname: string; // shown alongside the seat badge; the seat itself is the real identity
+  /** Seat, coach and seat, muscle group or outfit - see UserLocation. This is the real identity. */
+  location: UserLocation;
+  nickname: string; // shown alongside the location badge, to accompany it rather than replace it
   /** Optional free-text contact (Instagram handle, WhatsApp number, ...), shown only on the profile screen someone reaches by tapping your name - never in the group chat or the passenger list. */
   contact?: string;
 }
@@ -30,7 +55,13 @@ export interface ChatMessage {
   id: string; // uuid, used for mesh dedup
   scope: MessageScope;
   fromId: string;
-  fromSeat: Seat;
+  /**
+   * The sender's location already rendered ("14A", "V3 · 14A", "Pecho",
+   * "Camiseta roja"). A message only ever needs to show it, and a short
+   * string costs a fraction of the Bluetooth frames the full structure
+   * would.
+   */
+  fromLabel: string;
   fromNickname: string;
   toId?: string; // only set for scope 'private'
   body: string;
@@ -46,7 +77,8 @@ export type PresenceStatus = 'standing';
 export interface PresenceAlert {
   id: string; // same id reused for the "back" broadcast that cancels this alert
   fromId: string;
-  seat: Seat;
+  /** Rendered location, same reasoning as ChatMessage.fromLabel. */
+  label: string;
   status: PresenceStatus;
   /** false means "I'm back" - broadcast with the same id to clear the alert everywhere, not just locally. */
   active: boolean;
@@ -71,7 +103,7 @@ export interface PresenceReaction {
   /** The alert being reacted to. */
   alertId: string;
   fromId: string;
-  fromSeat: Seat;
+  fromLabel: string;
   kind: ReactionKind;
   sentAt: number;
 }

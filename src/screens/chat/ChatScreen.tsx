@@ -9,12 +9,13 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
 import { PhotoViewer } from '../../components/PhotoViewer';
-import { SeatBadge } from '../../components/SeatBadge';
+import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
 import { useProfileStore } from '../../state/profileStore';
 import { sendPrivateChatMessage } from '../../mesh/meshController';
 import { colorForPeer } from '../../theme';
+import { formatLocation } from '../../utils/location';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import type { ChatMessage } from '../../types';
 
@@ -160,7 +161,7 @@ export function ChatScreen({ route, navigation }: Props) {
         <View style={styles.peerHeader}>
           <View style={styles.peerHeaderRow}>
             <Avatar peerId={peerId} nickname={peer.profile.nickname} size={40} zoomable />
-            <SeatBadge seat={peer.profile.seat} />
+            <LocationBadge label={formatLocation(peer.profile.location)} location={peer.profile.location} />
             <Text style={[styles.peerName, { color: colorForPeer(peerId) }]}>{peer.profile.nickname}</Text>
           </View>
           {peer.profile.contact ? (

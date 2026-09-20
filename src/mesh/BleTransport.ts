@@ -1,4 +1,4 @@
-import type { Seat } from '../types';
+import type { UserLocation } from '../types';
 
 /**
  * Platform-agnostic contract the rest of the app codes against. Two
@@ -11,11 +11,11 @@ import type { Seat } from '../types';
  *    that file for the platform caveats — this is the hard part of the app.
  */
 export interface BleTransport {
-  start(myPeerId: string, seat: Seat | null): Promise<void>;
+  start(myPeerId: string, location: UserLocation | null): Promise<void>;
   stop(): Promise<void>;
 
   /** Fires whenever an advertisement from a nearby peer is seen or refreshed. */
-  onPeerSeen(listener: (peerId: string, rssi: number, seat: Seat | null) => void): () => void;
+  onPeerSeen(listener: (peerId: string, rssi: number, location: UserLocation | null) => void): () => void;
 
   /** Fires when a peer hasn't been seen recently and should be treated as out of range. */
   onPeerLost(listener: (peerId: string) => void): () => void;

@@ -9,7 +9,7 @@ import { CabinSeats } from '../../components/CabinSeats';
 import { MeshStatus } from '../../components/MeshStatus';
 import { PresenceBanner } from '../../components/PresenceBanner';
 import { PrivateMessageToast } from '../../components/PrivateMessageToast';
-import { SeatBadge } from '../../components/SeatBadge';
+import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useProfileStore } from '../../state/profileStore';
 import { usePresenceStore } from '../../state/presenceStore';
@@ -17,6 +17,7 @@ import { sendGroupChatMessage, startMesh, toggleStandUp } from '../../mesh/meshC
 import { ensureNotificationPermission, initNotifications } from '../../notifications/notifier';
 import { colorForPeer } from '../../theme';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
+import { VENUES } from '../../venues';
 import type { ChatMessage } from '../../types';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'CabinChat'>;
@@ -32,6 +33,9 @@ export function CabinChatScreen({ navigation }: Props) {
     Object.values(state.unreadByPeer).reduce((total, count) => total + count, 0),
   );
   const isStanding = usePresenceStore((state) => state.myActiveAlertId !== null);
+  // Every word on this screen belongs to the place the user said they were
+  // in; the machinery underneath is identical in all of them.
+  const venue = VENUES[myProfile?.location.kind ?? 'plane'];
   const [draft, setDraft] = useState('');
   const keyboardPadding = useKeyboardPadding(insets.bottom);
   const autoScroll = useChatAutoScroll<ChatMessage>();
@@ -167,7 +171,7 @@ export function CabinChatScreen({ navigation }: Props) {
       >
         <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>
           <View style={[styles.senderRow, mine && styles.senderRowMine]}>
-            <SeatBadge seat={item.fromSeat} />
+            <LocationBadge label={item.fromLabel} />
             <Text style={mine ? styles.senderNameMine : [styles.senderName, { color: colorForPeer(item.fromId) }]}>
               {item.fromNickname}
             </Text>
@@ -191,12 +195,12 @@ export function CabinChatScreen({ navigation }: Props) {
           </Pressable>
         </View>
         <Text style={styles.title} numberOfLines={1}>
-          Cabina
+          {venue.spaceTitle}
         </Text>
         <View style={[styles.headerSide, styles.headerSideRight]}>
           <Pressable style={styles.passengersButton} onPress={() => navigation.navigate('Passengers')}>
             <Text style={styles.passengersButtonText} numberOfLines={1}>
-              Pasajeros
+              {venue.peopleLabel}
             </Text>
             {unreadTotal > 0 && (
               <View style={styles.unreadBadge}>
@@ -225,9 +229,9 @@ export function CabinChatScreen({ navigation }: Props) {
         scrollEventThrottle={16}
         ListEmptyComponent={
           <View style={styles.emptyState}>
-            <CabinSeats />
-            <Text style={styles.emptyTitle}>Nadie ha hablado todavía</Text>
-            <Text style={styles.emptySubtitle}>En cuanto haya pasajeros cerca con la app abierta, aparecerán aquí.</Text>
+            {venue.hasSeats && <CabinSeats />}
+            <Text style={styles.emptyTitle}>{venue.emptyTitle}</Text>
+            <Text style={styles.emptySubtitle}>{venue.emptySubtitle}</Text>
             <MeshStatus />
           </View>
         }
@@ -250,7 +254,7 @@ export function CabinChatScreen({ navigation }: Props) {
           style={styles.input}
           value={draft}
           onChangeText={setDraft}
-          placeholder="Escribe a toda la cabina…"
+          placeholder={venue.composerPlaceholder}
           placeholderTextColor={theme.colors.textMuted}
           onSubmitEditing={handleSend}
         />

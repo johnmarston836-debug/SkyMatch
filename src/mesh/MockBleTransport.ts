@@ -1,20 +1,21 @@
-import type { Seat } from '../types';
+import type { UserLocation } from '../types';
 import type { BleTransport } from './BleTransport';
 import { BROADCAST_ID } from './protocol';
+import { formatLocation } from '../utils/location';
 
 interface SimulatedPeer {
   peerId: string;
-  seat: Seat;
+  location: UserLocation;
   nickname: string;
   contact?: string;
   rssi: number;
 }
 
 const SIMULATED_PEERS: SimulatedPeer[] = [
-  { peerId: 'sim-mia', seat: { row: 14, letter: 'A' }, nickname: 'Mia', contact: '@mia.viaja', rssi: -52 },
-  { peerId: 'sim-leo', seat: { row: 14, letter: 'C' }, nickname: 'Leo', rssi: -61 },
-  { peerId: 'sim-noa', seat: { row: 16, letter: 'F' }, nickname: 'Noa', rssi: -70 },
-  { peerId: 'sim-max', seat: { row: 9, letter: 'D' }, nickname: 'Max', contact: '+34 600 111 222', rssi: -58 },
+  { peerId: 'sim-mia', location: { kind: 'plane', seat: { row: 14, letter: 'A' } }, nickname: 'Mia', contact: '@mia.viaja', rssi: -52 },
+  { peerId: 'sim-leo', location: { kind: 'plane', seat: { row: 14, letter: 'C' } }, nickname: 'Leo', rssi: -61 },
+  { peerId: 'sim-noa', location: { kind: 'plane', seat: { row: 16, letter: 'F' } }, nickname: 'Noa', rssi: -70 },
+  { peerId: 'sim-max', location: { kind: 'plane', seat: { row: 9, letter: 'D' } }, nickname: 'Max', contact: '+34 600 111 222', rssi: -58 },
 ];
 
 const GROUP_LINES = ['¿Alguien sabe si hay wifi en este vuelo?', 'Menuda turbulencia hace un rato', '¿A qué hora aterrizamos?'];
@@ -26,7 +27,7 @@ const GROUP_LINES = ['¿Alguien sabe si hay wifi en este vuelo?', 'Menuda turbul
  * group chat, and echo back private messages sent to them.
  */
 export class MockBleTransport implements BleTransport {
-  private peerSeenListeners = new Set<(peerId: string, rssi: number, seat: Seat | null) => void>();
+  private peerSeenListeners = new Set<(peerId: string, rssi: number, location: UserLocation | null) => void>();
   private envelopeListeners = new Set<(raw: string, fromPeerId: string) => void>();
   private timers: ReturnType<typeof setInterval>[] = [];
   private myPeerId = '';
@@ -37,9 +38,9 @@ export class MockBleTransport implements BleTransport {
       const seenDelay = 800 + index * 650;
       this.timers.push(
         setTimeout(() => {
-          this.peerSeenListeners.forEach((listener) => listener(peer.peerId, peer.rssi, peer.seat));
+          this.peerSeenListeners.forEach((listener) => listener(peer.peerId, peer.rssi, peer.location));
           this.deliver(
-            this.makeEnvelope('profile', peer, { id: peer.peerId, seat: peer.seat, nickname: peer.nickname, contact: peer.contact }),
+            this.makeEnvelope('profile', peer, { id: peer.peerId, location: peer.location, nickname: peer.nickname, contact: peer.contact }),
           );
         }, seenDelay) as unknown as ReturnType<typeof setInterval>,
       );
@@ -53,7 +54,7 @@ export class MockBleTransport implements BleTransport {
                 id: `${peer.peerId}-group-${Date.now()}`,
                 scope: 'group',
                 fromId: peer.peerId,
-                fromSeat: peer.seat,
+                fromLabel: formatLocation(peer.location),
                 fromNickname: peer.nickname,
                 body: GROUP_LINES[index],
                 sentAt: Date.now(),
@@ -72,7 +73,7 @@ export class MockBleTransport implements BleTransport {
     this.envelopeListeners.clear();
   }
 
-  onPeerSeen(listener: (peerId: string, rssi: number, seat: Seat | null) => void) {
+  onPeerSeen(listener: (peerId: string, rssi: number, location: UserLocation | null) => void) {
     this.peerSeenListeners.add(listener);
     return () => this.peerSeenListeners.delete(listener);
   }
@@ -112,7 +113,7 @@ export class MockBleTransport implements BleTransport {
             id: `${peer.peerId}-reply-${Date.now()}`,
             scope: 'private',
             fromId: peer.peerId,
-            fromSeat: peer.seat,
+            fromLabel: formatLocation(peer.location),
             fromNickname: peer.nickname,
             toId: this.myPeerId,
             body: '¡Hola! (respuesta simulada)',

@@ -85,13 +85,13 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
           <Text style={styles.label}>CÓMO FUNCIONA · 1 DE 2</Text>
           <Text style={styles.title}>Los mensajes van saltando de móvil en móvil</Text>
           <Text style={styles.body}>
-            SkyMatch no usa internet ni la wifi del avión. Tu teléfono habla por Bluetooth
-            directamente con los teléfonos de los pasajeros que tienes cerca.
+            SkyMatch no usa internet ni wifi. Tu teléfono habla por Bluetooth directamente con
+            los teléfonos que tienes cerca.
           </Text>
 
           <MeshDiagram variant="relay" />
           <Text style={styles.diagramCaption}>
-            El pasajero de 21F está demasiado lejos para oírte, pero el de 14C repite tu mensaje.
+            El móvil de la derecha está demasiado lejos para oírte, pero el de en medio repite tu mensaje.
           </Text>
 
           <Text style={styles.bodySpaced}>
@@ -112,21 +112,21 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
 
           <MeshDiagram variant="broken" />
           <Text style={styles.diagramCaption}>
-            14C ha cerrado la app: deja de emitir y el mensaje ya no llega a 21F.
+            El móvil de en medio ha cerrado la app: deja de emitir y el mensaje ya no llega al otro lado.
           </Text>
 
           <View style={styles.callout}>
             <Text style={styles.calloutTitle}>Si sales de la app, te pierdes la conversación</Text>
             <Text style={styles.calloutText}>
               Los mensajes no se guardan en ningún servidor: solo existen en los móviles que
-              están en el avión. Lo que se diga mientras no estés no lo podrás recuperar
+              tienes alrededor. Lo que se diga mientras no estés no lo podrás recuperar
               después.
             </Text>
           </View>
 
           <Text style={styles.bodySpaced}>
-            El modo avión no es problema: puedes dejarlo activado y encender el Bluetooth por
-            separado. No hace falta wifi, ni datos, ni cobertura.
+            En un avión, el modo avión no es problema: puedes dejarlo activado y encender el
+            Bluetooth por separado. No hace falta wifi, ni datos, ni cobertura en ningún sitio.
           </Text>
         </View>
       </ScrollView>
@@ -147,7 +147,7 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
 type OnboardingProps = NativeStackScreenProps<OnboardingStackParamList, 'Tutorial'>;
 
 export function TutorialScreen({ navigation }: OnboardingProps) {
-  return <TutorialCarousel finishLabel="Entendido" onFinish={() => navigation.navigate('SeatPicker')} />;
+  return <TutorialCarousel finishLabel="Entendido" onFinish={() => navigation.navigate('VenuePicker')} />;
 }
 
 type MainProps = NativeStackScreenProps<MainStackParamList, 'HowItWorks'>;

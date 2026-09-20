@@ -1,7 +1,7 @@
 import { MeshService } from '../src/mesh/MeshService';
 import type { BleTransport } from '../src/mesh/BleTransport';
 import { shortHash } from '../src/utils/hash';
-import type { AvatarPacket, Seat } from '../src/types';
+import type { AvatarPacket, UserLocation } from '../src/types';
 
 /**
  * A pair of transports wired to each other, with a knob to drop the next N
@@ -59,7 +59,7 @@ function linked() {
   };
 }
 
-const SEAT: Seat = { row: 14, letter: 'A' };
+const LOCATION: UserLocation = { kind: 'plane', seat: { row: 14, letter: 'A' } };
 const PHOTO = 'photo-bytes-in-base64';
 
 describe('avatar exchange', () => {
@@ -68,7 +68,7 @@ describe('avatar exchange', () => {
     const seen: Array<string | undefined> = [];
     b.on('profile', (_peerId, packet) => seen.push(packet.avatarHash));
 
-    await a.broadcastProfile({ id: 'peer-a', seat: SEAT, nickname: 'Ana' }, shortHash(PHOTO));
+    await a.broadcastProfile({ id: 'peer-a', location: LOCATION, nickname: 'Ana' }, shortHash(PHOTO));
 
     expect(seen).toEqual([shortHash(PHOTO)]);
   });
