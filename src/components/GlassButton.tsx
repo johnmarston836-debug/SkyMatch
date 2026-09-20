@@ -1,17 +1,21 @@
 import React, { useRef } from 'react';
 import { Animated, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { GlassView } from 'skymatch-peripheral/glass';
+import { radii } from '../theme';
 import { useThemedStyles } from '../theme/ThemeContext';
 
 /**
- * A button in the system's glass idiom: a translucent fill that borrows the
- * colour underneath, a hairline that catches the light along the top edge, a
- * soft shadow that lifts it off the page, and a springy squash when pressed.
+ * A button in the system's glass idiom: a real pane of system glass behind
+ * it where the phone has one, a hairline that catches the light along the
+ * top edge, a soft shadow that lifts it off the page, and a springy squash
+ * when pressed.
  *
- * It is drawn rather than taken from UIKit. A real `UIGlassEffect` needs a
- * native view, and what it does that this can't is blur what is behind it -
- * which over these flat backgrounds is the same colour it already is. Where
- * it would show (the composer over a scrolling conversation) is the one
- * place worth spending a native component on later.
+ * The drawn surface underneath is not a leftover. The native pane blurs and
+ * refracts what is behind the button, which is exactly nothing on a flat
+ * background; the tint, the rim and the sheen are what make a button read as
+ * a button. And if the native side is missing - an older phone, a build
+ * where it didn't register - the button still looks like itself instead of
+ * disappearing.
  */
 interface Props {
   onPress: () => void;
@@ -60,7 +64,15 @@ export function GlassButton({
       // colour of its own: it darkens what is under it without picking a
       // side between the two themes.
       plain: {
-        backgroundColor: light ? 'rgba(118,118,128,0.12)' : 'rgba(118,118,128,0.28)',
+        // Lighter when there is real glass behind it: the pane already
+        // darkens what it covers, and both together turn muddy.
+        backgroundColor: GlassView
+          ? light
+            ? 'rgba(118,118,128,0.04)'
+            : 'rgba(118,118,128,0.10)'
+          : light
+            ? 'rgba(118,118,128,0.12)'
+            : 'rgba(118,118,128,0.28)',
         borderColor: light ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.10)',
       },
       accent: { backgroundColor: colors.accent, borderColor: 'rgba(255,255,255,0.22)' },
@@ -120,6 +132,11 @@ export function GlassButton({
           disabled && styles.disabled,
         ]}
       >
+        {/* Only under the plain variant: the filled ones are opaque, and
+            glass behind paint is glass nobody sees. */}
+        {GlassView !== null && variant === 'plain' && (
+          <GlassView style={StyleSheet.absoluteFill} cornerRadius={radii.pill} pointerEvents="none" />
+        )}
         <View
           style={[styles.sheen, variant === 'plain' ? styles.sheenPlain : styles.sheenFilled]}
           pointerEvents="none"

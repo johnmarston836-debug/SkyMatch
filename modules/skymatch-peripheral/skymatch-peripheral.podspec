@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.authors      = { "EFS" => "noreply@example.com" }
   s.platforms    = { :ios => min_ios_version_supported }
   s.source       = { :path => "." }
-  s.source_files = "ios/**/*.{h,m}"
+  s.source_files = "ios/**/*.{h,m,mm}"
   s.frameworks   = "CoreBluetooth", "UserNotifications"
 
   install_modules_dependencies(s)
