@@ -97,6 +97,11 @@ export function MeshStatus() {
         <Text style={styles.key}>Conectados</Text>
         <Text style={styles.value}>{status.connected}</Text>
       </View>
+
+      <View style={styles.row}>
+        <Text style={styles.key}>Te escuchan</Text>
+        <Text style={styles.value}>{status.subscribers}</Text>
+      </View>
     </View>
   );
 }

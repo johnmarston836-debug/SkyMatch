@@ -2,6 +2,7 @@
 
 static NSString *const kWriteEvent = @"SkyMatchPeripheralWrite";
 static NSString *const kStateEvent = @"SkyMatchPeripheralState";
+static NSString *const kSubscribersEvent = @"SkyMatchPeripheralSubscribers";
 
 @implementation SkyMatchPeripheral {
   CBPeripheralManager *_manager;
@@ -20,6 +21,8 @@ static NSString *const kStateEvent = @"SkyMatchPeripheralState";
    * being silently dropped.
    */
   NSMutableArray<NSData *> *_outbox;
+  /** Centrals currently listening for notifications: the only way out of the peripheral role. */
+  NSMutableSet<NSString *> *_subscribers;
 }
 
 RCT_EXPORT_MODULE();
@@ -31,7 +34,7 @@ RCT_EXPORT_MODULE();
 
 - (NSArray<NSString *> *)supportedEvents
 {
-  return @[ kWriteEvent, kStateEvent ];
+  return @[ kWriteEvent, kStateEvent, kSubscribersEvent ];
 }
 
 - (void)startObserving
@@ -57,6 +60,9 @@ RCT_EXPORT_METHOD(start:(NSString *)serviceUUID
   if (_outbox == nil) {
     _outbox = [NSMutableArray new];
   }
+  if (_subscribers == nil) {
+    _subscribers = [NSMutableSet new];
+  }
 
   if (_manager == nil) {
     // Publishing and advertising wait for peripheralManagerDidUpdateState:,
@@ -81,6 +87,8 @@ RCT_EXPORT_METHOD(stop:(RCTPromiseResolveBlock)resolve
   _serviceAdded = NO;
   _characteristic = nil;
   [_outbox removeAllObjects];
+  [_subscribers removeAllObjects];
+  [self emitSubscribers];
   resolve(nil);
 }
 
@@ -94,6 +102,15 @@ RCT_EXPORT_METHOD(notify:(NSString *)base64Value
     resolve(@NO);
     return;
   }
+  // Nothing to notify: queueing here would be worse than dropping, because
+  // updateValue refuses the data and peripheralManagerIsReadyToUpdate-
+  // Subscribers: only ever fires to relieve a *full* queue - never when
+  // there simply are no listeners. The backlog would jam permanently and
+  // this phone could never answer anyone again.
+  if (_subscribers.count == 0) {
+    resolve(@NO);
+    return;
+  }
   [_outbox addObject:data];
   [self drainOutbox];
   resolve(@YES);
@@ -101,7 +118,7 @@ RCT_EXPORT_METHOD(notify:(NSString *)base64Value
 
 - (void)drainOutbox
 {
-  if (_manager == nil || _characteristic == nil) {
+  if (_manager == nil || _characteristic == nil || _subscribers.count == 0) {
     return;
   }
   while (_outbox.count > 0) {
@@ -200,6 +217,31 @@ RCT_EXPORT_METHOD(notify:(NSString *)base64Value
   // CoreBluetooth wants exactly one response, for the first request only.
   if (requests.count > 0) {
     [peripheral respondToRequest:requests.firstObject withResult:CBATTErrorSuccess];
+  }
+}
+
+- (void)peripheralManager:(CBPeripheralManager *)peripheral
+                  central:(CBCentral *)central
+didSubscribeToCharacteristic:(CBCharacteristic *)characteristic
+{
+  [_subscribers addObject:central.identifier.UUIDString ?: @""];
+  [self emitSubscribers];
+  // Anything that piled up while nobody was listening can go out now.
+  [self drainOutbox];
+}
+
+- (void)peripheralManager:(CBPeripheralManager *)peripheral
+                  central:(CBCentral *)central
+didUnsubscribeFromCharacteristic:(CBCharacteristic *)characteristic
+{
+  [_subscribers removeObject:central.identifier.UUIDString ?: @""];
+  [self emitSubscribers];
+}
+
+- (void)emitSubscribers
+{
+  if (_hasListeners) {
+    [self sendEventWithName:kSubscribersEvent body:@{ @"count" : @(_subscribers.count) }];
   }
 }
 

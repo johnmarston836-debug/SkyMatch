@@ -62,6 +62,7 @@ export class RealBleTransport implements BleTransport {
   private scanSubscription: Subscription | null = null;
   private removeWriteListener: (() => void) | null = null;
   private removeStateListener: (() => void) | null = null;
+  private removeSubscriberListener: (() => void) | null = null;
   /** Device ids with a connection attempt in flight, so duplicate scan hits don't pile up more. */
   private connecting = new Set<string>();
   private connectedDevices = new Map<string, Device>();
@@ -88,6 +89,8 @@ export class RealBleTransport implements BleTransport {
     this.removeWriteListener = null;
     this.removeStateListener?.();
     this.removeStateListener = null;
+    this.removeSubscriberListener?.();
+    this.removeSubscriberListener = null;
     useMeshStatusStore.getState().reset();
     if (Platform.OS === 'android') {
       try {
@@ -177,6 +180,9 @@ export class RealBleTransport implements BleTransport {
     useMeshStatusStore.getState().setPeripheralSupported(Peripheral.isSupported);
     this.removeStateListener = Peripheral.addStateListener(({ state }) => {
       useMeshStatusStore.getState().setPeripheralState(state);
+    });
+    this.removeSubscriberListener = Peripheral.addSubscriberListener(({ count }) => {
+      useMeshStatusStore.getState().setSubscribers(count);
     });
     this.removeWriteListener = Peripheral.addWriteListener(({ value, centralId }) => {
       this.handleIncomingFrame(Buffer.from(value, 'base64').toString('utf8'), centralId);

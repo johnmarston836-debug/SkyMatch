@@ -11,3 +11,4 @@ export declare function stop(): Promise<void>;
 export declare function notify(base64Value: string): Promise<boolean>;
 export declare function addWriteListener(listener: (event: PeripheralWriteEvent) => void): () => void;
 export declare function addStateListener(listener: (event: { state: number }) => void): () => void;
+export declare function addSubscriberListener(listener: (event: { count: number }) => void): () => void;

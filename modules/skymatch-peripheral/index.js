@@ -4,6 +4,7 @@ const native = NativeModules.SkyMatchPeripheral;
 
 const WRITE_EVENT = 'SkyMatchPeripheralWrite';
 const STATE_EVENT = 'SkyMatchPeripheralState';
+const SUBSCRIBERS_EVENT = 'SkyMatchPeripheralSubscribers';
 
 let emitter = null;
 
@@ -60,4 +61,16 @@ function addStateListener(listener) {
   return () => subscription.remove();
 }
 
-module.exports = { isSupported, start, stop, notify, addWriteListener, addStateListener };
+/**
+ * Fires with how many centrals are listening for our notifications. That
+ * count is the whole outbound path for a phone others connected to, so a
+ * steady zero means everything we send that way is going nowhere.
+ */
+function addSubscriberListener(listener) {
+  const e = getEmitter();
+  if (e === null) return () => {};
+  const subscription = e.addListener(SUBSCRIBERS_EVENT, listener);
+  return () => subscription.remove();
+}
+
+module.exports = { isSupported, start, stop, notify, addWriteListener, addStateListener, addSubscriberListener };

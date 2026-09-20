@@ -21,6 +21,8 @@ interface MeshStatus {
   scanHits: number;
   /** Peers we currently hold a GATT connection to. */
   connected: number;
+  /** Centrals listening to us: our only outbound path towards phones that connected to us. */
+  subscribers: number;
 
   setPeripheralSupported: (supported: boolean) => void;
   setPeripheralState: (state: number) => void;
@@ -28,6 +30,7 @@ interface MeshStatus {
   setAdvertising: (advertising: boolean) => void;
   noteScanHit: (deviceId: string) => void;
   setConnected: (count: number) => void;
+  setSubscribers: (count: number) => void;
   reset: () => void;
 }
 
@@ -40,6 +43,7 @@ export const useMeshStatusStore = create<MeshStatus>((set) => ({
   advertising: false,
   scanHits: 0,
   connected: 0,
+  subscribers: 0,
 
   setPeripheralSupported: (supported) => set({ peripheralSupported: supported }),
   setPeripheralState: (state) => set({ peripheralState: state }),
@@ -51,8 +55,9 @@ export const useMeshStatusStore = create<MeshStatus>((set) => ({
     set({ scanHits: seenDevices.size });
   },
   setConnected: (count) => set({ connected: count }),
+  setSubscribers: (count) => set({ subscribers: count }),
   reset: () => {
     seenDevices.clear();
-    set({ peripheralState: null, centralState: null, advertising: false, scanHits: 0, connected: 0 });
+    set({ peripheralState: null, centralState: null, advertising: false, scanHits: 0, connected: 0, subscribers: 0 });
   },
 }));
