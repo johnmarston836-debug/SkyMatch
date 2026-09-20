@@ -5,6 +5,7 @@ import { Platform } from 'react-native';
 import { Buffer } from 'buffer';
 import type { Seat } from '../types';
 import type { BleTransport } from './BleTransport';
+import { useMeshStatusStore } from '../state/meshStatusStore';
 import { frameChunks, encodeFrame, decodeFrame, reassembleFrames, SERVICE_UUID, PROFILE_CHAR_UUID } from './protocol';
 import { packSeat, unpackSeat } from '../utils/seat';
 import { newId } from '../utils/id';
@@ -60,6 +61,9 @@ export class RealBleTransport implements BleTransport {
   private manager = new BleManager();
   private scanSubscription: Subscription | null = null;
   private removeWriteListener: (() => void) | null = null;
+  private removeStateListener: (() => void) | null = null;
+  /** Device ids with a connection attempt in flight, so duplicate scan hits don't pile up more. */
+  private connecting = new Set<string>();
   private connectedDevices = new Map<string, Device>();
   private peerSeenListeners = new Set<(peerId: string, rssi: number, seat: Seat | null) => void>();
   private peerLostListeners = new Set<(peerId: string) => void>();
@@ -82,6 +86,9 @@ export class RealBleTransport implements BleTransport {
     this.manager.stopDeviceScan();
     this.removeWriteListener?.();
     this.removeWriteListener = null;
+    this.removeStateListener?.();
+    this.removeStateListener = null;
+    useMeshStatusStore.getState().reset();
     if (Platform.OS === 'android') {
       try {
         await BLEAdvertiser.stopBroadcast();
@@ -167,14 +174,20 @@ export class RealBleTransport implements BleTransport {
       return;
     }
 
+    useMeshStatusStore.getState().setPeripheralSupported(Peripheral.isSupported);
+    this.removeStateListener = Peripheral.addStateListener(({ state }) => {
+      useMeshStatusStore.getState().setPeripheralState(state);
+    });
     this.removeWriteListener = Peripheral.addWriteListener(({ value, centralId }) => {
       this.handleIncomingFrame(Buffer.from(value, 'base64').toString('utf8'), centralId);
     });
     await Peripheral.start(SERVICE_UUID, PROFILE_CHAR_UUID, encodeLocalName(seat));
+    useMeshStatusStore.getState().setAdvertising(Peripheral.isSupported);
   }
 
   private startScanning() {
     this.scanSubscription = this.manager.onStateChange((state) => {
+      useMeshStatusStore.getState().setCentralState(state);
       if (state !== 'PoweredOn') return;
       this.manager.startDeviceScan([SERVICE_UUID], { allowDuplicates: true }, (error, device) => {
         if (error || !device) return;
@@ -195,12 +208,21 @@ export class RealBleTransport implements BleTransport {
         : seatFromLocalName(device.localName);
 
     this.lastSeenAt.set(device.id, Date.now());
+    useMeshStatusStore.getState().noteScanHit(device.id);
     this.peerSeenListeners.forEach((listener) => listener(device.id, device.rssi ?? -100, seat));
 
-    if (!this.connectedDevices.has(device.id)) {
-      this.connectAndSubscribe(device).catch(() => {
-        // connection races with the other side also trying to connect are expected in a mesh; safe to ignore
-      });
+    // Scanning with allowDuplicates fires many times a second, and a device
+    // only lands in connectedDevices once its connection has fully settled.
+    // Without this guard every one of those callbacks starts another
+    // connection to the same phone, and the pile-up stops any of them from
+    // ever completing.
+    if (!this.connectedDevices.has(device.id) && !this.connecting.has(device.id)) {
+      this.connecting.add(device.id);
+      this.connectAndSubscribe(device)
+        .catch(() => {
+          // Both sides racing to connect is normal in a mesh; the loser just retries later.
+        })
+        .finally(() => this.connecting.delete(device.id));
     }
   }
 
@@ -208,6 +230,7 @@ export class RealBleTransport implements BleTransport {
     const connected = await device.connect();
     await connected.discoverAllServicesAndCharacteristics();
     this.connectedDevices.set(device.id, connected);
+    useMeshStatusStore.getState().setConnected(this.connectedDevices.size);
 
     connected.monitorCharacteristicForService(SERVICE_UUID, PROFILE_CHAR_UUID, (error, characteristic) => {
       if (error || !characteristic?.value) return;
@@ -216,6 +239,7 @@ export class RealBleTransport implements BleTransport {
 
     connected.onDisconnected(() => {
       this.connectedDevices.delete(device.id);
+      useMeshStatusStore.getState().setConnected(this.connectedDevices.size);
     });
   }
 

@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { CabinSeats } from '../../components/CabinSeats';
+import { MeshStatus } from '../../components/MeshStatus';
 import { PresenceBanner } from '../../components/PresenceBanner';
 import { SeatBadge } from '../../components/SeatBadge';
 import { useChatStore } from '../../state/chatStore';
@@ -184,6 +185,7 @@ export function CabinChatScreen({ navigation }: Props) {
             <CabinSeats />
             <Text style={styles.emptyTitle}>Nadie ha hablado todavía</Text>
             <Text style={styles.emptySubtitle}>En cuanto haya pasajeros cerca con la app abierta, aparecerán aquí.</Text>
+            <MeshStatus />
           </View>
         }
       />

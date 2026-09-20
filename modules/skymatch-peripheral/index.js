@@ -3,6 +3,7 @@ const { NativeEventEmitter, NativeModules, Platform } = require('react-native');
 const native = NativeModules.SkyMatchPeripheral;
 
 const WRITE_EVENT = 'SkyMatchPeripheralWrite';
+const STATE_EVENT = 'SkyMatchPeripheralState';
 
 let emitter = null;
 
@@ -47,4 +48,16 @@ function addWriteListener(listener) {
   return () => subscription.remove();
 }
 
-module.exports = { isSupported, start, stop, notify, addWriteListener };
+/**
+ * Fires with CoreBluetooth's CBManagerState whenever the radio's state
+ * changes. Receiving anything at all also proves the native module loaded,
+ * which is otherwise invisible: every call here no-ops when it didn't.
+ */
+function addStateListener(listener) {
+  const e = getEmitter();
+  if (e === null) return () => {};
+  const subscription = e.addListener(STATE_EVENT, listener);
+  return () => subscription.remove();
+}
+
+module.exports = { isSupported, start, stop, notify, addWriteListener, addStateListener };

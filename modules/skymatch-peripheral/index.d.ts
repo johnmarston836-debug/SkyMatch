@@ -10,3 +10,4 @@ export declare function start(serviceUUID: string, charUUID: string, localName: 
 export declare function stop(): Promise<void>;
 export declare function notify(base64Value: string): Promise<boolean>;
 export declare function addWriteListener(listener: (event: PeripheralWriteEvent) => void): () => void;
+export declare function addStateListener(listener: (event: { state: number }) => void): () => void;
