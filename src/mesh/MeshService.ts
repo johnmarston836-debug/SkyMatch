@@ -1,17 +1,19 @@
 import type { BleTransport } from './BleTransport';
 import { MeshRouter } from './MeshRouter';
 import { BROADCAST_ID, type MeshEnvelope } from './protocol';
-import type { AvatarPacket, ChatMessage, PresenceAlert, PresenceReaction, Profile, Seat } from '../types';
+import type { AvatarPacket, ChatMessage, PresenceAlert, PresenceReaction, Profile, ProfilePacket, Seat } from '../types';
 import { newId } from '../utils/id';
 
 type Listeners = {
   peerSeen: (peerId: string, seat: Seat | null) => void;
   peerLost: (peerId: string) => void;
-  profile: (peerId: string, profile: Profile) => void;
+  profile: (peerId: string, profile: ProfilePacket) => void;
   message: (message: ChatMessage) => void;
   presence: (alert: PresenceAlert) => void;
   reaction: (reaction: PresenceReaction) => void;
   avatar: (avatar: AvatarPacket) => void;
+  /** Someone is missing our photo, or holding an outdated one, and is asking for it. */
+  avatarRequest: (fromId: string) => void;
 };
 
 /**
@@ -36,6 +38,7 @@ export class MeshService {
     presence: new Set(),
     reaction: new Set(),
     avatar: new Set(),
+    avatarRequest: new Set(),
   };
 
   constructor(
@@ -61,9 +64,14 @@ export class MeshService {
     return () => this.listeners[event].delete(listener as never);
   }
 
-  /** Broadcasts the lightweight {id, seat, nickname} profile so peers can label messages from us. */
-  async broadcastProfile(profile: Profile) {
-    await this.router.send({ id: newId(), kind: 'profile', fromId: this.myPeerId, toId: BROADCAST_ID, payload: profile });
+  /**
+   * Broadcasts the lightweight {id, seat, nickname} profile so peers can
+   * label messages from us, plus the fingerprint of our photo so they can
+   * tell whether the one they hold for us is current.
+   */
+  async broadcastProfile(profile: Profile, avatarHash?: string) {
+    const payload: ProfilePacket = avatarHash ? { ...profile, avatarHash } : profile;
+    await this.router.send({ id: newId(), kind: 'profile', fromId: this.myPeerId, toId: BROADCAST_ID, payload });
   }
 
   async sendGroupMessage(message: ChatMessage) {
@@ -93,9 +101,25 @@ export class MeshService {
     await this.router.send({ id: newId(), kind: 'presence', fromId: this.myPeerId, toId: BROADCAST_ID, payload: alert });
   }
 
-  /** Photos are broadcast rarely and never on the profile timer: one is worth hundreds of ordinary packets. */
-  async sendAvatar(avatar: AvatarPacket) {
-    await this.router.send({ id: newId(), kind: 'avatar', fromId: this.myPeerId, toId: BROADCAST_ID, payload: avatar });
+  /**
+   * Sends our photo to the one person who asked for it. A photo is worth
+   * hundreds of ordinary packets, so it is never broadcast: flooding it
+   * would make every phone in the cabin relay all of those frames to
+   * everyone else, including the many who already have it.
+   */
+  async sendAvatar(avatar: AvatarPacket, toId: string) {
+    await this.router.send({ id: newId(), kind: 'avatar', fromId: this.myPeerId, toId, payload: avatar });
+  }
+
+  /**
+   * Asks one peer for their photo. Tiny, and safe to repeat: it is sent
+   * again on every profile beat until their photo actually arrives, which
+   * is what makes a photo survive the frames a Bluetooth link loses - the
+   * old fire-and-forget push had no second chance, so a photo either made
+   * it the first time or never appeared at all.
+   */
+  async requestAvatar(toId: string) {
+    await this.router.send({ id: newId(), kind: 'avatarRequest', fromId: this.myPeerId, toId, payload: {} });
   }
 
   async sendPresenceReaction(reaction: PresenceReaction) {
@@ -122,6 +146,9 @@ export class MeshService {
         break;
       case 'avatar':
         this.emit('avatar', envelope.payload as AvatarPacket);
+        break;
+      case 'avatarRequest':
+        this.emit('avatarRequest', envelope.fromId);
         break;
       default:
         break;

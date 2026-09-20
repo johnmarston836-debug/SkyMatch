@@ -28,4 +28,13 @@ export interface BleTransport {
 
   /** Broadcast to every directly-connected peer, used by the router to flood a relay packet outward. */
   broadcast(raw: string, excludePeerId?: string): Promise<void>;
+
+  /**
+   * Optional: tells the transport that the connection it knows as
+   * `deviceId` belongs to the person whose profile id is `profileId`. The
+   * router addresses everything by profile id, while a Bluetooth connection
+   * is identified by a per-scanner device id, so without this every direct
+   * send misses and has to be flooded to the whole cabin instead.
+   */
+  notePeerIdentity?(deviceId: string, profileId: string): void;
 }

@@ -48,6 +48,14 @@ export class MeshRouter {
   private handleIncoming(raw: string, fromPeerId: string) {
     const envelope = decodeEnvelope(raw);
     if (!envelope) return;
+
+    // A packet still carrying its full TTL has not been relayed by anyone,
+    // so its sender is the neighbour that just handed it to us: the one
+    // moment where the Bluetooth connection and a profile id can be tied
+    // together. (A relayed packet names its original author, not the
+    // neighbour, which is why the TTL check matters.)
+    if (envelope.ttl === DEFAULT_TTL) this.transport.notePeerIdentity?.(fromPeerId, envelope.fromId);
+
     if (this.seenSet.has(envelope.id)) return;
     this.markSeen(envelope.id);
 

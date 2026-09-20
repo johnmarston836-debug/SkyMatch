@@ -13,6 +13,17 @@ export interface Profile {
   contact?: string;
 }
 
+/**
+ * What actually travels in a profile announcement: the profile plus the
+ * fingerprint of the sender's photo. Everyone re-announces every few
+ * seconds, so this is also the heartbeat that lets a phone notice it is
+ * missing someone's photo - or holding an old one - and ask for it.
+ */
+export interface ProfilePacket extends Profile {
+  /** shortHash() of the base64 photo, or absent when that person has none. */
+  avatarHash?: string;
+}
+
 export type MessageScope = 'group' | 'private';
 
 export interface ChatMessage {

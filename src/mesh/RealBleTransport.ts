@@ -23,6 +23,14 @@ import { packSeat, unpackSeat } from '../utils/seat';
 const ADVERTISE_MODE_LOW_LATENCY = 2;
 const ADVERTISE_TX_POWER_MEDIUM = 2;
 
+/**
+ * How long a partly-arrived send is kept before its chunks are thrown away.
+ * Generous, because a photo's hundreds of frames take a while to cross, but
+ * finite: a send interrupted half way can never complete, since the retry
+ * comes under a new frame id.
+ */
+const INCOMPLETE_FRAME_TTL_MS = 60_000;
+
 /** Prefix that marks one of our advertisements in an iOS local name, followed by the seat byte in hex. */
 const LOCAL_NAME_PREFIX = 'SM';
 
@@ -78,13 +86,18 @@ export class RealBleTransport implements BleTransport {
   private envelopeListeners = new Set<(raw: string, fromPeerId: string) => void>();
   private staleCheckTimer: ReturnType<typeof setInterval> | null = null;
   private lastSeenAt = new Map<string, number>();
-  /** frameId -> (chunk index -> chunk part), across all devices - frame ids are globally unique so one map is enough. */
-  private pendingFrames = new Map<string, Map<number, string>>();
+  /** frameId -> the chunks of that send so far, across all devices - frame ids are globally unique so one map is enough. */
+  private pendingFrames = new Map<string, { parts: Map<number, string>; touchedAt: number }>();
+  /** profile id -> the Bluetooth device id we reach that person through. */
+  private identities = new Map<string, string>();
 
   async start(myPeerId: string, seat: Seat | null): Promise<void> {
     await this.startAdvertising(seat);
     this.startScanning();
-    this.staleCheckTimer = setInterval(() => this.pruneStalePeers(), 5000);
+    this.staleCheckTimer = setInterval(() => {
+      this.pruneStalePeers();
+      this.prunePendingFrames();
+    }, 5000);
     void myPeerId; // full peer id is exchanged over GATT once connected; it doesn't fit in an advert
   }
 
@@ -110,6 +123,8 @@ export class RealBleTransport implements BleTransport {
     }
     if (this.staleCheckTimer) clearInterval(this.staleCheckTimer);
     this.connectedDevices.clear();
+    this.identities.clear();
+    this.pendingFrames.clear();
   }
 
   onPeerSeen(listener: (peerId: string, rssi: number, seat: Seat | null) => void) {
@@ -140,7 +155,12 @@ export class RealBleTransport implements BleTransport {
    * false instead lets the router flood, which does reach them.
    */
   async sendToPeer(peerId: string, raw: string): Promise<boolean> {
-    const device = this.connectedDevices.get(peerId);
+    // The router addresses people by profile id; this map is keyed by
+    // Bluetooth device id. Translate when we have learned the pairing, and
+    // otherwise treat the id as a device id (which is what a relay hop
+    // passes in).
+    const deviceId = this.identities.get(peerId) ?? peerId;
+    const device = this.connectedDevices.get(deviceId);
     if (!device) return false;
 
     try {
@@ -156,9 +176,15 @@ export class RealBleTransport implements BleTransport {
       // A link can die mid-write, and the failure used to escape as an
       // unhandled rejection that also aborted the broadcast to everyone
       // else. Drop the peer and report failure so the router floods instead.
-      this.dropDevice(peerId);
+      this.dropDevice(deviceId);
       return false;
     }
+  }
+
+  /** Only ever records a connection we opened ourselves, so the id is one `sendToPeer` can use. */
+  notePeerIdentity(deviceId: string, profileId: string) {
+    if (!this.connectedDevices.has(deviceId)) return;
+    this.identities.set(profileId, deviceId);
   }
 
   /** UUIDs come back in whatever case the platform feels like, so compare them folded. */
@@ -174,8 +200,13 @@ export class RealBleTransport implements BleTransport {
     }
   }
 
-  private dropDevice(peerId: string) {
-    this.connectedDevices.delete(peerId);
+  private dropDevice(deviceId: string) {
+    this.connectedDevices.delete(deviceId);
+    // Whoever we reached through this connection has to be looked up again,
+    // or we would keep writing into a link that is gone.
+    this.identities.forEach((mapped, profileId) => {
+      if (mapped === deviceId) this.identities.delete(profileId);
+    });
     useMeshStatusStore.getState().setConnected(this.connectedDevices.size);
   }
 
@@ -293,14 +324,28 @@ export class RealBleTransport implements BleTransport {
     const frame = decodeFrame(rawFrame);
     if (!frame) return;
 
-    const parts = this.pendingFrames.get(frame.id) ?? new Map<number, string>();
-    parts.set(frame.index, frame.part);
-    this.pendingFrames.set(frame.id, parts);
+    const pending = this.pendingFrames.get(frame.id) ?? { parts: new Map<number, string>(), touchedAt: 0 };
+    pending.parts.set(frame.index, frame.part);
+    pending.touchedAt = Date.now();
+    this.pendingFrames.set(frame.id, pending);
 
-    const raw = reassembleFrames(parts, frame.total);
+    const raw = reassembleFrames(pending.parts, frame.total);
     if (raw === null) return; // still waiting on more chunks of this frame
     this.pendingFrames.delete(frame.id);
     this.envelopeListeners.forEach((listener) => listener(raw, fromPeerId));
+  }
+
+  /**
+   * Throws away half-arrived sends. A photo is hundreds of frames and a link
+   * that dies in the middle of one leaves its chunks here forever: they can
+   * never be completed, because the sender starts the retry under a fresh
+   * frame id. Without this they just accumulate.
+   */
+  private prunePendingFrames() {
+    const now = Date.now();
+    this.pendingFrames.forEach((pending, frameId) => {
+      if (now - pending.touchedAt > INCOMPLETE_FRAME_TTL_MS) this.pendingFrames.delete(frameId);
+    });
   }
 
   private pruneStalePeers() {

@@ -9,7 +9,7 @@ import { Avatar } from '../../components/Avatar';
 import { SeatMap } from '../../components/SeatMap';
 import { useProfileStore } from '../../state/profileStore';
 import { useAvatarStore } from '../../state/avatarStore';
-import { announceProfileUpdate, sendMyAvatar } from '../../mesh/meshController';
+import { announceAvatarChange, announceProfileUpdate } from '../../mesh/meshController';
 import {
   ensureNotificationPermission,
   getNotificationPermission,
@@ -126,11 +126,12 @@ export function MyProfileScreen({ navigation }: Props) {
       return;
     }
     await setMyAvatar(asset.base64);
-    void sendMyAvatar();
+    void announceAvatarChange();
   };
 
   const handleRemovePhoto = async () => {
     await setMyAvatar(null);
+    void announceAvatarChange();
   };
 
   const handleSave = async () => {

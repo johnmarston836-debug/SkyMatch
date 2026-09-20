@@ -21,10 +21,24 @@ export const USE_MOCK_MESH = false;
 /** How often we re-announce who we are, so latecomers and stale lists heal themselves. */
 const PROFILE_ANNOUNCE_MS = 10_000;
 
+/**
+ * Don't ask the same person for their photo more often than this. A photo
+ * takes a while to cross the cabin, and their profile beat arrives every ten
+ * seconds: without this, we would ask again while the first answer was still
+ * being sent, and the two copies would fight over the same radio.
+ */
+const AVATAR_REQUEST_COOLDOWN_MS = 45_000;
+
+/** Same idea in the other direction: one photo per asker per window, however often they ask. */
+const AVATAR_SEND_COOLDOWN_MS = 20_000;
+
 let service: MeshService | null = null;
 let announceTimer: ReturnType<typeof setInterval> | null = null;
 /** Bluetooth device ids already greeted, so the duplicate scan hits don't re-announce endlessly. */
 const greeted = new Set<string>();
+/** profile id -> when we last asked them for their photo / last sent them ours. */
+const avatarRequestedAt = new Map<string, number>();
+const avatarSentAt = new Map<string, number>();
 
 /** Wires mesh events into the zustand stores. Call once, after the local profile is ready. */
 export async function startMesh(myProfile: Profile): Promise<MeshService> {
@@ -42,7 +56,7 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
     // actually gets our profile across.
     if (greeted.has(peerId)) return;
     greeted.add(peerId);
-    void service?.broadcastProfile(myProfile);
+    void service?.broadcastProfile(myProfile, useAvatarStore.getState().myAvatarHash());
   });
 
   service.on('peerLost', (peerId) => {
@@ -52,14 +66,36 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   // Keyed by the profile's own id, not the Bluetooth device id: the latter
   // is assigned per scanning phone, so the two never matched and profiles
   // landed under an id nothing else in the app ever looked up.
-  service.on('profile', (_peerId, profile) => {
-    const isNew = !useDiscoveryStore.getState().peers[profile.id];
+  service.on('profile', (_peerId, packet) => {
+    // The fingerprint rides along with the profile but isn't part of it:
+    // the passenger list stores who someone is, not what their photo looks
+    // like.
+    const { avatarHash, ...profile } = packet;
     useDiscoveryStore.getState().setProfile(profile);
-    // Their profile just arrived, so the link is definitely up - the one
-    // moment worth spending a photo on. Never on the profile timer: at
-    // hundreds of frames each, re-sending photos every few seconds would
-    // leave no bandwidth for anything else.
-    if (isNew) void sendMyAvatar();
+    // Their announcement carries the fingerprint of the photo they are
+    // showing. If it isn't the one we hold, ask for it - now, and again on
+    // every beat until it arrives. Photos used to be pushed once, the first
+    // time someone appeared: hundreds of frames with no acknowledgement and
+    // no second chance, so whichever direction happened to lose a frame
+    // never showed a photo at all. Asking until satisfied is what makes both
+    // phones end up with both photos.
+    if (avatarHash === undefined) {
+      useAvatarStore.getState().clearPeerAvatar(profile.id);
+      return;
+    }
+    if (useAvatarStore.getState().peerAvatarHashes[profile.id] === avatarHash) return;
+
+    const askedAt = avatarRequestedAt.get(profile.id) ?? 0;
+    if (Date.now() - askedAt < AVATAR_REQUEST_COOLDOWN_MS) return;
+    avatarRequestedAt.set(profile.id, Date.now());
+    void service?.requestAvatar(profile.id);
+  });
+
+  service.on('avatarRequest', (fromId) => {
+    const sentAt = avatarSentAt.get(fromId) ?? 0;
+    if (Date.now() - sentAt < AVATAR_SEND_COOLDOWN_MS) return;
+    avatarSentAt.set(fromId, Date.now());
+    void sendMyAvatarTo(fromId);
   });
 
   service.on('avatar', (avatar) => {
@@ -87,7 +123,7 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   });
 
   await service.start(myProfile.seat);
-  await service.broadcastProfile(myProfile);
+  await service.broadcastProfile(myProfile, useAvatarStore.getState().myAvatarHash());
 
   // The announcements above and on `peerSeen` both fire before any GATT
   // link exists, so they reach nobody and nothing ever retried them: that
@@ -97,7 +133,10 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   // or who edit their profile.
   if (announceTimer) clearInterval(announceTimer);
   announceTimer = setInterval(() => {
-    void service?.broadcastProfile(useProfileStore.getState().profile ?? myProfile);
+    void service?.broadcastProfile(
+      useProfileStore.getState().profile ?? myProfile,
+      useAvatarStore.getState().myAvatarHash(),
+    );
     useDiscoveryStore.getState().pruneStale();
   }, PROFILE_ANNOUNCE_MS);
 
@@ -178,16 +217,27 @@ export async function toggleStandUp(myProfile: Profile) {
   await service.sendPresenceAlert(alert);
 }
 
-/**
- * Sends our profile photo, if we have one. A photo is orders of magnitude
- * bigger than anything else on the mesh, so this is called sparingly: when a
- * new passenger appears, and when the photo itself changes.
- */
-export async function sendMyAvatar() {
+/** Answers one person's request for our photo. Nothing else ever puts a photo on the radio. */
+async function sendMyAvatarTo(toId: string) {
   const myAvatar = useAvatarStore.getState().myAvatar;
   const myProfile = useProfileStore.getState().profile;
   if (!service || !myAvatar || !myProfile) return;
-  await service.sendAvatar({ fromId: myProfile.id, imageBase64: myAvatar, sentAt: Date.now() });
+  await service.sendAvatar({ fromId: myProfile.id, imageBase64: myAvatar, sentAt: Date.now() }, toId);
+}
+
+/**
+ * Called when the user picks or removes a photo. It doesn't send the photo:
+ * it re-announces the profile, whose new fingerprint tells everyone that
+ * what they hold for us is out of date, and they ask for the new one. That
+ * way the photo only crosses the cabin towards people who actually want it.
+ */
+export async function announceAvatarChange() {
+  const myProfile = useProfileStore.getState().profile;
+  if (!service || !myProfile) return;
+  // Let them ask again straight away rather than sitting out the cooldown
+  // from the previous photo.
+  avatarSentAt.clear();
+  await service.broadcastProfile(myProfile, useAvatarStore.getState().myAvatarHash());
 }
 
 /** Reacts to someone else's stand-up alert. Broadcasts don't loop back, so it lands locally first. */
@@ -212,7 +262,7 @@ export async function sendPresenceReaction(myProfile: Profile, alertId: string, 
  */
 export async function announceProfileUpdate(myProfile: Profile) {
   if (!service) return;
-  await service.broadcastProfile(myProfile);
+  await service.broadcastProfile(myProfile, useAvatarStore.getState().myAvatarHash());
 }
 
 export function getMeshService(): MeshService | null {
