@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Animated, FlatList, Image, Pressable, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useChatAutoScroll } from '../../hooks/useChatAutoScroll';
 import { useKeyboardPadding } from '../../hooks/useKeyboardPadding';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
@@ -33,6 +34,7 @@ export function CabinChatScreen({ navigation }: Props) {
   const isStanding = usePresenceStore((state) => state.myActiveAlertId !== null);
   const [draft, setDraft] = useState('');
   const keyboardPadding = useKeyboardPadding(insets.bottom);
+  const autoScroll = useChatAutoScroll<ChatMessage>();
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
     header: {
@@ -151,6 +153,7 @@ export function CabinChatScreen({ navigation }: Props) {
     const body = draft.trim();
     if (!body) return;
     setDraft('');
+    autoScroll.stickToEnd();
     void sendGroupChatMessage(myProfile, body);
   };
 
@@ -211,10 +214,15 @@ export function CabinChatScreen({ navigation }: Props) {
       </View>
 
       <FlatList
+        ref={autoScroll.listRef}
         data={groupMessages}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         contentContainerStyle={styles.list}
+        onScroll={autoScroll.handleScroll}
+        onContentSizeChange={autoScroll.handleContentSizeChange}
+        onLayout={autoScroll.handleLayout}
+        scrollEventThrottle={16}
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <CabinSeats />

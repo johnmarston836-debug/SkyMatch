@@ -3,6 +3,7 @@ import { Animated, FlatList, Image, Pressable, Text, TextInput, View } from 'rea
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import { useChatAutoScroll } from '../../hooks/useChatAutoScroll';
 import { useKeyboardPadding } from '../../hooks/useKeyboardPadding';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
@@ -37,6 +38,7 @@ export function ChatScreen({ route, navigation }: Props) {
   const markRead = useChatStore((state) => state.markRead);
   const [draft, setDraft] = useState('');
   const keyboardPadding = useKeyboardPadding(insets.bottom);
+  const autoScroll = useChatAutoScroll<ChatMessage>();
   const [zoomedPhoto, setZoomedPhoto] = useState<string | null>(null);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
@@ -117,6 +119,7 @@ export function ChatScreen({ route, navigation }: Props) {
     const body = draft.trim();
     if (!body) return;
     setDraft('');
+    autoScroll.stickToEnd();
     void sendPrivateChatMessage(myProfile, peerId, body);
   };
 
@@ -130,6 +133,7 @@ export function ChatScreen({ route, navigation }: Props) {
     });
     const asset = result.assets?.[0];
     if (!asset?.base64) return;
+    autoScroll.stickToEnd();
     void sendPrivateChatMessage(myProfile, peerId, draft.trim() || 'Foto', asset.base64);
     setDraft('');
   };
@@ -166,7 +170,17 @@ export function ChatScreen({ route, navigation }: Props) {
           )}
         </View>
       )}
-      <FlatList data={messages} keyExtractor={(item) => item.id} renderItem={renderItem} contentContainerStyle={styles.list} />
+      <FlatList
+        ref={autoScroll.listRef}
+        data={messages}
+        keyExtractor={(item) => item.id}
+        renderItem={renderItem}
+        contentContainerStyle={styles.list}
+        onScroll={autoScroll.handleScroll}
+        onContentSizeChange={autoScroll.handleContentSizeChange}
+        onLayout={autoScroll.handleLayout}
+        scrollEventThrottle={16}
+      />
       <PhotoViewer imageBase64={zoomedPhoto} onClose={() => setZoomedPhoto(null)} />
 
       <View style={styles.inputRow}>
