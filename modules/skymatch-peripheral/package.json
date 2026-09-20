@@ -1,13 +1,15 @@
 {
   "name": "skymatch-peripheral",
   "version": "1.0.0",
-  "description": "iOS BLE peripheral role for SkyMatch: advertises the mesh service and hosts the GATT characteristic peers write to.",
+  "description": "iOS BLE peripheral role and local notifications for SkyMatch: advertises the mesh service, hosts the GATT characteristic peers write to, and posts alerts for messages that land while the app is in the background.",
   "main": "index.js",
   "types": "index.d.ts",
   "private": true,
   "files": [
     "index.js",
     "index.d.ts",
+    "notifications.js",
+    "notifications.d.ts",
     "ios",
     "skymatch-peripheral.podspec"
   ],

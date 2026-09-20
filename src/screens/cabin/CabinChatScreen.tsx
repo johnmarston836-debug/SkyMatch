@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
+import { Animated, FlatList, Image, Pressable, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useKeyboardPadding } from '../../hooks/useKeyboardPadding';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { CabinSeats } from '../../components/CabinSeats';
@@ -12,6 +13,7 @@ import { useChatStore } from '../../state/chatStore';
 import { useProfileStore } from '../../state/profileStore';
 import { usePresenceStore } from '../../state/presenceStore';
 import { sendGroupChatMessage, startMesh, toggleStandUp } from '../../mesh/meshController';
+import { ensureNotificationPermission, initNotifications } from '../../notifications/notifier';
 import { colorForPeer } from '../../theme';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import type { ChatMessage } from '../../types';
@@ -30,6 +32,7 @@ export function CabinChatScreen({ navigation }: Props) {
   );
   const isStanding = usePresenceStore((state) => state.myActiveAlertId !== null);
   const [draft, setDraft] = useState('');
+  const keyboardPadding = useKeyboardPadding(insets.bottom);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
     header: {
@@ -100,7 +103,7 @@ export function CabinChatScreen({ navigation }: Props) {
       alignItems: 'center' as const,
       gap: spacing(1),
       paddingHorizontal: spacing(2),
-      paddingTop: spacing(1),
+      paddingVertical: spacing(1),
       borderTopWidth: 1,
       borderTopColor: colors.border,
     },
@@ -135,6 +138,13 @@ export function CabinChatScreen({ navigation }: Props) {
     if (myProfile) void startMesh(myProfile);
   }, [myProfile]);
 
+  // Asked here rather than at launch: this is the screen where messages
+  // start arriving, so the iOS prompt lands with a reason behind it.
+  useEffect(() => {
+    initNotifications();
+    void ensureNotificationPermission();
+  }, []);
+
   if (!myProfile) return null;
 
   const handleSend = () => {
@@ -166,9 +176,8 @@ export function CabinChatScreen({ navigation }: Props) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={[styles.container, { paddingTop: insets.top + theme.spacing(2) }]}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    <Animated.View
+      style={[styles.container, { paddingTop: insets.top + theme.spacing(2), paddingBottom: keyboardPadding }]}
     >
       <View style={styles.header}>
         <View style={styles.headerSide}>
@@ -198,7 +207,7 @@ export function CabinChatScreen({ navigation }: Props) {
       <PrivateMessageToast onOpen={(peerId) => navigation.navigate('Chat', { peerId })} />
 
       <View style={styles.bannerArea}>
-        <PresenceBanner />
+        <PresenceBanner onOpenChat={(peerId) => navigation.navigate('Chat', { peerId })} />
       </View>
 
       <FlatList
@@ -216,7 +225,7 @@ export function CabinChatScreen({ navigation }: Props) {
         }
       />
 
-      <View style={[styles.inputRow, { paddingBottom: insets.bottom + theme.spacing(1) }]}>
+      <View style={styles.inputRow}>
         <Pressable
           style={[styles.standButton, isStanding && styles.standButtonActive]}
           onPress={() => void toggleStandUp(myProfile)}
@@ -241,6 +250,6 @@ export function CabinChatScreen({ navigation }: Props) {
           <Text style={styles.sendButtonText}>Enviar</Text>
         </Pressable>
       </View>
-    </KeyboardAvoidingView>
+    </Animated.View>
   );
 }

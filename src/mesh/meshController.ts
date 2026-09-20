@@ -6,6 +6,7 @@ import { useChatStore } from '../state/chatStore';
 import { usePresenceStore } from '../state/presenceStore';
 import { useProfileStore } from '../state/profileStore';
 import { useAvatarStore } from '../state/avatarStore';
+import { notifyPrivateMessage } from '../notifications/notifier';
 import { requestBlePermissions } from '../utils/permissions';
 import { newId } from '../utils/id';
 import type { ChatMessage, PresenceAlert, PresenceReaction, Profile, ReactionKind } from '../types';
@@ -72,6 +73,8 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
       const incoming = message.fromId !== myProfile.id;
       const peerId = incoming ? message.fromId : message.toId!;
       useChatStore.getState().addPrivateMessage(peerId, { ...message, viaMesh: true }, incoming);
+      // Nothing on screen is going to show it if the phone is in a pocket.
+      if (incoming) void notifyPrivateMessage(message);
     }
   });
 

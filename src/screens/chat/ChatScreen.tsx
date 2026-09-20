@@ -1,11 +1,13 @@
 import React, { useCallback, useLayoutEffect, useState } from 'react';
-import { FlatList, Image, KeyboardAvoidingView, Platform, Pressable, Text, TextInput, View } from 'react-native';
+import { Animated, FlatList, Image, Pressable, Text, TextInput, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
+import { useKeyboardPadding } from '../../hooks/useKeyboardPadding';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
+import { PhotoViewer } from '../../components/PhotoViewer';
 import { SeatBadge } from '../../components/SeatBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
@@ -34,6 +36,8 @@ export function ChatScreen({ route, navigation }: Props) {
   const setActivePeer = useChatStore((state) => state.setActivePeer);
   const markRead = useChatStore((state) => state.markRead);
   const [draft, setDraft] = useState('');
+  const keyboardPadding = useKeyboardPadding(insets.bottom);
+  const [zoomedPhoto, setZoomedPhoto] = useState<string | null>(null);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
     peerHeader: {
@@ -64,7 +68,7 @@ export function ChatScreen({ route, navigation }: Props) {
       alignItems: 'center' as const,
       gap: spacing(1),
       paddingHorizontal: spacing(2),
-      paddingTop: spacing(1),
+      paddingVertical: spacing(1),
       borderTopWidth: 1,
       borderTopColor: colors.border,
     },
@@ -136,7 +140,9 @@ export function ChatScreen({ route, navigation }: Props) {
       <View style={[styles.bubbleRow, mine && styles.bubbleRowMine]}>
         <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>
           {item.imageBase64 && (
-            <Image source={{ uri: `data:image/jpeg;base64,${item.imageBase64}` }} style={styles.image} resizeMode="cover" />
+            <Pressable onPress={() => setZoomedPhoto(item.imageBase64 ?? null)}>
+              <Image source={{ uri: `data:image/jpeg;base64,${item.imageBase64}` }} style={styles.image} resizeMode="cover" />
+            </Pressable>
           )}
           <Text style={mine ? styles.bubbleTextMine : styles.bubbleTextTheirs}>{item.body}</Text>
         </View>
@@ -145,11 +151,7 @@ export function ChatScreen({ route, navigation }: Props) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={insets.top}
-    >
+    <Animated.View style={[styles.container, { paddingBottom: keyboardPadding }]}>
       {peer?.profile && (
         <View style={styles.peerHeader}>
           <View style={styles.peerHeaderRow}>
@@ -165,7 +167,9 @@ export function ChatScreen({ route, navigation }: Props) {
         </View>
       )}
       <FlatList data={messages} keyExtractor={(item) => item.id} renderItem={renderItem} contentContainerStyle={styles.list} />
-      <View style={[styles.inputRow, { paddingBottom: insets.bottom + theme.spacing(1) }]}>
+      <PhotoViewer imageBase64={zoomedPhoto} onClose={() => setZoomedPhoto(null)} />
+
+      <View style={styles.inputRow}>
         <Pressable style={styles.attachButton} onPress={handleAttachImage}>
           <Image source={require('../../assets/icons/camera.png')} style={styles.attachButtonIcon} resizeMode="contain" />
         </Pressable>
@@ -181,6 +185,6 @@ export function ChatScreen({ route, navigation }: Props) {
           <Text style={styles.sendButtonText}>Enviar</Text>
         </Pressable>
       </View>
-    </KeyboardAvoidingView>
+    </Animated.View>
   );
 }

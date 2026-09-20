@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { Alert, KeyboardAvoidingView, Linking, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
@@ -9,6 +10,12 @@ import { SeatMap } from '../../components/SeatMap';
 import { useProfileStore } from '../../state/profileStore';
 import { useAvatarStore } from '../../state/avatarStore';
 import { announceProfileUpdate, sendMyAvatar } from '../../mesh/meshController';
+import {
+  ensureNotificationPermission,
+  getNotificationPermission,
+  notificationsSupported,
+  type NotificationPermission,
+} from '../../notifications/notifier';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import { formatSeat } from '../../utils/seat';
 import type { Seat } from '../../types';
@@ -29,6 +36,7 @@ export function MyProfileScreen({ navigation }: Props) {
   const [nickname, setNickname] = useState(profile?.nickname ?? '');
   const [contact, setContact] = useState(profile?.contact ?? '');
   const [seat, setSeat] = useState<Seat>(profile?.seat ?? { row: 14, letter: 'A' });
+  const [notifications, setNotifications] = useState<NotificationPermission>('undetermined');
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
     scroll: { paddingHorizontal: spacing(3) },
@@ -53,6 +61,18 @@ export function MyProfileScreen({ navigation }: Props) {
       fontSize: 15,
     },
     hint: { ...typography.subtitle, fontSize: 12, marginTop: spacing(1) },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: radii.md,
+      borderWidth: 1,
+      borderColor: colors.border,
+      padding: spacing(2),
+      marginTop: spacing(3),
+      gap: spacing(0.5),
+    },
+    cardTitle: { ...typography.body, fontWeight: '700' as const },
+    cardBody: { ...typography.subtitle, fontSize: 13 },
+    cardAction: { color: colors.accent, fontWeight: '700' as const, marginTop: spacing(1) },
     secondaryLink: {
       marginTop: spacing(3),
       paddingVertical: spacing(1.5),
@@ -71,6 +91,23 @@ export function MyProfileScreen({ navigation }: Props) {
   }));
 
   const canSave = nickname.trim().length > 0;
+
+  useFocusEffect(
+    useCallback(() => {
+      // Re-read every time: the user may have just changed it in Settings.
+      void getNotificationPermission().then(setNotifications);
+    }, []),
+  );
+
+  const handleNotifications = async () => {
+    if (notifications === 'denied') {
+      // iOS only ever asks once; after a no, Settings is the only way back.
+      await Linking.openSettings();
+      return;
+    }
+    await ensureNotificationPermission();
+    setNotifications(await getNotificationPermission());
+  };
 
   const handlePickPhoto = async () => {
     const result = await launchImageLibrary({
@@ -162,6 +199,24 @@ export function MyProfileScreen({ navigation }: Props) {
         <Text style={styles.hint}>
           Solo lo verá quien abra tu ficha o un chat privado contigo. Déjalo en blanco para no compartirlo.
         </Text>
+
+        {notificationsSupported && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Avisos</Text>
+            <Text style={styles.cardBody}>
+              {notifications === 'granted'
+                ? 'Te avisamos de los mensajes privados que lleguen con la app en segundo plano. Si cierras la app del todo, el Bluetooth se apaga y no llega nada.'
+                : 'Activa los avisos para enterarte de los mensajes privados aunque no tengas la app en pantalla.'}
+            </Text>
+            {notifications !== 'granted' && (
+              <Pressable onPress={handleNotifications}>
+                <Text style={styles.cardAction}>
+                  {notifications === 'denied' ? 'Abrir Ajustes' : 'Activar avisos'}
+                </Text>
+              </Pressable>
+            )}
+          </View>
+        )}
 
         <Pressable style={[styles.cta, !canSave && styles.ctaDisabled]} disabled={!canSave} onPress={handleSave}>
           <Text style={styles.ctaText}>Guardar cambios</Text>

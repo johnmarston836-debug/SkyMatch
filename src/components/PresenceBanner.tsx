@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Image, Pressable, Text, View, type ImageSourcePropType } from 'react-native';
+import { Image, Pressable, Text, View } from 'react-native';
+import { ReactionsSheet } from './ReactionsSheet';
+import { REACTION_ICONS, REACTION_ORDER } from './reactionIcons';
 import { usePresenceStore } from '../state/presenceStore';
 import { useProfileStore } from '../state/profileStore';
 import { sendPresenceReaction } from '../mesh/meshController';
@@ -7,26 +9,23 @@ import { useThemedStyles } from '../theme/ThemeContext';
 import { formatSeat } from '../utils/seat';
 import type { PresenceReaction, ReactionKind } from '../types';
 
-/** Drawn by hand rather than emoji, which render as tofu boxes on some devices. */
-const REACTION_ICONS: Record<ReactionKind, ImageSourcePropType> = {
-  ok: require('../assets/icons/reaction-ok.png'),
-  heart: require('../assets/icons/reaction-heart.png'),
-  laugh: require('../assets/icons/reaction-laugh.png'),
-};
-
-const REACTION_ORDER: ReactionKind[] = ['ok', 'heart', 'laugh'];
-
 // Stable reference for alerts nobody has reacted to: a fresh [] here would
 // make zustand think the snapshot changed on every read and spin forever.
 const NO_REACTIONS: PresenceReaction[] = [];
 
+interface Props {
+  /** Opens a private chat with whoever was tapped in the reactions list. */
+  onOpenChat: (peerId: string) => void;
+}
+
 /** Stack of "seat X is standing up" banners above the group chat, self-clearing as alerts expire. */
-export function PresenceBanner() {
+export function PresenceBanner({ onOpenChat }: Props) {
   const alerts = usePresenceStore((state) => state.alerts);
   const reactionsByAlert = usePresenceStore((state) => state.reactionsByAlert);
   const pruneExpired = usePresenceStore((state) => state.pruneExpired);
   const myProfile = useProfileStore((state) => state.profile);
   const [pickerFor, setPickerFor] = useState<string | null>(null);
+  const [reactionsFor, setReactionsFor] = useState<string | null>(null);
   const styles = useThemedStyles(({ colors, radii, spacing }) => ({
     container: { gap: spacing(1) },
     banner: {
@@ -56,6 +55,7 @@ export function PresenceBanner() {
       paddingVertical: spacing(0.5),
     },
     chipMine: { borderColor: colors.accent },
+    chipsHint: { color: colors.textMuted, fontSize: 11, fontWeight: '600' as const },
     chipIcon: { width: 14, height: 14, tintColor: colors.text },
     chipCount: { color: colors.text, fontSize: 12, fontWeight: '700' as const },
 
@@ -126,15 +126,20 @@ export function PresenceBanner() {
                   </>
                 )}
               </Text>
+              {/* The chips are their own Pressable so they also work on your
+                  own banner, where the parent is disabled to stop you
+                  reacting to yourself: seeing who reacted to you is the
+                  whole point of the list. */}
               {counts.length > 0 && (
-                <View style={styles.chips}>
+                <Pressable style={styles.chips} onPress={() => setReactionsFor(alert.id)}>
                   {counts.map((entry) => (
                     <View key={entry.kind} style={[styles.chip, mine?.kind === entry.kind && styles.chipMine]}>
                       <Image source={REACTION_ICONS[entry.kind]} style={styles.chipIcon} resizeMode="contain" />
                       <Text style={styles.chipCount}>{entry.count}</Text>
                     </View>
                   ))}
-                </View>
+                  <Text style={styles.chipsHint}>Ver</Text>
+                </Pressable>
               )}
             </View>
 
@@ -158,6 +163,8 @@ export function PresenceBanner() {
           </Pressable>
         );
       })}
+
+      <ReactionsSheet alertId={reactionsFor} onClose={() => setReactionsFor(null)} onOpenChat={onOpenChat} />
     </View>
   );
 }

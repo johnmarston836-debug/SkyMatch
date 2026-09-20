@@ -22,10 +22,13 @@ interface ChatState {
   activePeerId: string | null;
   /** The last incoming private message worth interrupting for; null once dismissed. */
   notice: PrivateNotice | null;
+  /** False while SkyMatch is in the background, where nothing on screen is being read. */
+  appActive: boolean;
 
   addGroupMessage: (message: ChatMessage) => void;
   addPrivateMessage: (peerId: string, message: ChatMessage, incoming?: boolean) => void;
   setActivePeer: (peerId: string | null) => void;
+  setAppActive: (active: boolean) => void;
   markRead: (peerId: string) => void;
   dismissNotice: () => void;
 }
@@ -36,6 +39,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   unreadByPeer: {},
   activePeerId: null,
   notice: null,
+  appActive: true,
 
   addGroupMessage: (message) => {
     if (get().groupMessages.some((m) => m.id === message.id)) return; // mesh relay can deliver duplicates
@@ -47,8 +51,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
     if (existing.some((m) => m.id === message.id)) return;
 
     // Only messages arriving while that conversation is off screen count as
-    // unread - otherwise reading a chat live would leave a badge behind.
-    const announce = incoming && get().activePeerId !== peerId;
+    // unread - otherwise reading a chat live would leave a badge behind. A
+    // chat left open when the phone was locked is off screen too.
+    const state = get();
+    const announce = incoming && !(state.appActive && state.activePeerId === peerId);
 
     set((state) => ({
       privateMessagesByPeer: {
@@ -68,6 +74,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
         : state.notice,
     }));
   },
+
+  setAppActive: (active) => set({ appActive: active }),
 
   setActivePeer: (peerId) =>
     set((state) => ({
