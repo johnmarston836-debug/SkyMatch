@@ -8,6 +8,14 @@ import {
 } from '../src/utils/location';
 import { PRESENCE_COPY, VENUES, VENUE_ORDER } from '../src/venues';
 import { quoteOf } from '../src/utils/id';
+import {
+  decodeFrame,
+  encodeFrame,
+  isRepairFrame,
+  missingIndices,
+  repairFrame,
+  MAX_REPAIR_REQUEST,
+} from '../src/mesh/protocol';
 import type { UserLocation } from '../src/types';
 
 const CASES: UserLocation[] = [
@@ -132,5 +140,35 @@ describe('the four-across venue chips', () => {
     for (const kind of VENUE_ORDER) {
       expect(VENUES[kind].shortName.length).toBeLessThanOrEqual(9);
     }
+  });
+});
+
+describe('repairing a send instead of repeating it', () => {
+  it('names exactly the chunks that never arrived', () => {
+    const parts = new Map<number, string>([
+      [0, 'a'],
+      [1, 'b'],
+      [3, 'd'],
+    ]);
+    expect(missingIndices(parts, 5)).toEqual([2, 4]);
+    expect(missingIndices(new Map([[0, 'a']]), 1)).toEqual([]);
+  });
+
+  it('keeps a request small enough to be worth sending', () => {
+    // A photo can be missing a hundred chunks after a bad patch. Asking for
+    // all of them in one packet would itself need splitting, which is the
+    // problem this is meant to solve.
+    const many = Array.from({ length: 200 }, (_, i) => i);
+    expect(repairFrame('abc', many).need).toHaveLength(MAX_REPAIR_REQUEST);
+  });
+
+  it('survives the trip as a frame like any other', () => {
+    const frame = repairFrame('abc12345', [7, 9]);
+    const decoded = decodeFrame(encodeFrame(frame));
+    expect(decoded).not.toBeNull();
+    expect(isRepairFrame(decoded!)).toBe(true);
+    expect(decoded!.need).toEqual([7, 9]);
+    // And an ordinary chunk is never mistaken for a request.
+    expect(isRepairFrame({ id: 'x', index: 0, total: 2, part: 'hola' })).toBe(false);
   });
 });

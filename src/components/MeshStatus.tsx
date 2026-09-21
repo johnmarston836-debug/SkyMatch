@@ -90,7 +90,7 @@ export function MeshStatus() {
 
       <View style={styles.row}>
         <Text style={styles.key}>Móviles detectados</Text>
-        <Text style={styles.value}>{status.scanHits}</Text>
+        <Text style={styles.value}>{status.nearby}</Text>
       </View>
 
       <View style={styles.row}>

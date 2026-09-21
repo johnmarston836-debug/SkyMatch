@@ -10,8 +10,12 @@ import {
   frameChunks,
   encodeFrame,
   decodeFrame,
+  isRepairFrame,
+  missingIndices,
   reassembleFrames,
+  repairFrame,
   newFrameId,
+  type Frame,
   SERVICE_UUID,
   PROFILE_CHAR_UUID,
 } from './protocol';
@@ -31,6 +35,19 @@ const ADVERTISE_TX_POWER_MEDIUM = 2;
  * comes under a new frame id.
  */
 const INCOMPLETE_FRAME_TTL_MS = 60_000;
+
+/** A send is assumed stalled, rather than merely slow, after this long without a chunk. */
+const STALLED_MS = 2_500;
+
+/** How long the chunks of an outgoing send are kept around in case they have to be repeated. */
+const SENT_FRAME_TTL_MS = 60_000;
+
+/**
+ * How many times one send is chased before giving up. The photo layer asks
+ * again on its own timer anyway, so this only has to cover a bad patch, not
+ * a peer who left.
+ */
+const MAX_REPAIR_ROUNDS = 6;
 
 /**
  * Prefix that marks one of our advertisements in an iOS local name, followed
@@ -89,9 +106,19 @@ export class RealBleTransport implements BleTransport {
   private peerLostListeners = new Set<(peerId: string) => void>();
   private envelopeListeners = new Set<(raw: string, fromPeerId: string) => void>();
   private staleCheckTimer: ReturnType<typeof setInterval> | null = null;
+  private repairTimer: ReturnType<typeof setInterval> | null = null;
   private lastSeenAt = new Map<string, number>();
   /** frameId -> the chunks of that send so far, across all devices - frame ids are globally unique so one map is enough. */
-  private pendingFrames = new Map<string, { parts: Map<number, string>; touchedAt: number }>();
+  private pendingFrames = new Map<
+    string,
+    { parts: Map<number, string>; touchedAt: number; total: number; from: string; rounds: number }
+  >();
+  /**
+   * The chunks we sent, kept so a receiver can ask for the ones that never
+   * arrived. A photo is a few dozen kilobytes and they are dropped after a
+   * minute; sending it all again from scratch costs far more.
+   */
+  private sentFrames = new Map<string, { frames: Frame[]; sentAt: number }>();
   /** profile id -> the Bluetooth device id we reach that person through. */
   private identities = new Map<string, string>();
 
@@ -102,6 +129,7 @@ export class RealBleTransport implements BleTransport {
       this.pruneStalePeers();
       this.prunePendingFrames();
     }, 5000);
+    this.repairTimer = setInterval(() => this.requestRepairs(), 1500);
     void myPeerId; // full peer id is exchanged over GATT once connected; it doesn't fit in an advert
   }
 
@@ -126,9 +154,11 @@ export class RealBleTransport implements BleTransport {
       await Peripheral.stop();
     }
     if (this.staleCheckTimer) clearInterval(this.staleCheckTimer);
+    if (this.repairTimer) clearInterval(this.repairTimer);
     this.connectedDevices.clear();
     this.identities.clear();
     this.pendingFrames.clear();
+    this.sentFrames.clear();
   }
 
   onPeerSeen(listener: (peerId: string, rssi: number, location: UserLocation | null) => void) {
@@ -167,13 +197,12 @@ export class RealBleTransport implements BleTransport {
     const device = this.connectedDevices.get(deviceId);
     if (!device) return false;
 
+    const frames = frameChunks(raw, newFrameId());
+    this.rememberSent(frames);
+
     try {
-      for (const frame of frameChunks(raw, newFrameId())) {
-        await device.writeCharacteristicWithResponseForService(
-          SERVICE_UUID,
-          PROFILE_CHAR_UUID,
-          Buffer.from(encodeFrame(frame), 'utf8').toString('base64'),
-        );
+      for (const frame of frames) {
+        await this.writeFrame(device, frame);
       }
       return true;
     } catch {
@@ -222,7 +251,12 @@ export class RealBleTransport implements BleTransport {
     // round: they never appear in connectedDevices, so without this they'd
     // only ever hear from us when they happen to write first.
     if (Peripheral.isSupported) {
-      for (const frame of frameChunks(raw, newFrameId())) {
+      const frames = frameChunks(raw, newFrameId());
+      // Remembered like the written ones: a phone that connected to us can
+      // only be answered by notifying, and it needs to be able to ask for
+      // the chunks it missed too.
+      this.rememberSent(frames);
+      for (const frame of frames) {
         await Peripheral.notify(Buffer.from(encodeFrame(frame), 'utf8').toString('base64'));
       }
     }
@@ -279,7 +313,7 @@ export class RealBleTransport implements BleTransport {
     const location = locationFromLocalName(device.localName);
 
     this.lastSeenAt.set(device.id, Date.now());
-    useMeshStatusStore.getState().noteScanHit(device.id);
+    useMeshStatusStore.getState().setNearby(this.lastSeenAt.size);
     this.peerSeenListeners.forEach((listener) => listener(device.id, device.rssi ?? -100, location));
 
     // Scanning with allowDuplicates fires many times a second, and a device
@@ -328,15 +362,95 @@ export class RealBleTransport implements BleTransport {
     const frame = decodeFrame(rawFrame);
     if (!frame) return;
 
-    const pending = this.pendingFrames.get(frame.id) ?? { parts: new Map<number, string>(), touchedAt: 0 };
+    // Someone is asking us to repeat chunks of a send of ours.
+    if (isRepairFrame(frame)) {
+      void this.resend(frame.id, frame.need ?? [], fromPeerId);
+      return;
+    }
+
+    const pending = this.pendingFrames.get(frame.id) ?? {
+      parts: new Map<number, string>(),
+      touchedAt: 0,
+      total: frame.total,
+      from: fromPeerId,
+      rounds: 0,
+    };
     pending.parts.set(frame.index, frame.part);
     pending.touchedAt = Date.now();
+    pending.total = frame.total;
+    pending.from = fromPeerId;
     this.pendingFrames.set(frame.id, pending);
 
     const raw = reassembleFrames(pending.parts, frame.total);
     if (raw === null) return; // still waiting on more chunks of this frame
     this.pendingFrames.delete(frame.id);
     this.envelopeListeners.forEach((listener) => listener(raw, fromPeerId));
+  }
+
+  /** Keeps an outgoing send around in case the other end asks for parts of it again. */
+  private rememberSent(frames: Frame[]) {
+    if (frames.length < 2) return; // a single-chunk send is cheaper to repeat whole
+    this.sentFrames.set(frames[0].id, { frames, sentAt: Date.now() });
+  }
+
+  private async writeFrame(device: Device, frame: Frame) {
+    await device.writeCharacteristicWithResponseForService(
+      SERVICE_UUID,
+      PROFILE_CHAR_UUID,
+      Buffer.from(encodeFrame(frame), 'utf8').toString('base64'),
+    );
+  }
+
+  /**
+   * Puts one frame on the wire towards a device: over the connection we
+   * opened to it when there is one, and otherwise as a notification, which
+   * is the only way back to a phone that connected to us.
+   */
+  private async pushFrame(frame: Frame, deviceId: string) {
+    const device = this.connectedDevices.get(deviceId);
+    if (device) {
+      try {
+        await this.writeFrame(device, frame);
+        return;
+      } catch {
+        this.dropDevice(deviceId);
+      }
+    }
+    if (Peripheral.isSupported) {
+      await Peripheral.notify(Buffer.from(encodeFrame(frame), 'utf8').toString('base64'));
+    }
+  }
+
+  /** Answers a repair request with just the chunks that were named. */
+  private async resend(frameId: string, need: number[], toDeviceId: string) {
+    const sent = this.sentFrames.get(frameId);
+    if (!sent) return; // too old, or never ours: the sender's own retry covers it
+
+    for (const index of need) {
+      const frame = sent.frames[index];
+      if (frame) await this.pushFrame(frame, toDeviceId);
+    }
+  }
+
+  /**
+   * Asks for the chunks of a stalled send instead of waiting for the whole
+   * thing to be sent again. A photo is hundreds of chunks and losing one
+   * used to cost all of them.
+   */
+  private requestRepairs() {
+    const now = Date.now();
+    this.pendingFrames.forEach((pending, frameId) => {
+      if (now - pending.touchedAt < STALLED_MS) return; // still arriving
+      if (pending.rounds >= MAX_REPAIR_ROUNDS) return;
+      const need = missingIndices(pending.parts, pending.total);
+      if (need.length === 0) return;
+
+      pending.rounds += 1;
+      // Counts as activity, so the next round waits its turn rather than
+      // firing again on the very next tick.
+      pending.touchedAt = now;
+      void this.pushFrame(repairFrame(frameId, need), pending.from);
+    });
   }
 
   /**
@@ -350,6 +464,9 @@ export class RealBleTransport implements BleTransport {
     this.pendingFrames.forEach((pending, frameId) => {
       if (now - pending.touchedAt > INCOMPLETE_FRAME_TTL_MS) this.pendingFrames.delete(frameId);
     });
+    this.sentFrames.forEach((sent, frameId) => {
+      if (now - sent.sentAt > SENT_FRAME_TTL_MS) this.sentFrames.delete(frameId);
+    });
   }
 
   private pruneStalePeers() {
@@ -360,5 +477,6 @@ export class RealBleTransport implements BleTransport {
         this.peerLostListeners.forEach((listener) => listener(peerId));
       }
     });
+    useMeshStatusStore.getState().setNearby(this.lastSeenAt.size);
   }
 }

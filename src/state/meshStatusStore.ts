@@ -17,8 +17,15 @@ interface MeshStatus {
   /** react-native-ble-plx's state for the scanning side. */
   centralState: string | null;
   advertising: boolean;
-  /** Distinct devices the scanner has ever seen advertising our service. */
-  scanHits: number;
+/**
+   * Phones advertising our service that the scanner can hear *right now*.
+   *
+   * It used to be every distinct device ever seen, which only ever went up:
+   * someone who walked off kept counting, and iOS hands the same phone a new
+   * identifier when its app restarts, so it counted twice. A radio panel
+   * that says three when there is one is worse than no panel.
+   */
+  nearby: number;
   /** Peers we currently hold a GATT connection to. */
   connected: number;
   /** Centrals listening to us: our only outbound path towards phones that connected to us. */
@@ -28,20 +35,18 @@ interface MeshStatus {
   setPeripheralState: (state: number) => void;
   setCentralState: (state: string) => void;
   setAdvertising: (advertising: boolean) => void;
-  noteScanHit: (deviceId: string) => void;
+  setNearby: (count: number) => void;
   setConnected: (count: number) => void;
   setSubscribers: (count: number) => void;
   reset: () => void;
 }
-
-const seenDevices = new Set<string>();
 
 export const useMeshStatusStore = create<MeshStatus>((set) => ({
   peripheralSupported: false,
   peripheralState: null,
   centralState: null,
   advertising: false,
-  scanHits: 0,
+  nearby: 0,
   connected: 0,
   subscribers: 0,
 
@@ -49,15 +54,9 @@ export const useMeshStatusStore = create<MeshStatus>((set) => ({
   setPeripheralState: (state) => set({ peripheralState: state }),
   setCentralState: (state) => set({ centralState: state }),
   setAdvertising: (advertising) => set({ advertising }),
-  noteScanHit: (deviceId) => {
-    if (seenDevices.has(deviceId)) return;
-    seenDevices.add(deviceId);
-    set({ scanHits: seenDevices.size });
-  },
+  setNearby: (count) => set({ nearby: count }),
   setConnected: (count) => set({ connected: count }),
   setSubscribers: (count) => set({ subscribers: count }),
-  reset: () => {
-    seenDevices.clear();
-    set({ peripheralState: null, centralState: null, advertising: false, scanHits: 0, connected: 0, subscribers: 0 });
-  },
+  reset: () =>
+    set({ peripheralState: null, centralState: null, advertising: false, nearby: 0, connected: 0, subscribers: 0 }),
 }));

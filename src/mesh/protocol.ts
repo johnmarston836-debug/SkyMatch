@@ -95,6 +95,36 @@ export interface Frame {
   index: number;
   total: number;
   part: string;
+  /**
+   * Only on a repair request: the chunk numbers the receiver never got.
+   *
+   * Without this a photo is all or nothing. It is hundreds of chunks, and
+   * losing any single one used to mean the receiver waited forever while the
+   * sender started the whole thing again from scratch. Naming the gaps turns
+   * that into a couple of chunks.
+   */
+  need?: number[];
+}
+
+/** How many gaps one request names. A long list defeats the point of a small packet. */
+export const MAX_REPAIR_REQUEST = 24;
+
+/** A frame that carries no data and asks for the chunks that never arrived. */
+export function repairFrame(id: string, need: number[]): Frame {
+  return { id, index: -1, total: 0, part: '', need: need.slice(0, MAX_REPAIR_REQUEST) };
+}
+
+export function isRepairFrame(frame: Frame): boolean {
+  return Array.isArray(frame.need);
+}
+
+/** Which chunks of a send are still missing, in order. */
+export function missingIndices(parts: Map<number, string>, total: number): number[] {
+  const missing: number[] = [];
+  for (let i = 0; i < total; i++) {
+    if (!parts.has(i)) missing.push(i);
+  }
+  return missing;
 }
 
 export function frameChunks(raw: string, frameId: string): Frame[] {
@@ -117,6 +147,7 @@ export function decodeFrame(raw: string): Frame | null {
     if (typeof parsed.id !== 'string' || typeof parsed.index !== 'number' || typeof parsed.total !== 'number') {
       return null;
     }
+    if (parsed.need !== undefined && !Array.isArray(parsed.need)) return null;
     return parsed as Frame;
   } catch {
     return null;
