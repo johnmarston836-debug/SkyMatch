@@ -1,5 +1,6 @@
-#import "SkyMatchGlassButton.h"
+// Declared here rather than in a header: see the note in SkyMatchGlassView.mm.
 
+#import <React/RCTViewComponentView.h>
 #import <react/renderer/components/SkyMatchGlassSpec/ComponentDescriptors.h>
 #import <react/renderer/components/SkyMatchGlassSpec/EventEmitters.h>
 #import <react/renderer/components/SkyMatchGlassSpec/Props.h>
@@ -18,7 +19,16 @@
 
 using namespace facebook::react;
 
-@interface SkyMatchGlassButton () <RCTSkyMatchGlassButtonViewProtocol>
+/**
+ * A system glass button - `.buttonStyle(.glass)` / `.glassProminent` - drawn
+ * by SwiftUI and laid out by React Native.
+ *
+ * Its label is a prop rather than React children: SwiftUI draws the label
+ * itself, and that is the part of the control Apple tunes. The size it wants
+ * comes back to JavaScript through `onGlassSize`, because Yoga cannot
+ * measure SwiftUI text.
+ */
+@interface SkyMatchGlassButton : RCTViewComponentView <RCTSkyMatchGlassButtonViewProtocol>
 @end
 
 @implementation SkyMatchGlassButton {

@@ -1,5 +1,13 @@
-#import "SkyMatchGlassView.h"
+// No header for this class on purpose.
+//
+// Declaring a module (which a pod with Swift in it must) makes CocoaPods
+// build an umbrella header out of every public header. These import React's
+// Fabric headers, which are C++, and the umbrella is compiled as plain
+// Objective-C - so the module build dies on `'atomic' file not found`.
+// Nothing outside this file needs the class: React Native's generated
+// provider only looks for the `Cls()` function below.
 
+#import <React/RCTViewComponentView.h>
 #import <react/renderer/components/SkyMatchGlassSpec/ComponentDescriptors.h>
 #import <react/renderer/components/SkyMatchGlassSpec/Props.h>
 #import <react/renderer/components/SkyMatchGlassSpec/RCTComponentViewHelpers.h>
@@ -17,7 +25,13 @@
 
 using namespace facebook::react;
 
-@interface SkyMatchGlassView () <RCTSkyMatchGlassViewViewProtocol>
+/**
+ * A pane of SwiftUI's `glassEffect(_:in:)`, to sit behind React Native
+ * content. It hosts no React children: a leaf view has none of the mounting
+ * rules a container has, and the caller puts it behind whatever it likes
+ * with an absolute fill.
+ */
+@interface SkyMatchGlassView : RCTViewComponentView <RCTSkyMatchGlassViewViewProtocol>
 @end
 
 @implementation SkyMatchGlassView {

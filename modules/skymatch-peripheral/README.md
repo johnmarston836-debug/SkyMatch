@@ -19,6 +19,16 @@ cd ios && bundle exec pod install
 New files here are only picked up by that, and `SkyMatchGlassView` also needs
 it to run React Native's code generator over `js/`.
 
+## Why the glass classes have no header
+
+A pod with Swift in it has to define a module, and CocoaPods builds that
+module's umbrella header out of every public header. A Fabric component's
+header imports React's renderer headers, which are C++, and the umbrella is
+compiled as plain Objective-C - so the module build dies on `'atomic' file
+not found`. Both classes are therefore declared inside their `.mm`. Nothing
+outside needs them: the generated provider only looks up the `Cls()`
+function.
+
 ## Why the button measures itself
 
 React Native lays out with Yoga, in JavaScript, and JavaScript cannot know
