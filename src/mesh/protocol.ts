@@ -29,6 +29,19 @@ export const MANUFACTURER_ID = 0xffff; // placeholder; replace with a registered
 export const BROADCAST_ID = '*';
 
 export const DEFAULT_TTL = 6; // max hops a packet will travel before being dropped
+
+/**
+ * The most packets one phone may put into the mesh in a window before the
+ * rest are ignored.
+ *
+ * Everything received is relayed onward, so one phone - buggy or malicious -
+ * can drown the Bluetooth of a whole room for everyone in it. The allowance
+ * is far above normal use: a photo is one packet however many chunks it
+ * takes, a profile beat is one every ten seconds, and nobody types thirty
+ * messages in ten seconds.
+ */
+export const FLOOD_LIMIT = 30;
+export const FLOOD_WINDOW_MS = 10_000;
 export const SEEN_CACHE_SIZE = 512; // recently-relayed message ids kept to stop flood loops
 export const PEER_STALE_MS = 15_000; // an advert not refreshed within this window is considered out of range
 

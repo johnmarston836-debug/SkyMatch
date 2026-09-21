@@ -6,6 +6,7 @@ import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
 import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
+import { useBlockStore } from '../../state/blockStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
 import { colorForPeer } from '../../theme';
 import { describeLocation, formatLocation } from '../../utils/location';
@@ -23,6 +24,8 @@ export function ProfileScreen({ route, navigation }: Props) {
   // The invitation to start talking only makes sense before there is
   // anything to go back to; afterwards the conversation itself is the link.
   const hasConversation = useChatStore((state) => (state.privateMessagesByPeer[peerId]?.length ?? 0) > 0);
+  const muted = useBlockStore((state) => state.muted[peerId] === true);
+  const toggleMuted = useBlockStore((state) => state.toggle);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing(3) },
     backLink: { color: colors.text, fontWeight: '600' as const, marginBottom: spacing(3) },
@@ -53,6 +56,9 @@ export function ProfileScreen({ route, navigation }: Props) {
     ctaText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700' as const },
     openChat: { marginTop: 'auto' as const, paddingVertical: spacing(2), alignItems: 'center' as const },
     openChatText: { ...typography.body, fontWeight: '700' as const },
+    mute: { paddingVertical: spacing(2), alignItems: 'center' as const },
+    muteText: { color: colors.danger, fontWeight: '600' as const, fontSize: 14 },
+    muteUndo: { ...typography.subtitle, fontSize: 14, fontWeight: '600' as const },
   }));
 
   return (
@@ -93,6 +99,12 @@ export function ProfileScreen({ route, navigation }: Props) {
               <Text style={styles.ctaText}>Enviar mensaje privado</Text>
             </Pressable>
           )}
+
+          <Pressable style={styles.mute} onPress={() => void toggleMuted(peerId)}>
+            <Text style={muted ? styles.muteUndo : styles.muteText}>
+              {muted ? 'Dejar de silenciar' : 'Silenciar a esta persona'}
+            </Text>
+          </Pressable>
         </>
       )}
     </View>

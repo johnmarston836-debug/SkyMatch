@@ -1,6 +1,7 @@
 import { MeshService } from '../src/mesh/MeshService';
 import type { BleTransport } from '../src/mesh/BleTransport';
 import { shortHash } from '../src/utils/hash';
+import { FLOOD_LIMIT, FLOOD_WINDOW_MS } from '../src/mesh/protocol';
 import type { AvatarPacket, UserLocation } from '../src/types';
 
 /**
@@ -103,5 +104,33 @@ describe('avatar exchange', () => {
     // ask again - which is the whole point of asking rather than pushing.
     await b.requestAvatar('peer-a');
     expect(received).toHaveLength(1);
+  });
+});
+
+describe('a phone that floods the mesh', () => {
+  it('is ignored past its allowance, and heard again in the next window', async () => {
+    const { a, b } = linked();
+    const heard: string[] = [];
+    b.on('message', (message) => heard.push(message.id));
+
+    const send = (n: number) =>
+      a.sendGroupMessage({
+        id: `m${n}`,
+        scope: 'group',
+        fromId: 'peer-a',
+        fromLabel: '14A',
+        fromNickname: 'Ana',
+        body: 'spam',
+        sentAt: n,
+      });
+
+    for (let i = 0; i < FLOOD_LIMIT + 10; i++) await send(i);
+    expect(heard).toHaveLength(FLOOD_LIMIT);
+
+    // The allowance is per window, not a ban: after it passes they are heard.
+    jest.spyOn(Date, 'now').mockReturnValue(Date.now() + FLOOD_WINDOW_MS + 1);
+    await send(999);
+    expect(heard).toHaveLength(FLOOD_LIMIT + 1);
+    jest.spyOn(Date, 'now').mockRestore();
   });
 });

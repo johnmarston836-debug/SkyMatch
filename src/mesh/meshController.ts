@@ -6,6 +6,7 @@ import { useChatStore } from '../state/chatStore';
 import { usePresenceStore } from '../state/presenceStore';
 import { useProfileStore } from '../state/profileStore';
 import { useAvatarStore } from '../state/avatarStore';
+import { useBlockStore } from '../state/blockStore';
 import { notifyPrivateMessage } from '../notifications/notifier';
 import { requestBlePermissions } from '../utils/permissions';
 import { newId } from '../utils/id';
@@ -109,6 +110,7 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   // is assigned per scanning phone, so the two never matched and profiles
   // landed under an id nothing else in the app ever looked up.
   service.on('profile', (_peerId, packet) => {
+    if (useBlockStore.getState().isMuted(packet.id)) return;
     // Everything past this line is untyped input from another phone, which
     // may be running an older build (a profile was a bare seat then) or a
     // newer one. A profile we can't read is dropped rather than stored:
@@ -152,10 +154,12 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   });
 
   service.on('avatar', (avatar) => {
+    if (useBlockStore.getState().isMuted(avatar.fromId)) return;
     useAvatarStore.getState().setPeerAvatar(avatar.fromId, avatar.imageBase64);
   });
 
   service.on('message', (packet) => {
+    if (useBlockStore.getState().isMuted(packet.fromId)) return;
     // Same boundary as the profile above: an older peer labels its messages
     // with the seat they were sent from rather than a label ready to draw,
     // which would otherwise show as an empty badge.
@@ -174,10 +178,12 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   });
 
   service.on('presence', (alert) => {
+    if (useBlockStore.getState().isMuted(alert.fromId)) return;
     usePresenceStore.getState().applyAlert({ ...alert, label: labelOf(alert) });
   });
 
   service.on('reaction', (reaction) => {
+    if (useBlockStore.getState().isMuted(reaction.fromId)) return;
     usePresenceStore.getState().applyReaction({ ...reaction, fromLabel: labelOf(reaction) });
   });
 

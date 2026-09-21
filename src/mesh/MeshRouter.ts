@@ -1,5 +1,14 @@
 import type { BleTransport } from './BleTransport';
-import { decodeEnvelope, encodeEnvelope, BROADCAST_ID, DEFAULT_TTL, SEEN_CACHE_SIZE, type MeshEnvelope } from './protocol';
+import {
+  decodeEnvelope,
+  encodeEnvelope,
+  BROADCAST_ID,
+  DEFAULT_TTL,
+  FLOOD_LIMIT,
+  FLOOD_WINDOW_MS,
+  SEEN_CACHE_SIZE,
+  type MeshEnvelope,
+} from './protocol';
 
 /**
  * Flood routing with a bounded "seen" cache: every node that relays a
@@ -11,6 +20,8 @@ import { decodeEnvelope, encodeEnvelope, BROADCAST_ID, DEFAULT_TTL, SEEN_CACHE_S
 export class MeshRouter {
   private seen: string[] = [];
   private seenSet = new Set<string>();
+  /** When each sender's current allowance started, and how much of it is spent. */
+  private rates = new Map<string, { since: number; count: number }>();
   private deliverListeners = new Set<(envelope: MeshEnvelope) => void>();
 
   constructor(
@@ -48,6 +59,7 @@ export class MeshRouter {
   private handleIncoming(raw: string, fromPeerId: string) {
     const envelope = decodeEnvelope(raw);
     if (!envelope) return;
+    if (this.floods(envelope.fromId)) return;
 
     // A packet still carrying its full TTL has not been relayed by anyone,
     // so its sender is the neighbour that just handed it to us: the one
@@ -78,6 +90,26 @@ export class MeshRouter {
     void this.transport.sendToPeer(relayed.toId, encodeEnvelope(relayed)).then((delivered) => {
       if (!delivered) void this.transport.broadcast(encodeEnvelope(relayed), fromPeerId);
     });
+  }
+
+  /**
+   * True once a sender is past its allowance for the current window.
+   *
+   * Dropped here, before delivering *and* before relaying: a phone that
+   * floods is not just noise on this screen, it is noise this phone would
+   * otherwise repeat to everyone else in the room.
+   */
+  private floods(fromId: string): boolean {
+    const now = Date.now();
+    const rate = this.rates.get(fromId);
+
+    if (!rate || now - rate.since > FLOOD_WINDOW_MS) {
+      this.rates.set(fromId, { since: now, count: 1 });
+      return false;
+    }
+
+    rate.count += 1;
+    return rate.count > FLOOD_LIMIT;
   }
 
   private markSeen(id: string) {

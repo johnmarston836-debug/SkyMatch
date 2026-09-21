@@ -17,8 +17,10 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
 import { VenueLocationChooser } from '../../components/VenueLocationChooser';
+import { useDiscoveryStore } from '../../state/discoveryStore';
 import { useProfileStore } from '../../state/profileStore';
 import { useAvatarStore } from '../../state/avatarStore';
+import { useBlockStore } from '../../state/blockStore';
 import { announceAvatarChange, announceProfileUpdate } from '../../mesh/meshController';
 import {
   ensureNotificationPermission,
@@ -41,6 +43,7 @@ export function MyProfileScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
   const profile = useProfileStore((state) => state.profile);
+  const peers = useDiscoveryStore((state) => state.peers);
   const save = useProfileStore((state) => state.save);
   const myAvatar = useAvatarStore((state) => state.myAvatar);
   const setMyAvatar = useAvatarStore((state) => state.setMyAvatar);
@@ -48,6 +51,9 @@ export function MyProfileScreen({ navigation }: Props) {
   const [contact, setContact] = useState(profile?.contact ?? '');
   const [location, setLocation] = useState<UserLocation>(profile?.location ?? defaultLocation('plane'));
   const [notifications, setNotifications] = useState<NotificationPermission>('undetermined');
+  const muted = useBlockStore((state) => state.muted);
+  const toggleMuted = useBlockStore((state) => state.toggle);
+  const mutedIds = Object.keys(muted);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
     scroll: { paddingHorizontal: spacing(3) },
@@ -92,6 +98,14 @@ export function MyProfileScreen({ navigation }: Props) {
     cardTitle: { ...typography.body, fontWeight: '700' as const },
     cardBody: { ...typography.subtitle, fontSize: 13 },
     cardAction: { color: colors.accent, fontWeight: '700' as const, marginTop: spacing(1) },
+    mutedRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'space-between' as const,
+      paddingVertical: spacing(1),
+    },
+    mutedName: { ...typography.body },
+    mutedUndo: { color: colors.accent, fontWeight: '700' as const, fontSize: 14 },
     secondaryLink: {
       marginTop: spacing(3),
       paddingVertical: spacing(1.5),
@@ -220,6 +234,26 @@ export function MyProfileScreen({ navigation }: Props) {
         <Text style={styles.hint}>
           Solo lo verá quien abra tu ficha o un chat privado contigo. Déjalo en blanco para no compartirlo.
         </Text>
+
+        {mutedIds.length > 0 && (
+          <View style={styles.card}>
+            <Text style={styles.cardTitle}>Silenciados</Text>
+            <Text style={styles.cardBody}>
+              No ves sus mensajes. Tu móvil sigue pasando los suyos a los demás, porque es parte de cómo llegan
+              los mensajes de todos.
+            </Text>
+            {mutedIds.map((peerId) => (
+              <View key={peerId} style={styles.mutedRow}>
+                <Text style={styles.mutedName} numberOfLines={1}>
+                  {peers[peerId]?.profile?.nickname ?? 'Alguien que ya no está cerca'}
+                </Text>
+                <Pressable onPress={() => void toggleMuted(peerId)} hitSlop={8}>
+                  <Text style={styles.mutedUndo}>Quitar</Text>
+                </Pressable>
+              </View>
+            ))}
+          </View>
+        )}
 
         {notificationsSupported && (
           <View style={styles.card}>
