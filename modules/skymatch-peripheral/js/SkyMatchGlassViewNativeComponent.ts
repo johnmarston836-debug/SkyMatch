@@ -10,8 +10,6 @@ import type { Float, WithDefault } from 'react-native/Libraries/Types/CodegenTyp
  * likes with an absolute fill.
  */
 export interface NativeProps extends ViewProps {
-  /** `Glass.clear` instead of `Glass.regular`: lets far more through. */
-  clear?: WithDefault<boolean, false>;
   /** Rounded to match the shape it sits behind; capped natively at a pill. */
   cornerRadius?: WithDefault<Float, 0>;
 }

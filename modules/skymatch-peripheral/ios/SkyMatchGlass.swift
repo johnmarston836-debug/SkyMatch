@@ -17,17 +17,15 @@ import UIKit
 /// A pane of glass to sit behind arbitrary React Native content.
 private struct GlassSurface: View {
   let cornerRadius: CGFloat
-  let clear: Bool
 
   var body: some View {
     #if compiler(>=6.2)
       if #available(iOS 26.0, *) {
-        // `.clear` lets far more through than `.regular`; both refract what
-        // is behind them, which is the whole point of the material.
-        Color.clear.glassEffect(
-          clear ? Glass.clear : Glass.regular,
-          in: .rect(cornerRadius: cornerRadius)
-        )
+        // `.regular` is the default variant and the one the whole app uses.
+        // The `.clear` variant is deliberately not offered: nothing here
+        // needs it, and an API symbol nobody calls is a build that can break
+        // for no gain.
+        Color.clear.glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
       } else {
         fallback
       }
@@ -48,7 +46,6 @@ private struct GlassSurface: View {
 @objc(SkyMatchGlassSurfaceHost)
 public final class SkyMatchGlassSurfaceHost: UIView {
   @objc public var cornerRadius: CGFloat = 0 { didSet { refresh() } }
-  @objc public var clear: Bool = false { didSet { refresh() } }
 
   private var host: UIHostingController<AnyView>?
 
@@ -60,11 +57,10 @@ public final class SkyMatchGlassSurfaceHost: UIView {
     refresh()
   }
 
-  @available(*, unavailable)
-  required init?(coder: NSCoder) { fatalError("not used") }
+  required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
 
   private func refresh() {
-    let root = AnyView(GlassSurface(cornerRadius: cornerRadius, clear: clear))
+    let root = AnyView(GlassSurface(cornerRadius: cornerRadius))
 
     if let host {
       host.rootView = root
@@ -128,7 +124,7 @@ private struct GlassButton: View {
           .font(.system(size: 11, weight: .heavy))
           .padding(.horizontal, 5)
           .padding(.vertical, 1)
-          .background(Capsule().fill(.background))
+          .background(Capsule().fill(Color(uiColor: .systemBackground)))
           .foregroundStyle(tint ?? .accentColor)
       }
     }
@@ -164,8 +160,7 @@ public final class SkyMatchGlassButtonHost: UIView {
     refresh()
   }
 
-  @available(*, unavailable)
-  required init?(coder: NSCoder) { fatalError("not used") }
+  required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
 
   private func refresh() {
     let root = AnyView(
@@ -200,7 +195,15 @@ public final class SkyMatchGlassButtonHost: UIView {
 
   private func report() {
     guard let host else { return }
-    let fitted = host.sizeThatFits(in: UIView.layoutFittingCompressedSize)
+
+    // `sizeThatFits(in:)` on a hosting controller arrived in iOS 16 and this
+    // app deploys to 15.1, so the older route has to exist too.
+    let fitted: CGSize
+    if #available(iOS 16.0, *) {
+      fitted = host.sizeThatFits(in: UIView.layoutFittingCompressedSize)
+    } else {
+      fitted = host.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
+    }
     guard fitted.width > 0, fitted.height > 0 else { return }
     // Only when it actually changed: this runs from layout, and feeding the
     // same size back into layout on every pass is a loop.

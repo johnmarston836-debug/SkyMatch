@@ -14,7 +14,7 @@ export interface NativeProps extends ViewProps {
   prominent?: WithDefault<boolean, false>;
   enabled?: WithDefault<boolean, true>;
   tint?: ColorValue;
-  onPress?: DirectEventHandler<Readonly<{}>>;
+  onPress?: DirectEventHandler<null>;
   /** The size SwiftUI wants; Yoga cannot measure SwiftUI text. */
   onSizeChange?: DirectEventHandler<Readonly<{ width: Double; height: Double }>>;
 }

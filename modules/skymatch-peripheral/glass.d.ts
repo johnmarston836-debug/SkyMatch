@@ -7,7 +7,6 @@ import type { ColorValue, HostComponent, NativeSyntheticEvent, ViewProps } from 
  * along with them.
  */
 export interface GlassProps extends ViewProps {
-  clear?: boolean;
   cornerRadius?: number;
 }
 
@@ -17,7 +16,7 @@ export interface GlassButtonProps extends ViewProps {
   prominent?: boolean;
   enabled?: boolean;
   tint?: ColorValue;
-  onPress?: (event: NativeSyntheticEvent<Readonly<{}>>) => void;
+  onPress?: (event: NativeSyntheticEvent<null>) => void;
   onSizeChange?: (event: NativeSyntheticEvent<Readonly<{ width: number; height: number }>>) => void;
 }
 

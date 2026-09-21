@@ -7,7 +7,14 @@
 
 #import <React/RCTConversions.h>
 
+// Where this header lands depends on whether the pods are built as static
+// libraries (the default) or as frameworks (USE_FRAMEWORKS in the Podfile),
+// and the app can be built either way.
+#if __has_include(<skymatch_peripheral/skymatch_peripheral-Swift.h>)
 #import <skymatch_peripheral/skymatch_peripheral-Swift.h>
+#else
+#import "skymatch_peripheral-Swift.h"
+#endif
 
 using namespace facebook::react;
 
