@@ -4,8 +4,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
-import { BackLink } from '../../components/BackLink';
-import { AppButton } from '../../components/AppButton';
 import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
@@ -27,7 +25,7 @@ export function ProfileScreen({ route, navigation }: Props) {
   const hasConversation = useChatStore((state) => (state.privateMessagesByPeer[peerId]?.length ?? 0) > 0);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing(3) },
-    backRow: { alignItems: 'flex-start' as const, marginBottom: spacing(3) },
+    backLink: { color: colors.text, fontWeight: '600' as const, marginBottom: spacing(3) },
     emptyState: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, gap: spacing(1) },
     emptyIcon: { width: 56, height: 56, tintColor: colors.textMuted },
     emptySubtitle: { ...typography.subtitle, textAlign: 'center' as const },
@@ -45,7 +43,13 @@ export function ProfileScreen({ route, navigation }: Props) {
     },
     contactValue: { ...typography.body, fontWeight: '700' as const, marginTop: spacing(1), fontSize: 17 },
     contactEmpty: { ...typography.subtitle, marginTop: spacing(1) },
-    cta: { marginTop: 'auto' as const },
+    cta: {
+      marginTop: 'auto' as const,
+      backgroundColor: colors.accent,
+      borderRadius: radii.pill,
+      paddingVertical: spacing(2),
+      alignItems: 'center' as const,
+    },
     ctaText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700' as const },
     openChat: { marginTop: 'auto' as const, paddingVertical: spacing(2), alignItems: 'center' as const },
     openChatText: { ...typography.body, fontWeight: '700' as const },
@@ -53,9 +57,9 @@ export function ProfileScreen({ route, navigation }: Props) {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + themeSpacing(2), paddingBottom: insets.bottom + themeSpacing(3) }]}>
-      <View style={styles.backRow}>
-        <BackLink onPress={() => navigation.goBack()} />
-      </View>
+      <Pressable onPress={() => navigation.goBack()}>
+        <Text style={styles.backLink}>← Volver</Text>
+      </Pressable>
 
       {!profile ? (
         <View style={styles.emptyState}>
@@ -85,14 +89,9 @@ export function ProfileScreen({ route, navigation }: Props) {
               <Text style={styles.openChatText}>Abrir conversación</Text>
             </Pressable>
           ) : (
-            <AppButton
-              variant="accent"
-              size="lg"
-              style={styles.cta}
-              onPress={() => navigation.navigate('Chat', { peerId })}
-            >
+            <Pressable style={styles.cta} onPress={() => navigation.navigate('Chat', { peerId })}>
               <Text style={styles.ctaText}>Enviar mensaje privado</Text>
-            </AppButton>
+            </Pressable>
           )}
         </>
       )}

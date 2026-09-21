@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, Text } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -8,7 +8,6 @@ import { useProfileStore } from '../../state/profileStore';
 import { announceProfileUpdate } from '../../mesh/meshController';
 import { VENUES } from '../../venues';
 import { defaultLocation } from '../../utils/location';
-import { AppButton } from '../../components/AppButton';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import type { UserLocation } from '../../types';
 
@@ -30,13 +29,19 @@ export function SessionStartScreen({ navigation }: Props) {
   const save = useProfileStore((state) => state.save);
   const [location, setLocation] = useState<UserLocation>(profile?.location ?? defaultLocation('plane'));
   const venue = VENUES[location.kind];
-  const styles = useThemedStyles(({ colors, spacing, typography }) => ({
+  const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
     content: { paddingHorizontal: spacing(3), flexGrow: 1 },
     greeting: typography.label,
     title: { ...typography.title, marginTop: spacing(1) },
     subtitle: { ...typography.subtitle, marginTop: spacing(1), lineHeight: 22 },
-    cta: { marginTop: spacing(3) },
+    cta: {
+      marginTop: spacing(3),
+      backgroundColor: colors.accent,
+      borderRadius: radii.pill,
+      paddingVertical: spacing(2),
+      alignItems: 'center' as const,
+    },
     ctaText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700' as const },
   }));
 
@@ -72,9 +77,9 @@ export function SessionStartScreen({ navigation }: Props) {
 
         <VenueLocationChooser location={location} onChange={setLocation} />
 
-        <AppButton variant="accent" size="lg" style={styles.cta} onPress={handleEnter}>
+        <Pressable style={styles.cta} onPress={handleEnter}>
           <Text style={styles.ctaText}>{venue.enterCta}</Text>
-        </AppButton>
+        </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -7,8 +7,6 @@ import { useKeyboardPadding } from '../../hooks/useKeyboardPadding';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { CabinSeats } from '../../components/CabinSeats';
-import { ComposerBar } from '../../components/ComposerBar';
-import { AppButton } from '../../components/AppButton';
 import { MeshStatus } from '../../components/MeshStatus';
 import { PresenceBanner } from '../../components/PresenceBanner';
 import { PrivateMessageToast } from '../../components/PrivateMessageToast';
@@ -45,10 +43,6 @@ export function CabinChatScreen({ navigation }: Props) {
   const venue = VENUES[myProfile?.location.kind ?? 'plane'];
   const [draft, setDraft] = useState('');
   const [replyTo, setReplyTo] = useState<ReplyQuote | null>(null);
-  // The composer floats over the conversation, so the list has to end above
-  // it rather than behind it - and the strip's height depends on the text
-  // size the reader chose, so it is measured rather than guessed.
-  const [composerHeight, setComposerHeight] = useState(64);
   const keyboardPadding = useKeyboardPadding(insets.bottom);
   const autoScroll = useChatAutoScroll<ChatMessage>();
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
@@ -67,7 +61,26 @@ export function CabinChatScreen({ navigation }: Props) {
     // and it is the piece that gives way when the text is scaled up, so the
     // buttons never get squeezed into a vertical strip of letters.
     title: { ...typography.title, fontSize: 22, flexShrink: 1 },
+    myProfileButton: {
+      backgroundColor: colors.surfaceAlt,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: radii.pill,
+      paddingHorizontal: spacing(2),
+      paddingVertical: spacing(1),
+      flexShrink: 0,
+    },
     myProfileButtonText: { color: colors.text, fontWeight: '700' as const, fontSize: 13 },
+    passengersButton: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      gap: spacing(0.75),
+      backgroundColor: colors.accent,
+      borderRadius: radii.pill,
+      paddingHorizontal: spacing(2),
+      paddingVertical: spacing(1),
+      flexShrink: 0,
+    },
     passengersButtonText: { color: '#FFFFFF', fontWeight: '700' as const, fontSize: 13 },
     unreadBadge: {
       minWidth: 18,
@@ -97,14 +110,26 @@ export function CabinChatScreen({ navigation }: Props) {
     senderNameMine: { fontSize: 12, fontWeight: '700' as const, color: colors.background },
     bodyText: { ...typography.body },
     bodyTextMine: { ...typography.body, color: colors.background },
-    composer: { position: 'absolute' as const, left: 0, right: 0, bottom: 0 },
     inputRow: {
       flexDirection: 'row' as const,
       alignItems: 'center' as const,
       gap: spacing(1),
       paddingHorizontal: spacing(2),
       paddingVertical: spacing(1),
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
     },
+    standButton: {
+      width: 44,
+      height: 44,
+      borderRadius: radii.pill,
+      backgroundColor: colors.surfaceAlt,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    standButtonActive: { backgroundColor: colors.accentAlt, borderColor: colors.accentAlt },
     standButtonIcon: { width: 22, height: 22, tintColor: colors.textMuted },
     standButtonIconActive: { tintColor: '#FFFFFF' },
     input: {
@@ -117,6 +142,7 @@ export function CabinChatScreen({ navigation }: Props) {
       paddingVertical: spacing(1.2),
       color: colors.text,
     },
+    sendButton: { backgroundColor: colors.accent, borderRadius: radii.pill, paddingHorizontal: spacing(2), paddingVertical: spacing(1.2) },
     sendButtonText: { color: '#FFFFFF', fontWeight: '700' as const },
   }));
 
@@ -172,17 +198,17 @@ export function CabinChatScreen({ navigation }: Props) {
     >
       <View style={styles.header}>
         <View style={styles.headerSide}>
-          <AppButton onPress={() => navigation.navigate('MyProfile')}>
+          <Pressable style={styles.myProfileButton} onPress={() => navigation.navigate('MyProfile')}>
             <Text style={styles.myProfileButtonText} numberOfLines={1}>
               Mi perfil
             </Text>
-          </AppButton>
+          </Pressable>
         </View>
         <Text style={styles.title} numberOfLines={1}>
           {venue.spaceTitle}
         </Text>
         <View style={[styles.headerSide, styles.headerSideRight]}>
-          <AppButton variant="accent" onPress={() => navigation.navigate('Passengers')}>
+          <Pressable style={styles.passengersButton} onPress={() => navigation.navigate('Passengers')}>
             <Text style={styles.passengersButtonText} numberOfLines={1}>
               {venue.peopleLabel}
             </Text>
@@ -191,7 +217,7 @@ export function CabinChatScreen({ navigation }: Props) {
                 <Text style={styles.unreadBadgeText}>{unreadTotal > 9 ? '9+' : unreadTotal}</Text>
               </View>
             )}
-          </AppButton>
+          </Pressable>
         </View>
       </View>
 
@@ -206,7 +232,7 @@ export function CabinChatScreen({ navigation }: Props) {
         data={groupMessages}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
-        contentContainerStyle={[styles.list, { paddingBottom: composerHeight + theme.spacing(2) }]}
+        contentContainerStyle={styles.list}
         onScroll={autoScroll.handleScroll}
         onContentSizeChange={autoScroll.handleContentSizeChange}
         onLayout={autoScroll.handleLayout}
@@ -221,30 +247,31 @@ export function CabinChatScreen({ navigation }: Props) {
         }
       />
 
-      <ComposerBar style={styles.composer} onLayout={(event) => setComposerHeight(event.nativeEvent.layout.height)}>
-        <ReplyComposerBar quote={replyTo} onCancel={() => setReplyTo(null)} />
+      <ReplyComposerBar quote={replyTo} onCancel={() => setReplyTo(null)} />
 
-        <View style={styles.inputRow}>
-          <AppButton round variant={alertActive ? 'active' : 'plain'} onPress={() => void togglePresence(myProfile)}>
-            <Image
-              source={alertActive ? venue.alertIconActive : venue.alertIcon}
-              style={[styles.standButtonIcon, alertActive && styles.standButtonIconActive]}
-              resizeMode="contain"
-            />
-          </AppButton>
-          <TextInput
-            style={styles.input}
-            value={draft}
-            onChangeText={setDraft}
-            placeholder={venue.composerPlaceholder}
-            placeholderTextColor={theme.colors.textMuted}
-            onSubmitEditing={handleSend}
+      <View style={styles.inputRow}>
+        <Pressable
+          style={[styles.standButton, alertActive && styles.standButtonActive]}
+          onPress={() => void togglePresence(myProfile)}
+        >
+          <Image
+            source={alertActive ? venue.alertIconActive : venue.alertIcon}
+            style={[styles.standButtonIcon, alertActive && styles.standButtonIconActive]}
+            resizeMode="contain"
           />
-          <AppButton variant="accent" onPress={handleSend}>
-            <Text style={styles.sendButtonText}>Enviar</Text>
-          </AppButton>
-        </View>
-      </ComposerBar>
+        </Pressable>
+        <TextInput
+          style={styles.input}
+          value={draft}
+          onChangeText={setDraft}
+          placeholder={venue.composerPlaceholder}
+          placeholderTextColor={theme.colors.textMuted}
+          onSubmitEditing={handleSend}
+        />
+        <Pressable style={styles.sendButton} onPress={handleSend}>
+          <Text style={styles.sendButtonText}>Enviar</Text>
+        </Pressable>
+      </View>
     </Animated.View>
   );
 }

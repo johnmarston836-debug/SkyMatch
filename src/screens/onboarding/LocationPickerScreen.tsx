@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/RootNavigator';
-import { BackLink } from '../../components/BackLink';
 import { LocationPicker } from '../../components/LocationPicker';
 import { VENUES } from '../../venues';
 import { defaultLocation, formatLocation } from '../../utils/location';
-import { AppButton } from '../../components/AppButton';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import type { UserLocation } from '../../types';
 
@@ -21,7 +19,7 @@ export function LocationPickerScreen({ route, navigation }: Props) {
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
     content: { paddingHorizontal: spacing(3), flexGrow: 1 },
-    backRow: { alignItems: 'flex-start' as const, marginBottom: spacing(2) },
+    backLink: { color: colors.text, fontWeight: '600' as const, marginBottom: spacing(2) },
     label: typography.label,
     title: { ...typography.title, marginTop: spacing(1) },
     subtitle: { ...typography.subtitle, marginTop: spacing(1), marginBottom: spacing(2), lineHeight: 22 },
@@ -36,7 +34,13 @@ export function LocationPickerScreen({ route, navigation }: Props) {
     helpText: { ...typography.subtitle, fontSize: 13, lineHeight: 19 },
     readout: { alignItems: 'center' as const, marginBottom: spacing(3) },
     readoutText: { color: colors.text, fontSize: 40, fontWeight: '800' as const, letterSpacing: 1, textAlign: 'center' as const },
-    cta: { marginTop: 'auto' as const },
+    cta: {
+      marginTop: 'auto' as const,
+      backgroundColor: colors.accent,
+      borderRadius: radii.pill,
+      paddingVertical: spacing(2),
+      alignItems: 'center' as const,
+    },
     ctaText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700' as const },
   }));
 
@@ -49,9 +53,9 @@ export function LocationPickerScreen({ route, navigation }: Props) {
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.backRow}>
-          <BackLink onPress={() => navigation.goBack()} label={venue.name} />
-        </View>
+        <Pressable onPress={() => navigation.goBack()}>
+          <Text style={styles.backLink}>← {venue.name}</Text>
+        </Pressable>
 
         <Text style={styles.label}>PASO 2 DE 3</Text>
         <Text style={styles.title}>{venue.locationTitle}</Text>
@@ -67,14 +71,9 @@ export function LocationPickerScreen({ route, navigation }: Props) {
 
         <LocationPicker location={location} onChange={setLocation} />
 
-        <AppButton
-          variant="accent"
-          size="lg"
-          style={styles.cta}
-          onPress={() => navigation.navigate('ProfileSetup', { location })}
-        >
+        <Pressable style={styles.cta} onPress={() => navigation.navigate('ProfileSetup', { location })}>
           <Text style={styles.ctaText}>Continuar</Text>
-        </AppButton>
+        </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
-import { BackLink } from '../../components/BackLink';
 import { CabinSeats } from '../../components/CabinSeats';
 import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
@@ -47,6 +46,7 @@ export function PassengersScreen({ navigation }: Props) {
     container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing(3) },
     header: { flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'space-between' as const, marginBottom: spacing(2) },
     title: typography.title,
+    backLink: { color: colors.text, fontWeight: '600' as const },
     headerSpacer: { width: 60 },
     emptyState: { flex: 1, alignItems: 'center' as const, justifyContent: 'center' as const, gap: spacing(2) },
     emptySubtitle: { ...typography.subtitle, textAlign: 'center' as const },
@@ -142,7 +142,9 @@ export function PassengersScreen({ navigation }: Props) {
   return (
     <View style={[styles.container, { paddingTop: insets.top + themeSpacing(2) }]}>
       <View style={styles.header}>
-        <BackLink onPress={() => navigation.goBack()} />
+        <Pressable onPress={() => navigation.goBack()}>
+          <Text style={styles.backLink}>← Volver</Text>
+        </Pressable>
         <Text style={styles.title}>{venue.peopleLabel}</Text>
         <View style={styles.headerSpacer} />
       </View>

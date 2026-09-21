@@ -63,13 +63,7 @@ function MainNavigator() {
       <MainStack.Screen name="MyProfile" component={MyProfileScreen} />
       <MainStack.Screen name="HowItWorks" component={HowItWorksScreen} />
       <MainStack.Screen name="Profile" component={ProfileScreen} />
-      <MainStack.Screen
-        name="Chat"
-        component={ChatScreen}
-        // Without an explicit label the back button falls back to the
-        // previous screen's route name, which is code, in English: "Profile".
-        options={{ headerShown: true, title: '', headerBackTitle: 'Volver' }}
-      />
+      <MainStack.Screen name="Chat" component={ChatScreen} options={{ headerShown: true, title: '' }} />
     </MainStack.Navigator>
   );
 }

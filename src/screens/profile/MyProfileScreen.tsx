@@ -16,8 +16,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
-import { BackLink } from '../../components/BackLink';
-import { AppButton } from '../../components/AppButton';
 import { VenueLocationChooser } from '../../components/VenueLocationChooser';
 import { useProfileStore } from '../../state/profileStore';
 import { useAvatarStore } from '../../state/avatarStore';
@@ -54,21 +52,11 @@ export function MyProfileScreen({ navigation }: Props) {
     container: { flex: 1, backgroundColor: colors.background },
     scroll: { paddingHorizontal: spacing(3) },
     header: { flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'space-between' as const },
-
+    backLink: { color: colors.text, fontWeight: '600' as const },
     headerSpacer: { width: 60 },
     title: typography.title,
-    photoBlock: {
-      alignItems: 'center' as const,
-      gap: spacing(1.5),
-      marginTop: spacing(3),
-      marginBottom: spacing(1),
-    },
-    // The two photo actions belong together and to the photo, so they sit on
-    // one line under it. Stacked, "Quitar" drifted down into the venue chips
-    // and read as if it belonged to them.
-    photoActions: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: spacing(1.5) },
+    photoBlock: { alignItems: 'center' as const, gap: spacing(1), marginTop: spacing(3) },
     photoAction: { color: colors.accent, fontWeight: '700' as const },
-    photoActionDivider: { color: colors.textMuted, fontSize: 13 },
     photoRemove: { ...typography.subtitle, fontSize: 13 },
     fieldLabel: { ...typography.label, marginTop: spacing(2), marginBottom: spacing(1) },
     input: {
@@ -100,7 +88,14 @@ export function MyProfileScreen({ navigation }: Props) {
       alignItems: 'center' as const,
     },
     secondaryLinkText: { ...typography.body, fontWeight: '700' as const },
-    cta: { marginTop: spacing(3) },
+    cta: {
+      backgroundColor: colors.accent,
+      borderRadius: radii.pill,
+      paddingVertical: spacing(2),
+      alignItems: 'center' as const,
+      marginTop: spacing(3),
+    },
+    ctaDisabled: { opacity: 0.4 },
     ctaText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700' as const },
   }));
 
@@ -167,26 +162,23 @@ export function MyProfileScreen({ navigation }: Props) {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <BackLink onPress={() => navigation.goBack()} />
+          <Pressable onPress={() => navigation.goBack()}>
+            <Text style={styles.backLink}>← Volver</Text>
+          </Pressable>
           <Text style={styles.title}>Mi perfil</Text>
           <View style={styles.headerSpacer} />
         </View>
 
         <View style={styles.photoBlock}>
           <Avatar nickname={nickname} size={88} zoomable />
-          <View style={styles.photoActions}>
-            <Pressable onPress={handlePickPhoto} hitSlop={8}>
-              <Text style={styles.photoAction}>{myAvatar ? 'Cambiar foto' : 'Añadir foto'}</Text>
+          <Pressable onPress={handlePickPhoto}>
+            <Text style={styles.photoAction}>{myAvatar ? 'Cambiar foto' : 'Añadir foto'}</Text>
+          </Pressable>
+          {myAvatar !== null && (
+            <Pressable onPress={handleRemovePhoto}>
+              <Text style={styles.photoRemove}>Quitar</Text>
             </Pressable>
-            {myAvatar !== null && (
-              <>
-                <Text style={styles.photoActionDivider}>·</Text>
-                <Pressable onPress={handleRemovePhoto} hitSlop={8}>
-                  <Text style={styles.photoRemove}>Quitar</Text>
-                </Pressable>
-              </>
-            )}
-          </View>
+          )}
         </View>
 
         <VenueLocationChooser location={location} onChange={setLocation} />
@@ -232,9 +224,9 @@ export function MyProfileScreen({ navigation }: Props) {
           </View>
         )}
 
-        <AppButton variant="accent" size="lg" style={styles.cta} disabled={!canSave} onPress={handleSave}>
+        <Pressable style={[styles.cta, !canSave && styles.ctaDisabled]} disabled={!canSave} onPress={handleSave}>
           <Text style={styles.ctaText}>Guardar cambios</Text>
-        </AppButton>
+        </Pressable>
 
         <Pressable style={styles.secondaryLink} onPress={() => navigation.navigate('HowItWorks')}>
           <Text style={styles.secondaryLinkText}>Cómo funciona SkyMatch</Text>

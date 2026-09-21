@@ -4,7 +4,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList, OnboardingStackParamList } from '../../navigation/RootNavigator';
 import { MeshDiagram } from '../../components/MeshDiagram';
-import { AppButton } from '../../components/AppButton';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 
 interface CarouselProps {
@@ -137,9 +136,9 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
           <View style={[styles.dot, page === 0 && styles.dotActive]} />
           <View style={[styles.dot, page === 1 && styles.dotActive]} />
         </View>
-        <AppButton variant="accent" size="lg" onPress={goNext}>
+        <Pressable style={styles.cta} onPress={goNext}>
           <Text style={styles.ctaText}>{page === 0 ? 'Siguiente' : finishLabel}</Text>
-        </AppButton>
+        </Pressable>
       </View>
     </View>
   );

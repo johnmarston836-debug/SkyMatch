@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Text, TextInput, View } from 'react-native';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/RootNavigator';
 import { useProfileStore } from '../../state/profileStore';
-import { AppButton } from '../../components/AppButton';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import { formatLocation } from '../../utils/location';
 import { VENUES } from '../../venues';
@@ -37,7 +36,14 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
       color: colors.text,
       fontSize: 15,
     },
-    cta: { marginTop: 'auto' as const },
+    cta: {
+      marginTop: 'auto' as const,
+      backgroundColor: colors.accent,
+      borderRadius: radii.pill,
+      paddingVertical: spacing(2),
+      alignItems: 'center' as const,
+    },
+    ctaDisabled: { opacity: 0.4 },
     ctaText: { color: '#FFFFFF', fontSize: 17, fontWeight: '700' as const },
   }));
 
@@ -82,9 +88,9 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
         compartirlo.
       </Text>
 
-      <AppButton variant="accent" size="lg" style={styles.cta} disabled={!canContinue} onPress={handleContinue}>
+      <Pressable style={[styles.cta, !canContinue && styles.ctaDisabled]} disabled={!canContinue} onPress={handleContinue}>
         <Text style={styles.ctaText}>{venue.enterCta}</Text>
-      </AppButton>
+      </Pressable>
     </View>
   );
 }
