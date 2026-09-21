@@ -1,0 +1,287 @@
+import type { Strings } from './es';
+
+/** Italiano. */
+export const it: Strings = {
+  common: {
+    back: 'Indietro',
+    close: 'Chiudi',
+    send: 'Invia',
+    continue: 'Continua',
+    next: 'Avanti',
+    photo: 'Foto',
+    private: 'Privato',
+    you: 'Tu',
+    remove: 'Togli',
+    see: 'Vedi',
+  },
+
+  welcome: {
+    badge: 'SENZA WIFI NÉ DATI',
+    title: 'La chat di chi hai accanto',
+    body:
+      'Un aereo, un treno, la palestra o un bar: una chat comune con chi ti sta vicino, ' +
+      'riconoscibile da dove si trova o da cosa indossa, usando il Bluetooth del tuo telefono ' +
+      'per collegarti direttamente agli altri.',
+    cta: 'Inizia',
+    disclaimer: 'Non esce niente dalla stanza: tutto viaggia da telefono a telefono via Bluetooth.',
+  },
+
+  tutorial: {
+    diagramYou: 'TU',
+    page1Label: 'COME FUNZIONA · 1 DI 2',
+    page1Title: 'I messaggi saltano di telefono in telefono',
+    page1Body:
+      'SkyMatch non usa internet né wifi. Il tuo telefono parla via Bluetooth direttamente con i telefoni che hai vicino.',
+    page1Caption: 'Il telefono a destra è troppo lontano per sentirti, ma quello in mezzo ripete il tuo messaggio.',
+    page1Body2:
+      'Il Bluetooth arriva a pochi metri, quindi i telefoni che stanno in mezzo si passano i messaggi finché ' +
+      'non arrivano a destinazione. Più gente tiene l’app aperta, più lontano arriva tutto.',
+    page2Label: 'COME FUNZIONA · 2 DI 2',
+    page2Title: 'Lascia l’app aperta',
+    page2Body:
+      'Il tuo telefono invia e riceve solo mentre l’app è sullo schermo. Se la chiudi o passi a un’altra ' +
+      'applicazione, smetti di ricevere messaggi e smetti anche di fare da ponte per gli altri.',
+    page2Caption: 'Il telefono in mezzo ha chiuso l’app: smette di trasmettere e il messaggio non arriva più dall’altra parte.',
+    calloutTitle: 'Se esci dall’app, ti perdi la conversazione',
+    calloutBody:
+      'Non c’è nessun server: i messaggi esistono solo sui telefoni che hai intorno, e quello che si dice ' +
+      'mentre non ci sei non lo potrai recuperare dopo. Le tue chat private invece restano salvate sul tuo ' +
+      'telefono, così non perdi chi hai conosciuto quando chiudi l’app.',
+    page2Body2:
+      'In aereo la modalità aereo non è un problema: puoi lasciarla attiva e accendere il Bluetooth a parte. ' +
+      'Non serve wifi, né dati, né campo da nessuna parte.',
+    understood: 'Ho capito',
+  },
+
+  venuePicker: {
+    step: 'PASSO 1 DI 3',
+    title: 'Dove sei?',
+    subtitle:
+      'Cambia solo una cosa: come ti trovano gli altri senza sapere il tuo nome. Il resto dell’app è uguale in tutti e quattro.',
+  },
+
+  locationStep: {
+    step: 'PASSO 2 DI 3',
+  },
+
+  profileSetup: {
+    step: 'PASSO 3 DI 3',
+    title: 'Come ti chiamiamo?',
+    identitySuffix: '— il nome serve solo ad accompagnarlo.',
+    namePlaceholder: 'Il tuo nome o un soprannome',
+    contactLabel: 'Instagram / WhatsApp (facoltativo)',
+    contactPlaceholder: '@iltuonome o il tuo numero',
+    contactHint: 'Lo vedrà solo chi tocca il tuo nome in chat per aprire la tua scheda. Lascialo vuoto se preferisci non condividerlo.',
+  },
+
+  sessionStart: {
+    greeting: (nickname: string) => `CIAO, ${nickname.toUpperCase()}`,
+    title: 'Dove sei adesso?',
+    subtitle: 'È l’unica cosa che cambia da un giorno all’altro. Il tuo nome, il tuo contatto e la tua foto restano salvati.',
+  },
+
+  cabin: {
+    myProfile: 'Il mio profilo',
+  },
+
+  chat: {
+    title: 'Privato',
+    noContact: 'Non ha condiviso un contatto',
+    placeholder: 'Scrivi un messaggio…',
+    seen: 'Visto',
+    replyingTo: (nickname: string) => `Rispondi a ${nickname}`,
+  },
+
+  passengers: {
+    ownPreview: (body: string) => `Tu: ${body}`,
+    noMessagesYet: 'Ancora nessun messaggio',
+  },
+
+  profile: {
+    notArrivedYet: 'Il suo profilo non è ancora arrivato.',
+    contactLabel: 'CONTATTO',
+    noContactShared: 'Non ha condiviso nessun contatto.',
+    openConversation: 'Apri conversazione',
+    sendPrivateMessage: 'Invia messaggio privato',
+    mute: 'Silenzia questa persona',
+    unmute: 'Non silenziare più',
+  },
+
+  myProfile: {
+    title: 'Il mio profilo',
+    changePhoto: 'Cambia foto',
+    addPhoto: 'Aggiungi foto',
+    photoTooBigTitle: 'Foto troppo grande',
+    photoTooBigBody: 'Prova con un’altra immagine: via Bluetooth passano solo foto molto piccole.',
+    nameLabel: 'NOME',
+    contactLabel: 'INSTAGRAM / WHATSAPP (FACOLTATIVO)',
+    contactHint: 'Lo vedrà solo chi apre la tua scheda o una chat privata con te. Lascialo vuoto per non condividerlo.',
+    mutedTitle: 'Silenziati',
+    mutedBody:
+      'Non vedi i loro messaggi. Il tuo telefono continua a passare i loro agli altri, perché è parte di come arrivano i messaggi di tutti.',
+    mutedUnknown: 'Qualcuno che non è più vicino',
+    alertsTitle: 'Avvisi',
+    alertsOn:
+      'Ti avvisiamo dei messaggi privati che arrivano con l’app in secondo piano. Se chiudi l’app del tutto, il Bluetooth si spegne e non arriva niente.',
+    alertsOff: 'Attiva gli avvisi per sapere dei messaggi privati anche senza l’app sullo schermo.',
+    openSettings: 'Apri Impostazioni',
+    enableAlerts: 'Attiva gli avvisi',
+    save: 'Salva modifiche',
+    howItWorks: 'Come funziona SkyMatch',
+  },
+
+  reactions: {
+    count: (total: number) => (total === 1 ? '1 reazione' : `${total} reazioni`),
+    empty: 'Non ha ancora reagito nessuno.',
+    tapToWrite: 'Tocca per scrivergli',
+  },
+
+  radio: {
+    panelLabel: 'STATO DELLA RADIO',
+    advertising: 'Ti vedono (in trasmissione)',
+    scanning: 'Tu cerchi (scansione)',
+    devices: 'Telefoni rilevati',
+    connected: 'Connessi',
+    listeners: 'Ti ascoltano',
+    moduleMissing: 'modulo non caricato',
+    on: 'acceso',
+    off: 'spento',
+    noPermission: 'senza permesso',
+    unavailable: 'non disponibile',
+    starting: 'avvio…',
+    noAnswer: 'nessuna risposta',
+    deniedTitle: 'SkyMatch non ha il permesso Bluetooth',
+    deniedAction: 'Daglielo in Impostazioni',
+    poweredOffTitle: 'Il Bluetooth è spento',
+    poweredOffAction: 'Accendilo per vedere chi hai vicino',
+    unsupportedTitle: 'Questo telefono non può usare il Bluetooth a basso consumo',
+    invisibleTitle: 'Tu vedi gli altri, ma loro non vedono te',
+  },
+
+  notifications: {
+    sentPhoto: 'Ti ha mandato una foto',
+  },
+
+  presence: {
+    countdown: (minutes: number) => ` tra ${minutes} min`,
+    byStatus: {
+      standing: { self: 'Sei in piedi', other: 'è in piedi' },
+      leavingMachine: { self: 'Lasci la macchina', other: 'lascia la macchina' },
+    },
+  },
+
+  muscles: {
+    chest: 'Petto',
+    back: 'Schiena',
+    legs: 'Gambe',
+    shoulders: 'Spalle',
+    arms: 'Braccia',
+    core: 'Core',
+    cardio: 'Cardio',
+    fullbody: 'Full body',
+  },
+
+  colors: {
+    black: 'Nero',
+    white: 'Bianco',
+    grey: 'Grigio',
+    red: 'Rosso',
+    blue: 'Blu',
+    green: 'Verde',
+    yellow: 'Giallo',
+    pink: 'Rosa',
+  },
+
+  location: {
+    coachShort: 'C',
+    describeSeat: (seat: string) => `Posto ${seat}`,
+    describeCoachSeat: (coach: number, seat: string) => `Carrozza ${coach}, posto ${seat}`,
+    describeMuscle: (muscle: string) => `Oggi allena ${muscle.toLowerCase()}`,
+    describeOutfit: (color: string) => `Veste di ${color.toLowerCase()}`,
+  },
+
+  picker: {
+    coachLabel: 'CARROZZA',
+    seatLetterHint: 'Tocca la lettera del tuo posto',
+    rowLabel: 'FILA',
+    outfitHint: 'Quello del capo che si vede di più: la maglietta, la felpa o la giacca che hai addosso.',
+    spotLabel: 'DOVE SEI? (FACOLTATIVO)',
+    spotPlaceholder: 'Al bancone, in terrazza, vicino all’ingresso…',
+    spotHint: 'Un punto preciso ti risparmia metà delle occhiate. Puoi cambiarlo quando ti sposti.',
+  },
+
+  venues: {
+    plane: {
+      name: 'Aereo',
+      shortName: 'Aereo',
+      tagline: 'Il tuo posto è la tua identità',
+      spaceTitle: 'Cabina',
+      peopleLabel: 'Passeggeri',
+      peopleSearching: 'Cerco passeggeri qui vicino…',
+      composerPlaceholder: 'Scrivi a tutta la cabina…',
+      emptyTitle: 'Non ha ancora parlato nessuno',
+      emptySubtitle: 'Appena ci saranno passeggeri vicini con l’app aperta, compariranno qui.',
+      locationTitle: 'A che posto sei?',
+      locationSubtitle: 'È così che ti riconosceranno nella chat della cabina.',
+      locationHelp:
+        'Qui nessuno sa il tuo nome: il tuo posto è quello che compare accanto a ogni tuo messaggio ed è quello che gli altri usano per collocarti in cabina.',
+      locationFieldLabel: 'IL TUO POSTO',
+      identityNote: 'Nella chat della cabina ti vedranno come',
+      enterCta: 'Entra in cabina',
+    },
+    train: {
+      name: 'Treno',
+      shortName: 'Treno',
+      tagline: 'Carrozza e posto',
+      spaceTitle: 'Treno',
+      peopleLabel: 'Viaggiatori',
+      peopleSearching: 'Cerco viaggiatori qui vicino…',
+      composerPlaceholder: 'Scrivi a tutto il treno…',
+      emptyTitle: 'Non ha ancora parlato nessuno',
+      emptySubtitle: 'Appena ci saranno viaggiatori vicini con l’app aperta, compariranno qui.',
+      locationTitle: 'Dove sei seduto?',
+      locationSubtitle: 'Carrozza e posto: con quelli ti trovano.',
+      locationHelp:
+        'Un treno è lungo e gli stessi numeri di posto tornano in ogni carrozza. Insieme compaiono accanto ai tuoi messaggi e sono quello che permette a qualcuno di sapere dove sei.',
+      locationFieldLabel: 'LA TUA CARROZZA E IL TUO POSTO',
+      identityNote: 'Nella chat del treno ti vedranno come',
+      enterCta: 'Entra nel treno',
+    },
+    gym: {
+      name: 'Palestra',
+      shortName: 'Palestra',
+      tagline: 'Per quello che alleni oggi',
+      spaceTitle: 'Sala',
+      peopleLabel: 'Gente',
+      peopleSearching: 'Cerco gente che si allena qui vicino…',
+      composerPlaceholder: 'Scrivi a tutta la sala…',
+      emptyTitle: 'Non ha ancora parlato nessuno',
+      emptySubtitle: 'Appena ci sarà qualcuno vicino con l’app aperta, comparirà qui.',
+      locationTitle: 'Cosa alleni oggi?',
+      locationSubtitle: 'È quello che ti colloca in sala: chi allena la stessa cosa ti trova.',
+      locationHelp:
+        'In una sala senza posti né numeri, quello che ti colloca è la zona in cui sei, e lo dice quello che alleni. Compare accanto ai tuoi messaggi ed è quello che ti mette in contatto con chi sta sulle stesse macchine.',
+      locationFieldLabel: 'QUELLO CHE ALLENI OGGI',
+      identityNote: 'Nella chat della sala ti vedranno come',
+      enterCta: 'Entra in sala',
+    },
+    public: {
+      name: 'Spazio pubblico',
+      shortName: 'Pubblico',
+      tagline: 'Per quello che indossi',
+      spaceTitle: 'Qui vicino',
+      peopleLabel: 'Gente',
+      peopleSearching: 'Cerco gente qui vicino…',
+      composerPlaceholder: 'Scrivi alla gente di qui…',
+      emptyTitle: 'Non ha ancora parlato nessuno',
+      emptySubtitle: 'Appena ci sarà qualcuno vicino con l’app aperta, comparirà qui.',
+      locationTitle: 'Di che colore sei vestito?',
+      locationSubtitle: 'Il colore dei vestiti che hai addosso adesso.',
+      locationHelp:
+        'Qui non ci sono posti né numeri, quindi si indica qualcuno come si fa sempre: dai vestiti, "quello con la maglietta rossa". Il colore che scegli compare accanto ai tuoi messaggi ed è quello che permette di riconoscerti tra la gente. Se ti cambi o ti sposti, cambialo in Il mio profilo.',
+      locationFieldLabel: 'IL COLORE DEI TUOI VESTITI',
+      identityNote: 'Qui ti vedranno come',
+      enterCta: 'Entra',
+    },
+  },
+};

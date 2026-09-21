@@ -1,11 +1,25 @@
 import { ca } from '../src/i18n/ca';
+import { de } from '../src/i18n/de';
 import { en } from '../src/i18n/en';
 import { es } from '../src/i18n/es';
+import { fr } from '../src/i18n/fr';
+// Aliased: a bare `it` would shadow Jest's own, and every test in this file
+// would stop being a test.
+import { it as italian } from '../src/i18n/it';
+import { pt } from '../src/i18n/pt';
 import { detectLanguage, languageFor, setLanguage, t, FALLBACK_LANGUAGE, LANGUAGES } from '../src/i18n';
 import { describeLocation, formatLocation } from '../src/utils/location';
 import { venueOf } from '../src/venues';
 
 type Node = Record<string, unknown>;
+
+/**
+ * Listed by hand rather than read out of the module, so a dictionary that
+ * was written but never wired into `DICTIONARIES` still fails here instead
+ * of shipping unreachable.
+ */
+const DICTIONARIES = { es, en, ca, fr, de, it: italian, pt };
+const OTHER_THAN_SPANISH = Object.entries(DICTIONARIES).filter(([name]) => name !== 'es');
 
 /**
  * The shape of a dictionary as a flat list: one entry per leaf, saying
@@ -39,10 +53,11 @@ function render(value: unknown): string {
 describe('the dictionaries', () => {
   const reference = shapeOf(es as unknown as Node);
 
-  it.each([
-    ['en', en],
-    ['ca', ca],
-  ])('%s says everything Spanish says, in the same shape', (_name, dictionary) => {
+  it('carries every language it says it does', () => {
+    expect(Object.keys(DICTIONARIES).sort()).toEqual([...LANGUAGES].sort());
+  });
+
+  it.each(OTHER_THAN_SPANISH)('%s says everything Spanish says, in the same shape', (_name, dictionary) => {
     const shape = shapeOf(dictionary as unknown as Node);
     expect([...shape.keys()].sort()).toEqual([...reference.keys()].sort());
     for (const [path, kind] of reference) {
@@ -50,11 +65,7 @@ describe('the dictionaries', () => {
     }
   });
 
-  it.each([
-    ['es', es],
-    ['en', en],
-    ['ca', ca],
-  ])('%s leaves nothing blank', (_name, dictionary) => {
+  it.each(Object.entries(DICTIONARIES))('%s leaves nothing blank', (_name, dictionary) => {
     const flat = new Map<string, unknown>();
     const walk = (node: Node, prefix = '') => {
       for (const [key, value] of Object.entries(node)) {
@@ -78,6 +89,12 @@ describe('choosing the language', () => {
     expect(languageFor('es_419')).toBe('es');
     expect(languageFor('ca-AD')).toBe('ca');
     expect(languageFor('EN-gb')).toBe('en');
+    // Brazil and Portugal, Austria and Germany, Quebec and France, Ticino
+    // and Italy: one dictionary each, not two.
+    expect(languageFor('pt-BR')).toBe('pt');
+    expect(languageFor('de-AT')).toBe('de');
+    expect(languageFor('fr-CA')).toBe('fr');
+    expect(languageFor('it-CH')).toBe('it');
   });
 
   it('falls back rather than showing a language nobody asked for', () => {

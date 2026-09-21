@@ -1,14 +1,18 @@
 import { NativeModules, Platform } from 'react-native';
 import { ca } from './ca';
+import { de } from './de';
 import { en } from './en';
+import { fr } from './fr';
+import { it } from './it';
+import { pt } from './pt';
 import { es, type Strings } from './es';
 
 export type { Strings, VenueStrings } from './es';
 
-export type Language = 'es' | 'en' | 'ca';
+export type Language = 'es' | 'en' | 'ca' | 'fr' | 'de' | 'it' | 'pt';
 
 /** Every language the app carries. Adding one is this list plus its file. */
-export const LANGUAGES: Language[] = ['es', 'en', 'ca'];
+export const LANGUAGES: Language[] = ['es', 'en', 'ca', 'fr', 'de', 'it', 'pt'];
 
 /**
  * What a phone set to Japanese gets. English rather than Spanish: this is an
@@ -17,12 +21,13 @@ export const LANGUAGES: Language[] = ['es', 'en', 'ca'];
  */
 export const FALLBACK_LANGUAGE: Language = 'en';
 
-const DICTIONARIES: Record<Language, Strings> = { es, en, ca };
+const DICTIONARIES: Record<Language, Strings> = { es, en, ca, fr, de, it, pt };
 
 /**
  * The language out of a BCP 47 tag, ignoring the region: someone on
- * "es-419" gets Spanish, and the difference between Mexico and Spain is not
- * worth a second dictionary here.
+ * "es-419" gets Spanish and someone on "pt-BR" gets Portuguese. The
+ * difference between Mexico and Spain, or Brazil and Portugal, is not worth
+ * a second dictionary in an app whose longest sentence is a tutorial page.
  */
 export function languageFor(tag: string | null | undefined): Language {
   const base = (tag ?? '').toLowerCase().replace(/_/g, '-').split('-')[0];

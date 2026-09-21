@@ -15,10 +15,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		030B5081270A7B4B155464B2 /* fr */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = fr; path = SkyMatch/fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* SkyMatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SkyMatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = SkyMatch/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = SkyMatch/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = SkyMatch/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		323486B5B5B1C5C6E2AD8B34 /* it */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = it; path = SkyMatch/it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		3B4392A12AC88292D35C810B /* Pods-SkyMatch.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SkyMatch.debug.xcconfig"; path = "Target Support Files/Pods-SkyMatch/Pods-SkyMatch.debug.xcconfig"; sourceTree = "<group>"; };
 		5709B34CF0A7D63546082F79 /* Pods-SkyMatch.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SkyMatch.release.xcconfig"; path = "Target Support Files/Pods-SkyMatch/Pods-SkyMatch.release.xcconfig"; sourceTree = "<group>"; };
 		5DCACB8F33CDC322A6C60F78 /* libPods-SkyMatch.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-SkyMatch.a"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -27,6 +29,8 @@
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = SkyMatch/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		BF9142195BE282E0DC67FF75 /* ca */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = ca; path = SkyMatch/ca.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		C62A78C215D5A84282CE967A /* es */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = es; path = SkyMatch/es.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CD84355849263830E3634720 /* pt */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = pt; path = SkyMatch/pt.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		D493436819D9C5BCD6A01545 /* de */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = de; path = SkyMatch/de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -148,6 +152,10 @@
 				Base,
 				es,
 				ca,
+				fr,
+				de,
+				it,
+				pt,
 			);
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
@@ -265,6 +273,10 @@
 				65201B533B5BBE08EF002756 /* en */,
 				C62A78C215D5A84282CE967A /* es */,
 				BF9142195BE282E0DC67FF75 /* ca */,
+				030B5081270A7B4B155464B2 /* fr */,
+				D493436819D9C5BCD6A01545 /* de */,
+				323486B5B5B1C5C6E2AD8B34 /* it */,
+				CD84355849263830E3634720 /* pt */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";

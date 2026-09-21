@@ -1,0 +1,3 @@
+"NSBluetoothAlwaysUsageDescription" = "O SkyMatch usa o Bluetooth para encontrar e conversar com as pessoas que tens perto, sem wifi nem dados.";
+"NSBluetoothPeripheralUsageDescription" = "O SkyMatch usa o Bluetooth para encontrar e conversar com as pessoas que tens perto, sem wifi nem dados.";
+"NSPhotoLibraryUsageDescription" = "O SkyMatch precisa de aceder às tuas fotos para poderes enviar uma imagem num chat privado.";
