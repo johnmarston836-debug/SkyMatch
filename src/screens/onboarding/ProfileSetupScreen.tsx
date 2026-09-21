@@ -82,7 +82,7 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
         compartirlo.
       </Text>
 
-      <GlassButton variant="accent" size="lg" title={venue.enterCta} style={styles.cta} disabled={!canContinue} onPress={handleContinue}>
+      <GlassButton variant="accent" size="lg" style={styles.cta} disabled={!canContinue} onPress={handleContinue}>
         <Text style={styles.ctaText}>{venue.enterCta}</Text>
       </GlassButton>
     </View>

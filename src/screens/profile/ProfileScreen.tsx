@@ -88,7 +88,6 @@ export function ProfileScreen({ route, navigation }: Props) {
             <GlassButton
               variant="accent"
               size="lg"
-              title="Enviar mensaje privado"
               style={styles.cta}
               onPress={() => navigation.navigate('Chat', { peerId })}
             >

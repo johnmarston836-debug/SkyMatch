@@ -13,7 +13,7 @@ export function BackLink({ onPress, label = 'Volver' }: { onPress: () => void; l
   }));
 
   return (
-    <GlassButton onPress={onPress} title={`‹ ${label}`} accessibilityLabel={label}>
+    <GlassButton onPress={onPress} accessibilityLabel={label}>
       <Text style={styles.text}>‹ {label}</Text>
     </GlassButton>
   );

@@ -70,7 +70,6 @@ export function LocationPickerScreen({ route, navigation }: Props) {
         <GlassButton
           variant="accent"
           size="lg"
-          title="Continuar"
           style={styles.cta}
           onPress={() => navigation.navigate('ProfileSetup', { location })}
         >

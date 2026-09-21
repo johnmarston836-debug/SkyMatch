@@ -1,29 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  Pressable,
-  StyleSheet,
-  View,
-  type StyleProp,
-  type ViewStyle,
-} from 'react-native';
-import { GlassButtonView, GlassView } from 'skymatch-peripheral/glass';
-import { NativeFallback } from './NativeFallback';
+import React, { useRef } from 'react';
+import { Animated, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import { radii } from '../theme';
-import { useAppTheme, useThemedStyles } from '../theme/ThemeContext';
+import { useThemedStyles } from '../theme/ThemeContext';
 
 interface Props {
   onPress: () => void;
-  /**
-   * The label, when it is plain text. With it, the button is SwiftUI's own
-   * glass button - the one Apple draws and animates - instead of one of
-   * ours. Without it, `children` are rendered on a glass surface, which is
-   * what the buttons made of our own pictograms need.
-   */
-  title?: string;
-  /** Small count beside the label, as on the people button. */
-  badge?: string;
-  children?: React.ReactNode;
+  children: React.ReactNode;
   /** 'plain' borrows the background; 'accent' is the primary action; 'active' marks a toggle that is on. */
   variant?: 'plain' | 'accent' | 'active';
   /** A circular icon button rather than a pill with a label. */
@@ -38,23 +20,20 @@ interface Props {
 }
 
 /**
- * A button on a pane of the system's own glass, with a springy squash when
- * pressed.
+ * Every button in the app: a rounded surface with a hairline that catches
+ * the light along its top edge, a soft shadow that lifts it off the page,
+ * and a springy squash when pressed.
  *
- * The coloured variants are tinted glass rather than paint, which is what
- * makes a prominent glass button prominent: the material still shows what is
- * behind it, coloured. Paint over glass is just paint, and the glass under it
- * is wasted.
- *
- * The drawn fill, rim and sheen are what a phone without the material falls
- * back to. They are deliberately near-invisible when the real thing is
- * present: a painted highlight on top of a material that already has one
- * reads as a mistake, and that is what made the first version look wrong.
+ * Drawn in React Native on purpose. There was a version of this backed by
+ * SwiftUI's own glass button, and it was abandoned: React Native lays out
+ * with Yoga and cannot measure a SwiftUI label, so the button had to report
+ * its own size back and the result came out small, and taps on a SwiftUI
+ * button hosted inside the renderer never reached their handler. Two
+ * problems that cost more than the material was worth. It is all in the
+ * history if it is ever worth another go.
  */
 export function GlassButton({
   onPress,
-  title,
-  badge,
   children,
   variant = 'plain',
   round = false,
@@ -65,23 +44,6 @@ export function GlassButton({
   accessibilityLabel,
 }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
-  // SwiftUI measures the label; Yoga can't. The button reports the size it
-  // wants and it is applied back as a style - one extra pass, against a C++
-  // shadow node as the only alternative.
-  const [measured, setMeasured] = useState<{ width: number; height: number } | null>(null);
-  /**
-   * A native button that never reports a size is a button nobody can see,
-   * and it fails silently: an unregistered component renders as nothing
-   * rather than throwing, so no error boundary catches it. If no size has
-   * arrived shortly after mounting, the drawn button takes over.
-   */
-  const [nativeSilent, setNativeSilent] = useState(false);
-  useEffect(() => {
-    if (measured !== null) return;
-    const timer = setTimeout(() => setNativeSilent(true), 700);
-    return () => clearTimeout(timer);
-  }, [measured]);
-  const accent = useAppTheme().colors[variant === 'active' ? 'accentAlt' : 'accent'];
   const styles = useThemedStyles((theme) => {
     const { colors, spacing } = theme;
     const light = theme.scheme === 'light';
@@ -97,20 +59,7 @@ export function GlassButton({
       },
       pill: { paddingHorizontal: spacing(2), paddingVertical: spacing(1) },
       pillLarge: { paddingHorizontal: spacing(3), paddingVertical: spacing(2) },
-      round: {
-        width: 44,
-        height: 44,
-        paddingHorizontal: 0,
-        paddingVertical: 0,
-      },
-      // With glass behind, the fill is only there to keep the label
-      // legible over whatever the material picks up; without it, the fill
-      // is the whole button.
-      // Always drawn, glass or no glass. A colour laid on at partial
-      // strength so the material shows through comes out washed: over a flat
-      // white background there is nothing behind it to darken it back, and a
-      // primary action ends up looking disabled. The fill carries the
-      // colour; the pane on top of it adds the material's own light.
+      round: { width: 44, height: 44, paddingHorizontal: 0, paddingVertical: 0 },
       plain: {
         backgroundColor: light ? 'rgba(118,118,128,0.12)' : 'rgba(118,118,128,0.28)',
         borderColor: light ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.10)',
@@ -118,33 +67,19 @@ export function GlassButton({
       accent: { backgroundColor: colors.accent, borderColor: 'rgba(255,255,255,0.22)' },
       active: { backgroundColor: colors.accentAlt, borderColor: 'rgba(255,255,255,0.22)' },
       disabled: { opacity: 0.4 },
+      // Two pieces, not one: a single flat band over a saturated fill reads
+      // as a button split in half rather than as a highlight.
       rim: {
         position: 'absolute' as const,
         left: 0,
         right: 0,
         top: 0,
         height: 1,
-        backgroundColor: light
-          ? 'rgba(255,255,255,0.85)'
-          : 'rgba(255,255,255,0.28)',
+        backgroundColor: light ? 'rgba(255,255,255,0.85)' : 'rgba(255,255,255,0.28)',
       },
-      sheen: {
-        position: 'absolute' as const,
-        left: 0,
-        right: 0,
-        top: 0,
-        height: '45%' as const,
-      },
-      sheenPlain: {
-        backgroundColor: light
-          ? 'rgba(255,255,255,0.45)'
-          : 'rgba(255,255,255,0.08)',
-      },
-      sheenFilled: {
-        backgroundColor: light
-          ? 'rgba(255,255,255,0.14)'
-          : 'rgba(255,255,255,0.09)',
-      },
+      sheen: { position: 'absolute' as const, left: 0, right: 0, top: 0, height: '45%' as const },
+      sheenPlain: { backgroundColor: light ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.08)' },
+      sheenFilled: { backgroundColor: light ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.09)' },
       shadow: {
         shadowColor: '#000000',
         shadowOpacity: light ? 0.1 : 0.4,
@@ -156,14 +91,9 @@ export function GlassButton({
   });
 
   const spring = (toValue: number) =>
-    Animated.spring(scale, {
-      toValue,
-      useNativeDriver: true,
-      speed: 40,
-      bounciness: 6,
-    }).start();
+    Animated.spring(scale, { toValue, useNativeDriver: true, speed: 40, bounciness: 6 }).start();
 
-  const drawn = (
+  return (
     <Animated.View style={[styles.shadow, { transform: [{ scale }] }, style]}>
       <Pressable
         accessibilityRole="button"
@@ -180,9 +110,6 @@ export function GlassButton({
           disabled && styles.disabled,
         ]}
       >
-        {GlassView !== null && (
-          <GlassView style={StyleSheet.absoluteFill} cornerRadius={radii.pill} pointerEvents="none" />
-        )}
         <View
           style={[styles.sheen, variant === 'plain' ? styles.sheenPlain : styles.sheenFilled]}
           pointerEvents="none"
@@ -191,26 +118,5 @@ export function GlassButton({
         {children}
       </Pressable>
     </Animated.View>
-  );
-
-  if (GlassButtonView === null || title === undefined || nativeSilent) return drawn;
-
-  return (
-    <NativeFallback fallback={drawn}>
-      <GlassButtonView
-        title={title}
-        badge={badge}
-        prominent={variant !== 'plain'}
-        enabled={!disabled}
-        tint={variant === 'plain' ? undefined : accent}
-        onGlassPress={() => !disabled && onPress()}
-        onGlassSize={(event) => setMeasured(event.nativeEvent)}
-        style={[
-          // A full-width action stretches; a pill is as wide as its label.
-          size === 'lg' ? { height: measured?.height } : (measured ?? undefined),
-          style,
-        ]}
-      />
-    </NativeFallback>
   );
 }

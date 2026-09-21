@@ -232,7 +232,7 @@ export function MyProfileScreen({ navigation }: Props) {
           </View>
         )}
 
-        <GlassButton variant="accent" size="lg" title="Guardar cambios" style={styles.cta} disabled={!canSave} onPress={handleSave}>
+        <GlassButton variant="accent" size="lg" style={styles.cta} disabled={!canSave} onPress={handleSave}>
           <Text style={styles.ctaText}>Guardar cambios</Text>
         </GlassButton>
 

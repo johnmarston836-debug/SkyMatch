@@ -72,7 +72,7 @@ export function SessionStartScreen({ navigation }: Props) {
 
         <VenueLocationChooser location={location} onChange={setLocation} />
 
-        <GlassButton variant="accent" size="lg" title={venue.enterCta} style={styles.cta} onPress={handleEnter}>
+        <GlassButton variant="accent" size="lg" style={styles.cta} onPress={handleEnter}>
           <Text style={styles.ctaText}>{venue.enterCta}</Text>
         </GlassButton>
       </ScrollView>

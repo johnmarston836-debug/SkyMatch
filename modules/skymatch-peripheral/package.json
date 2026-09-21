@@ -10,24 +10,10 @@
     "index.d.ts",
     "notifications.js",
     "notifications.d.ts",
-    "glass.js",
-    "glass.d.ts",
-    "js",
     "ios",
     "skymatch-peripheral.podspec"
   ],
   "peerDependencies": {
     "react-native": "*"
-  },
-  "codegenConfig": {
-    "name": "SkyMatchGlassSpec",
-    "type": "components",
-    "jsSrcsDir": "js",
-    "ios": {
-      "componentProvider": {
-        "SkyMatchGlassView": "SkyMatchGlassView",
-        "SkyMatchGlassButton": "SkyMatchGlassButton"
-      }
-    }
   }
 }
