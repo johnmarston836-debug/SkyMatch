@@ -70,7 +70,10 @@ export class MeshService {
    * tell whether the one they hold for us is current.
    */
   async broadcastProfile(profile: Profile, avatarHash?: string) {
-    const payload: ProfilePacket = avatarHash ? { ...profile, avatarHash } : profile;
+    // `''` travels: it is how someone says they took their photo down.
+    // `undefined` does not: it means we don't know yet, and announcing that
+    // as "no photo" makes everyone else throw away the copy they hold.
+    const payload: ProfilePacket = avatarHash === undefined ? profile : { ...profile, avatarHash };
     await this.router.send({ id: newId(), kind: 'profile', fromId: this.myPeerId, toId: BROADCAST_ID, payload });
   }
 

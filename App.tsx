@@ -25,13 +25,17 @@ function AppContent() {
   const hydrated = useProfileStore((state) => state.hydrated);
   const profile = useProfileStore((state) => state.profile);
   const hydrateAvatar = useAvatarStore((state) => state.hydrate);
+  const avatarsHydrated = useAvatarStore((state) => state.hydrated);
 
   useEffect(() => {
     void hydrate();
     void hydrateAvatar();
   }, [hydrate, hydrateAvatar]);
 
-  if (!hydrated) {
+  // Both, not just the profile: the mesh starts as soon as this screen goes
+  // away, and starting it before the photos are off disk means announcing
+  // that we have none.
+  if (!hydrated || !avatarsHydrated) {
     return (
       <View style={[styles.loading, { backgroundColor: colors.background }]}>
         <Image

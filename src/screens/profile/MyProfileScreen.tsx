@@ -55,8 +55,18 @@ export function MyProfileScreen({ navigation }: Props) {
     backLink: { color: colors.text, fontWeight: '600' as const },
     headerSpacer: { width: 60 },
     title: typography.title,
-    photoBlock: { alignItems: 'center' as const, gap: spacing(1), marginTop: spacing(3) },
+    photoBlock: {
+      alignItems: 'center' as const,
+      gap: spacing(1.5),
+      marginTop: spacing(3),
+      marginBottom: spacing(1),
+    },
+    // The two photo actions belong together and to the photo, so they sit on
+    // one line under it. Stacked, "Quitar" drifted down into the venue chips
+    // and read as if it belonged to them.
+    photoActions: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: spacing(1.5) },
     photoAction: { color: colors.accent, fontWeight: '700' as const },
+    photoActionDivider: { color: colors.textMuted, fontSize: 13 },
     photoRemove: { ...typography.subtitle, fontSize: 13 },
     fieldLabel: { ...typography.label, marginTop: spacing(2), marginBottom: spacing(1) },
     input: {
@@ -171,14 +181,19 @@ export function MyProfileScreen({ navigation }: Props) {
 
         <View style={styles.photoBlock}>
           <Avatar nickname={nickname} size={88} zoomable />
-          <Pressable onPress={handlePickPhoto}>
-            <Text style={styles.photoAction}>{myAvatar ? 'Cambiar foto' : 'Añadir foto'}</Text>
-          </Pressable>
-          {myAvatar !== null && (
-            <Pressable onPress={handleRemovePhoto}>
-              <Text style={styles.photoRemove}>Quitar</Text>
+          <View style={styles.photoActions}>
+            <Pressable onPress={handlePickPhoto} hitSlop={8}>
+              <Text style={styles.photoAction}>{myAvatar ? 'Cambiar foto' : 'Añadir foto'}</Text>
             </Pressable>
-          )}
+            {myAvatar !== null && (
+              <>
+                <Text style={styles.photoActionDivider}>·</Text>
+                <Pressable onPress={handleRemovePhoto} hitSlop={8}>
+                  <Text style={styles.photoRemove}>Quitar</Text>
+                </Pressable>
+              </>
+            )}
+          </View>
         </View>
 
         <VenueLocationChooser location={location} onChange={setLocation} />

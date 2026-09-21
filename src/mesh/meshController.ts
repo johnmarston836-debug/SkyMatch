@@ -129,7 +129,10 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
     // no second chance, so whichever direction happened to lose a frame
     // never showed a photo at all. Asking until satisfied is what makes both
     // phones end up with both photos.
-    if (avatarHash === undefined) {
+    // No fingerprint at all: that phone hasn't said, so leave the photo we
+    // have alone. Only an explicit empty one means they took it down.
+    if (avatarHash === undefined) return;
+    if (avatarHash === '') {
       useAvatarStore.getState().clearPeerAvatar(profile.id);
       return;
     }

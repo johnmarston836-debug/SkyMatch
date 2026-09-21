@@ -10,6 +10,7 @@ jest.mock('react-native-reanimated', () => {
     __esModule: true,
     default: { View, Text, ScrollView, Image, createAnimatedComponent: (Component) => Component },
     useSharedValue: (initial) => ({ value: initial }),
+    useAnimatedKeyboard: () => ({ height: { value: 0 }, state: { value: 0 } }),
     useAnimatedStyle: (factory) => factory(),
     withSpring: (toValue) => toValue,
     withTiming: (toValue, _config, callback) => {
