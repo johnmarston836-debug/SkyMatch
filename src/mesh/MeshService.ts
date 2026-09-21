@@ -1,7 +1,16 @@
 import type { BleTransport } from './BleTransport';
 import { MeshRouter } from './MeshRouter';
 import { BROADCAST_ID, type MeshEnvelope } from './protocol';
-import type { AvatarPacket, ChatMessage, PresenceAlert, PresenceReaction, Profile, ProfilePacket, UserLocation } from '../types';
+import type {
+  AvatarPacket,
+  ChatMessage,
+  PresenceAlert,
+  PresenceReaction,
+  Profile,
+  ProfilePacket,
+  ReadReceipt,
+  UserLocation,
+} from '../types';
 import { newId } from '../utils/id';
 
 type Listeners = {
@@ -14,6 +23,8 @@ type Listeners = {
   avatar: (avatar: AvatarPacket) => void;
   /** Someone is missing our photo, or holding an outdated one, and is asking for it. */
   avatarRequest: (fromId: string) => void;
+  /** Someone has read what we sent them. */
+  read: (receipt: ReadReceipt) => void;
 };
 
 /**
@@ -39,6 +50,7 @@ export class MeshService {
     reaction: new Set(),
     avatar: new Set(),
     avatarRequest: new Set(),
+    read: new Set(),
   };
 
   constructor(
@@ -125,6 +137,11 @@ export class MeshService {
     await this.router.send({ id: newId(), kind: 'avatarRequest', fromId: this.myPeerId, toId, payload: {} });
   }
 
+  /** Tells one person we have read up to a point in what they sent us. */
+  async sendReadReceipt(receipt: ReadReceipt) {
+    await this.router.send({ id: newId(), kind: 'read', fromId: this.myPeerId, toId: receipt.toId, payload: receipt });
+  }
+
   async sendPresenceReaction(reaction: PresenceReaction) {
     await this.router.send({ id: reaction.id, kind: 'reaction', fromId: this.myPeerId, toId: BROADCAST_ID, payload: reaction });
   }
@@ -152,6 +169,9 @@ export class MeshService {
         break;
       case 'avatarRequest':
         this.emit('avatarRequest', envelope.fromId);
+        break;
+      case 'read':
+        this.emit('read', envelope.payload as ReadReceipt);
         break;
       default:
         break;

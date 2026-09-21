@@ -111,6 +111,22 @@ export interface PresenceAlert {
   expiresAt: number;
 }
 
+/**
+ * "I have read everything you sent me up to this moment."
+ *
+ * One mark for a whole conversation rather than one per message: a receipt
+ * per message would double the traffic of a chat, and this says the same
+ * thing in a packet that is the same size whether it covers one message or
+ * forty. Repeating it is harmless, which matters on a radio that loses
+ * things.
+ */
+export interface ReadReceipt {
+  fromId: string;
+  toId: string;
+  /** The `sentAt` of the newest message of theirs that has been read. */
+  upTo: number;
+}
+
 /** A profile photo, sent on its own because it is orders of magnitude bigger than everything else on the mesh. */
 export interface AvatarPacket {
   fromId: string;

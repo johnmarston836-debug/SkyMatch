@@ -1,4 +1,4 @@
-import React, { useCallback, useLayoutEffect, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
 import { FlatList, Image, Pressable, Text, TextInput, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { launchImageLibrary } from 'react-native-image-picker';
@@ -17,7 +17,7 @@ import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
 import { useProfileStore } from '../../state/profileStore';
-import { sendPrivateChatMessage } from '../../mesh/meshController';
+import { sendPrivateChatMessage, sendReadReceipt } from '../../mesh/meshController';
 import { colorForPeer } from '../../theme';
 import { formatLocation } from '../../utils/location';
 import { formatTime, quoteOf } from '../../utils/id';
@@ -42,6 +42,7 @@ export function ChatScreen({ route, navigation }: Props) {
   const myProfile = useProfileStore((state) => state.profile);
   const setActivePeer = useChatStore((state) => state.setActivePeer);
   const markRead = useChatStore((state) => state.markRead);
+  const readUpTo = useChatStore((state) => state.readUpToByPeer[peerId] ?? 0);
   const [draft, setDraft] = useState('');
   const keyboardPadding = useKeyboardPadding(insets.bottom);
   const autoScroll = useChatAutoScroll<ChatMessage>();
@@ -71,6 +72,7 @@ export function ChatScreen({ route, navigation }: Props) {
     bubbleTheirs: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
     bubbleTextMine: { ...typography.body, color: colors.background },
     bubbleTextTheirs: { ...typography.body },
+    seen: { fontSize: 11, color: colors.textMuted, alignSelf: 'flex-end' as const, marginTop: 2 },
     time: { fontSize: 11, color: colors.textMuted, alignSelf: 'flex-end' as const, marginTop: 2 },
     timeMine: { fontSize: 11, color: colors.background, opacity: 0.6, alignSelf: 'flex-end' as const, marginTop: 2 },
     image: { width: 220, height: 220, borderRadius: radii.sm, marginBottom: spacing(1) },
@@ -122,6 +124,12 @@ export function ChatScreen({ route, navigation }: Props) {
     }, [peerId, setActivePeer, markRead]),
   );
 
+  // Told to them while the conversation is actually on screen, and again
+  // whenever something new arrives into it.
+  useEffect(() => {
+    if (myProfile) void sendReadReceipt(myProfile, peerId);
+  }, [myProfile, peerId, messages]);
+
   if (!myProfile) return null;
 
   const handleSend = () => {
@@ -149,6 +157,14 @@ export function ChatScreen({ route, navigation }: Props) {
     setReplyTo(null);
   };
 
+  const lastSeenMine = (() => {
+    let id: string | null = null;
+    for (const message of messages) {
+      if (message.fromId === myProfile?.id && message.sentAt <= readUpTo) id = message.id;
+    }
+    return id;
+  })();
+
   const renderItem = ({ item }: { item: ChatMessage }) => {
     const mine = item.fromId === myProfile.id;
     return (
@@ -168,6 +184,7 @@ export function ChatScreen({ route, navigation }: Props) {
             <Text style={mine ? styles.bubbleTextMine : styles.bubbleTextTheirs}>{item.body}</Text>
             <Text style={mine ? styles.timeMine : styles.time}>{formatTime(item.sentAt)}</Text>
           </View>
+          {item.id === lastSeenMine && <Text style={styles.seen}>Visto</Text>}
         </View>
       </SwipeToReply>
     );

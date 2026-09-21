@@ -118,9 +118,10 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
           <View style={styles.callout}>
             <Text style={styles.calloutTitle}>Si sales de la app, te pierdes la conversación</Text>
             <Text style={styles.calloutText}>
-              Los mensajes no se guardan en ningún servidor: solo existen en los móviles que
-              tienes alrededor. Lo que se diga mientras no estés no lo podrás recuperar
-              después.
+              No hay servidor: los mensajes solo existen en los móviles que tienes
+              alrededor, y lo que se diga mientras no estés no lo podrás recuperar después.
+              Tus chats privados sí se quedan guardados en tu propio móvil, para que no
+              pierdas a quien conociste al cerrar la app.
             </Text>
           </View>
 

@@ -82,6 +82,8 @@ const greeted = new Set<string>();
 /** profile id -> when we last asked them for their photo / last sent them ours. */
 const avatarRequestedAt = new Map<string, number>();
 const avatarSentAt = new Map<string, number>();
+/** The last moment we told each person we had read up to, so we don't repeat ourselves. */
+const lastReceiptSent = new Map<string, number>();
 
 /** Wires mesh events into the zustand stores. Call once, after the local profile is ready. */
 export async function startMesh(myProfile: Profile): Promise<MeshService> {
@@ -180,6 +182,11 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   service.on('presence', (alert) => {
     if (useBlockStore.getState().isMuted(alert.fromId)) return;
     usePresenceStore.getState().applyAlert({ ...alert, label: labelOf(alert) });
+  });
+
+  service.on('read', (receipt) => {
+    if (useBlockStore.getState().isMuted(receipt.fromId)) return;
+    useChatStore.getState().noteReadUpTo(receipt.fromId, receipt.upTo);
   });
 
   service.on('reaction', (reaction) => {
@@ -316,6 +323,23 @@ export async function announceAvatarChange() {
   // from the previous photo.
   avatarSentAt.clear();
   await service.broadcastProfile(myProfile, useAvatarStore.getState().myAvatarHash());
+}
+
+/**
+ * Tells someone we have read what they sent us, up to their newest message.
+ *
+ * One mark for the whole conversation rather than one per message, and
+ * sending it again is harmless - which is what makes it survive a radio
+ * that loses things. Nothing is sent when there is nothing new to
+ * acknowledge, so an open chat doesn't chatter.
+ */
+export async function sendReadReceipt(myProfile: Profile, toId: string) {
+  if (!service) return;
+  const upTo = useChatStore.getState().newestIncoming(toId, myProfile.id);
+  if (upTo === 0) return;
+  if (lastReceiptSent.get(toId) === upTo) return;
+  lastReceiptSent.set(toId, upTo);
+  await service.sendReadReceipt({ fromId: myProfile.id, toId, upTo });
 }
 
 /** Reacts to someone else's stand-up alert. Broadcasts don't loop back, so it lands locally first. */

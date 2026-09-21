@@ -6,6 +6,7 @@ import { RootNavigator } from './src/navigation/RootNavigator';
 import { useProfileStore } from './src/state/profileStore';
 import { useAvatarStore } from './src/state/avatarStore';
 import { useBlockStore } from './src/state/blockStore';
+import { useChatStore } from './src/state/chatStore';
 import { ThemeProvider, useAppTheme } from './src/theme/ThemeContext';
 
 function App() {
@@ -27,13 +28,15 @@ function AppContent() {
   const profile = useProfileStore((state) => state.profile);
   const hydrateAvatar = useAvatarStore((state) => state.hydrate);
   const hydrateMuted = useBlockStore((state) => state.hydrate);
+  const hydrateChats = useChatStore((state) => state.hydrate);
   const avatarsHydrated = useAvatarStore((state) => state.hydrated);
 
   useEffect(() => {
     void hydrate();
     void hydrateAvatar();
     void hydrateMuted();
-  }, [hydrate, hydrateAvatar, hydrateMuted]);
+    void hydrateChats();
+  }, [hydrate, hydrateAvatar, hydrateMuted, hydrateChats]);
 
   // Both, not just the profile: the mesh starts as soon as this screen goes
   // away, and starting it before the photos are off disk means announcing
