@@ -22,3 +22,9 @@ export function quoteOf(message: { fromNickname: string; body: string; imageBase
     excerpt: text.length > EXCERPT_CHARS ? `${text.slice(0, EXCERPT_CHARS - 1)}…` : text,
   };
 }
+
+/** The clock time a message was sent, as a conversation shows it. */
+export function formatTime(sentAt: number): string {
+  const date = new Date(sentAt);
+  return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
+}

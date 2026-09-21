@@ -9,6 +9,7 @@ import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
 import { useProfileStore } from '../../state/profileStore';
+import { formatTime } from '../../utils/id';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import { formatLocation } from '../../utils/location';
 import { VENUES } from '../../venues';
@@ -25,11 +26,6 @@ interface Conversation {
 function preview(message: ChatMessage, myId: string | undefined): string {
   const body = message.imageBase64 && !message.body ? 'Foto' : message.body;
   return message.fromId === myId ? `Tú: ${body}` : body;
-}
-
-function formatTime(at: number): string {
-  const date = new Date(at);
-  return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
 
 /** The cabin's conversation list: everyone nearby, with the chat you already have with them. */

@@ -20,7 +20,7 @@ import { useProfileStore } from '../../state/profileStore';
 import { sendPrivateChatMessage } from '../../mesh/meshController';
 import { colorForPeer } from '../../theme';
 import { formatLocation } from '../../utils/location';
-import { quoteOf } from '../../utils/id';
+import { formatTime, quoteOf } from '../../utils/id';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import type { ChatMessage, ReplyQuote } from '../../types';
 
@@ -71,6 +71,8 @@ export function ChatScreen({ route, navigation }: Props) {
     bubbleTheirs: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
     bubbleTextMine: { ...typography.body, color: colors.background },
     bubbleTextTheirs: { ...typography.body },
+    time: { fontSize: 11, color: colors.textMuted, alignSelf: 'flex-end' as const, marginTop: 2 },
+    timeMine: { fontSize: 11, color: colors.background, opacity: 0.6, alignSelf: 'flex-end' as const, marginTop: 2 },
     image: { width: 220, height: 220, borderRadius: radii.sm, marginBottom: spacing(1) },
     inputRow: {
       flexDirection: 'row' as const,
@@ -164,6 +166,7 @@ export function ChatScreen({ route, navigation }: Props) {
               </Pressable>
             )}
             <Text style={mine ? styles.bubbleTextMine : styles.bubbleTextTheirs}>{item.body}</Text>
+            <Text style={mine ? styles.timeMine : styles.time}>{formatTime(item.sentAt)}</Text>
           </View>
         </View>
       </SwipeToReply>

@@ -9,6 +9,7 @@ import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { CabinSeats } from '../../components/CabinSeats';
 import { MeshStatus } from '../../components/MeshStatus';
 import { PresenceBanner } from '../../components/PresenceBanner';
+import { RadioWarning } from '../../components/RadioWarning';
 import { PrivateMessageToast } from '../../components/PrivateMessageToast';
 import { QuotedMessage } from '../../components/QuotedMessage';
 import { ReplyComposerBar } from '../../components/ReplyComposerBar';
@@ -21,7 +22,7 @@ import { sendGroupChatMessage, startMesh, togglePresence } from '../../mesh/mesh
 import { ensureNotificationPermission, initNotifications } from '../../notifications/notifier';
 import { colorForPeer } from '../../theme';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
-import { quoteOf } from '../../utils/id';
+import { formatTime, quoteOf } from '../../utils/id';
 import { VENUES } from '../../venues';
 import type { ChatMessage, ReplyQuote } from '../../types';
 
@@ -110,6 +111,10 @@ export function CabinChatScreen({ navigation }: Props) {
     senderNameMine: { fontSize: 12, fontWeight: '700' as const, color: colors.background },
     bodyText: { ...typography.body },
     bodyTextMine: { ...typography.body, color: colors.background },
+    // Small and aligned to the trailing edge, so it reads as a footnote to
+    // the message rather than as part of it.
+    time: { fontSize: 11, color: colors.textMuted, alignSelf: 'flex-end' as const, marginTop: 2 },
+    timeMine: { fontSize: 11, color: colors.background, opacity: 0.6, alignSelf: 'flex-end' as const, marginTop: 2 },
     inputRow: {
       flexDirection: 'row' as const,
       alignItems: 'center' as const,
@@ -186,6 +191,7 @@ export function CabinChatScreen({ navigation }: Props) {
             </View>
             {item.replyTo && <QuotedMessage quote={item.replyTo} inverted={mine} />}
             <Text style={mine ? styles.bodyTextMine : styles.bodyText}>{item.body}</Text>
+            <Text style={mine ? styles.timeMine : styles.time}>{formatTime(item.sentAt)}</Text>
           </View>
         </Pressable>
       </SwipeToReply>
@@ -224,6 +230,7 @@ export function CabinChatScreen({ navigation }: Props) {
       <PrivateMessageToast onOpen={(peerId) => navigation.navigate('Chat', { peerId })} />
 
       <View style={styles.bannerArea}>
+        <RadioWarning />
         <PresenceBanner onOpenChat={(peerId) => navigation.navigate('Chat', { peerId })} />
       </View>
 
