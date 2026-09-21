@@ -172,7 +172,7 @@ export function CabinChatScreen({ navigation }: Props) {
     >
       <View style={styles.header}>
         <View style={styles.headerSide}>
-          <GlassButton onPress={() => navigation.navigate('MyProfile')}>
+          <GlassButton title="Mi perfil" onPress={() => navigation.navigate('MyProfile')}>
             <Text style={styles.myProfileButtonText} numberOfLines={1}>
               Mi perfil
             </Text>
@@ -182,7 +182,12 @@ export function CabinChatScreen({ navigation }: Props) {
           {venue.spaceTitle}
         </Text>
         <View style={[styles.headerSide, styles.headerSideRight]}>
-          <GlassButton variant="accent" onPress={() => navigation.navigate('Passengers')}>
+          <GlassButton
+            variant="accent"
+            title={venue.peopleLabel}
+            badge={unreadTotal > 0 ? (unreadTotal > 9 ? '9+' : String(unreadTotal)) : undefined}
+            onPress={() => navigation.navigate('Passengers')}
+          >
             <Text style={styles.passengersButtonText} numberOfLines={1}>
               {venue.peopleLabel}
             </Text>
@@ -240,7 +245,7 @@ export function CabinChatScreen({ navigation }: Props) {
             placeholderTextColor={theme.colors.textMuted}
             onSubmitEditing={handleSend}
           />
-          <GlassButton variant="accent" onPress={handleSend}>
+          <GlassButton variant="accent" title="Enviar" onPress={handleSend}>
             <Text style={styles.sendButtonText}>Enviar</Text>
           </GlassButton>
         </View>

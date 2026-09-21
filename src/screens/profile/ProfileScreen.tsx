@@ -85,7 +85,13 @@ export function ProfileScreen({ route, navigation }: Props) {
               <Text style={styles.openChatText}>Abrir conversación</Text>
             </Pressable>
           ) : (
-            <GlassButton variant="accent" style={styles.cta} onPress={() => navigation.navigate('Chat', { peerId })}>
+            <GlassButton
+              variant="accent"
+              size="lg"
+              title="Enviar mensaje privado"
+              style={styles.cta}
+              onPress={() => navigation.navigate('Chat', { peerId })}
+            >
               <Text style={styles.ctaText}>Enviar mensaje privado</Text>
             </GlassButton>
           )}

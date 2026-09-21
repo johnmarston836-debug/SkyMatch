@@ -20,12 +20,13 @@
     "react-native": "*"
   },
   "codegenConfig": {
-    "name": "SkyMatchGlassViewSpec",
+    "name": "SkyMatchGlassSpec",
     "type": "components",
     "jsSrcsDir": "js",
     "ios": {
       "componentProvider": {
-        "SkyMatchGlassView": "SkyMatchGlassView"
+        "SkyMatchGlassView": "SkyMatchGlassView",
+        "SkyMatchGlassButton": "SkyMatchGlassButton"
       }
     }
   }

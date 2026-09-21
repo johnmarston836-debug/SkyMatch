@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Animated,
   Pressable,
@@ -7,13 +7,22 @@ import {
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import { GlassView } from 'skymatch-peripheral/glass';
+import { GlassButtonView, GlassView } from 'skymatch-peripheral/glass';
 import { radii } from '../theme';
-import { useThemedStyles } from '../theme/ThemeContext';
+import { useAppTheme, useThemedStyles } from '../theme/ThemeContext';
 
 interface Props {
   onPress: () => void;
-  children: React.ReactNode;
+  /**
+   * The label, when it is plain text. With it, the button is SwiftUI's own
+   * glass button - the one Apple draws and animates - instead of one of
+   * ours. Without it, `children` are rendered on a glass surface, which is
+   * what the buttons made of our own pictograms need.
+   */
+  title?: string;
+  /** Small count beside the label, as on the people button. */
+  badge?: string;
+  children?: React.ReactNode;
   /** 'plain' borrows the background; 'accent' is the primary action; 'active' marks a toggle that is on. */
   variant?: 'plain' | 'accent' | 'active';
   /** A circular icon button rather than a pill with a label. */
@@ -43,6 +52,8 @@ interface Props {
  */
 export function GlassButton({
   onPress,
+  title,
+  badge,
   children,
   variant = 'plain',
   round = false,
@@ -53,6 +64,11 @@ export function GlassButton({
   accessibilityLabel,
 }: Props) {
   const scale = useRef(new Animated.Value(1)).current;
+  // SwiftUI measures the label; Yoga can't. The button reports the size it
+  // wants and it is applied back as a style - one extra pass, against a C++
+  // shadow node as the only alternative.
+  const [measured, setMeasured] = useState<{ width: number; height: number } | null>(null);
+  const accent = useAppTheme().colors[variant === 'active' ? 'accentAlt' : 'accent'];
   const styles = useThemedStyles((theme) => {
     const { colors, spacing } = theme;
     const light = theme.scheme === 'light';
@@ -125,6 +141,25 @@ export function GlassButton({
       },
     };
   });
+
+  if (GlassButtonView !== null && title !== undefined) {
+    return (
+      <GlassButtonView
+        title={title}
+        badge={badge}
+        prominent={variant !== 'plain'}
+        enabled={!disabled}
+        tint={variant === 'plain' ? undefined : accent}
+        onPress={() => !disabled && onPress()}
+        onSizeChange={(event) => setMeasured(event.nativeEvent)}
+        style={[
+          // A full-width action stretches; a pill is as wide as its label.
+          size === 'lg' ? { height: measured?.height } : measured ?? undefined,
+          style,
+        ]}
+      />
+    );
+  }
 
   const spring = (toValue: number) =>
     Animated.spring(scale, {

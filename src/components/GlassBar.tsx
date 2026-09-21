@@ -22,10 +22,10 @@ interface Props {
 export function GlassBar({ children, style, onLayout }: Props) {
   const styles = useThemedStyles(({ colors, scheme }) => ({
     bar: {
-      // Under the pane: what the strip falls back to, and what keeps the
-      // text legible over a busy conversation when it is there.
-      backgroundColor: scheme === 'light' ? 'rgba(255,255,255,0.82)' : 'rgba(10,10,10,0.78)',
-      borderTopWidth: StyleSheet.hairlineWidth,
+      // Nothing of our own when the material is there: the point is to see
+      // the conversation through it. What is left is the pre-iOS-26 strip.
+      backgroundColor: GlassView !== null ? 'transparent' : scheme === 'light' ? 'rgba(255,255,255,0.86)' : 'rgba(10,10,10,0.82)',
+      borderTopWidth: GlassView !== null ? 0 : StyleSheet.hairlineWidth,
       borderTopColor: colors.border,
     },
     content: { backgroundColor: 'transparent' },

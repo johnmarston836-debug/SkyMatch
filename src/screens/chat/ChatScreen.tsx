@@ -208,7 +208,7 @@ export function ChatScreen({ route, navigation }: Props) {
             placeholderTextColor={theme.colors.textMuted}
             onSubmitEditing={handleSend}
           />
-          <GlassButton variant="accent" onPress={handleSend}>
+          <GlassButton variant="accent" title="Enviar" onPress={handleSend}>
             <Text style={styles.sendButtonText}>Enviar</Text>
           </GlassButton>
         </View>

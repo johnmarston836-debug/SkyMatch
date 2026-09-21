@@ -1,13 +1,14 @@
 const { Platform } = require('react-native');
 
 /**
- * The native glass pane, or null where there isn't one.
+ * The native glass pieces, or null where there aren't any.
  *
- * Resolved in a try/catch on purpose: if the native side didn't build, or
- * the component never registered, the caller draws its own surface and the
- * app looks like it did before instead of losing every button.
+ * Resolved inside a try on purpose: if the native half didn't build, or the
+ * component never registered, callers fall back to drawing their own surface
+ * and the app looks like it did before instead of losing every button.
  */
 let GlassView = null;
+let GlassButtonView = null;
 
 if (Platform.OS === 'ios') {
   try {
@@ -15,6 +16,11 @@ if (Platform.OS === 'ios') {
   } catch {
     GlassView = null;
   }
+  try {
+    GlassButtonView = require('./js/SkyMatchGlassButtonNativeComponent').default ?? null;
+  } catch {
+    GlassButtonView = null;
+  }
 }
 
-module.exports = { GlassView, isSupported: GlassView !== null };
+module.exports = { GlassView, GlassButtonView, isSupported: GlassView !== null };

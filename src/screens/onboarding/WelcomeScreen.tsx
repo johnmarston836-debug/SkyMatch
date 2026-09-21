@@ -51,7 +51,7 @@ export function WelcomeScreen({ navigation }: Props) {
       </View>
 
       <View style={styles.footer}>
-        <GlassButton variant="accent" size="lg" onPress={() => navigation.navigate('Tutorial')}>
+        <GlassButton variant="accent" size="lg" title="Empezar" onPress={() => navigation.navigate('Tutorial')}>
           <Text style={styles.ctaText}>Empezar</Text>
         </GlassButton>
         <Text style={styles.disclaimer}>Nada sale de la sala: todo viaja de móvil a móvil por Bluetooth.</Text>

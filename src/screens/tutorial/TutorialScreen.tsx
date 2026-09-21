@@ -137,7 +137,12 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
           <View style={[styles.dot, page === 0 && styles.dotActive]} />
           <View style={[styles.dot, page === 1 && styles.dotActive]} />
         </View>
-        <GlassButton variant="accent" size="lg" onPress={goNext}>
+        <GlassButton
+          variant="accent"
+          size="lg"
+          title={page === 0 ? 'Siguiente' : finishLabel}
+          onPress={goNext}
+        >
           <Text style={styles.ctaText}>{page === 0 ? 'Siguiente' : finishLabel}</Text>
         </GlassButton>
       </View>
