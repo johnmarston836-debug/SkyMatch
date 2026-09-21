@@ -8,6 +8,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { GlassButtonView, GlassView } from 'skymatch-peripheral/glass';
+import { NativeFallback } from './NativeFallback';
 import { radii } from '../theme';
 import { useAppTheme, useThemedStyles } from '../theme/ThemeContext';
 
@@ -142,25 +143,6 @@ export function GlassButton({
     };
   });
 
-  if (GlassButtonView !== null && title !== undefined) {
-    return (
-      <GlassButtonView
-        title={title}
-        badge={badge}
-        prominent={variant !== 'plain'}
-        enabled={!disabled}
-        tint={variant === 'plain' ? undefined : accent}
-        onGlassPress={() => !disabled && onPress()}
-        onGlassSize={(event) => setMeasured(event.nativeEvent)}
-        style={[
-          // A full-width action stretches; a pill is as wide as its label.
-          size === 'lg' ? { height: measured?.height } : measured ?? undefined,
-          style,
-        ]}
-      />
-    );
-  }
-
   const spring = (toValue: number) =>
     Animated.spring(scale, {
       toValue,
@@ -169,7 +151,7 @@ export function GlassButton({
       bounciness: 6,
     }).start();
 
-  return (
+  const drawn = (
     <Animated.View style={[styles.shadow, { transform: [{ scale }] }, style]}>
       <Pressable
         accessibilityRole="button"
@@ -197,5 +179,26 @@ export function GlassButton({
         {children}
       </Pressable>
     </Animated.View>
+  );
+
+  if (GlassButtonView === null || title === undefined) return drawn;
+
+  return (
+    <NativeFallback fallback={drawn}>
+      <GlassButtonView
+        title={title}
+        badge={badge}
+        prominent={variant !== 'plain'}
+        enabled={!disabled}
+        tint={variant === 'plain' ? undefined : accent}
+        onGlassPress={() => !disabled && onPress()}
+        onGlassSize={(event) => setMeasured(event.nativeEvent)}
+        style={[
+          // A full-width action stretches; a pill is as wide as its label.
+          size === 'lg' ? { height: measured?.height } : (measured ?? undefined),
+          style,
+        ]}
+      />
+    </NativeFallback>
   );
 }
