@@ -5,7 +5,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
 import { BackLink } from '../../components/BackLink';
-import { GlassButton } from '../../components/GlassButton';
+import { AppButton } from '../../components/AppButton';
 import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
@@ -85,14 +85,14 @@ export function ProfileScreen({ route, navigation }: Props) {
               <Text style={styles.openChatText}>Abrir conversación</Text>
             </Pressable>
           ) : (
-            <GlassButton
+            <AppButton
               variant="accent"
               size="lg"
               style={styles.cta}
               onPress={() => navigation.navigate('Chat', { peerId })}
             >
               <Text style={styles.ctaText}>Enviar mensaje privado</Text>
-            </GlassButton>
+            </AppButton>
           )}
         </>
       )}

@@ -15,7 +15,7 @@ interface Props {
  * Nearly opaque rather than see-through: the messages scroll underneath it,
  * and text over text is unreadable long before it is pretty.
  */
-export function GlassBar({ children, style, onLayout }: Props) {
+export function ComposerBar({ children, style, onLayout }: Props) {
   const styles = useThemedStyles(({ colors, scheme }) => ({
     bar: {
       backgroundColor: scheme === 'light' ? 'rgba(255,255,255,0.94)' : 'rgba(10,10,10,0.94)',

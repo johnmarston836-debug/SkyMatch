@@ -3,7 +3,7 @@ import { Image, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/RootNavigator';
-import { GlassButton } from '../../components/GlassButton';
+import { AppButton } from '../../components/AppButton';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'Welcome'>;
@@ -51,9 +51,9 @@ export function WelcomeScreen({ navigation }: Props) {
       </View>
 
       <View style={styles.footer}>
-        <GlassButton variant="accent" size="lg" onPress={() => navigation.navigate('Tutorial')}>
+        <AppButton variant="accent" size="lg" onPress={() => navigation.navigate('Tutorial')}>
           <Text style={styles.ctaText}>Empezar</Text>
-        </GlassButton>
+        </AppButton>
         <Text style={styles.disclaimer}>Nada sale de la sala: todo viaja de móvil a móvil por Bluetooth.</Text>
       </View>
     </View>

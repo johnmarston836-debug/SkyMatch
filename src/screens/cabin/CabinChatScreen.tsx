@@ -7,8 +7,8 @@ import { useKeyboardPadding } from '../../hooks/useKeyboardPadding';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { CabinSeats } from '../../components/CabinSeats';
-import { GlassBar } from '../../components/GlassBar';
-import { GlassButton } from '../../components/GlassButton';
+import { ComposerBar } from '../../components/ComposerBar';
+import { AppButton } from '../../components/AppButton';
 import { MeshStatus } from '../../components/MeshStatus';
 import { PresenceBanner } from '../../components/PresenceBanner';
 import { PrivateMessageToast } from '../../components/PrivateMessageToast';
@@ -172,17 +172,17 @@ export function CabinChatScreen({ navigation }: Props) {
     >
       <View style={styles.header}>
         <View style={styles.headerSide}>
-          <GlassButton onPress={() => navigation.navigate('MyProfile')}>
+          <AppButton onPress={() => navigation.navigate('MyProfile')}>
             <Text style={styles.myProfileButtonText} numberOfLines={1}>
               Mi perfil
             </Text>
-          </GlassButton>
+          </AppButton>
         </View>
         <Text style={styles.title} numberOfLines={1}>
           {venue.spaceTitle}
         </Text>
         <View style={[styles.headerSide, styles.headerSideRight]}>
-          <GlassButton variant="accent" onPress={() => navigation.navigate('Passengers')}>
+          <AppButton variant="accent" onPress={() => navigation.navigate('Passengers')}>
             <Text style={styles.passengersButtonText} numberOfLines={1}>
               {venue.peopleLabel}
             </Text>
@@ -191,7 +191,7 @@ export function CabinChatScreen({ navigation }: Props) {
                 <Text style={styles.unreadBadgeText}>{unreadTotal > 9 ? '9+' : unreadTotal}</Text>
               </View>
             )}
-          </GlassButton>
+          </AppButton>
         </View>
       </View>
 
@@ -221,17 +221,17 @@ export function CabinChatScreen({ navigation }: Props) {
         }
       />
 
-      <GlassBar style={styles.composer} onLayout={(event) => setComposerHeight(event.nativeEvent.layout.height)}>
+      <ComposerBar style={styles.composer} onLayout={(event) => setComposerHeight(event.nativeEvent.layout.height)}>
         <ReplyComposerBar quote={replyTo} onCancel={() => setReplyTo(null)} />
 
         <View style={styles.inputRow}>
-          <GlassButton round variant={alertActive ? 'active' : 'plain'} onPress={() => void togglePresence(myProfile)}>
+          <AppButton round variant={alertActive ? 'active' : 'plain'} onPress={() => void togglePresence(myProfile)}>
             <Image
               source={alertActive ? venue.alertIconActive : venue.alertIcon}
               style={[styles.standButtonIcon, alertActive && styles.standButtonIconActive]}
               resizeMode="contain"
             />
-          </GlassButton>
+          </AppButton>
           <TextInput
             style={styles.input}
             value={draft}
@@ -240,11 +240,11 @@ export function CabinChatScreen({ navigation }: Props) {
             placeholderTextColor={theme.colors.textMuted}
             onSubmitEditing={handleSend}
           />
-          <GlassButton variant="accent" onPress={handleSend}>
+          <AppButton variant="accent" onPress={handleSend}>
             <Text style={styles.sendButtonText}>Enviar</Text>
-          </GlassButton>
+          </AppButton>
         </View>
-      </GlassBar>
+      </ComposerBar>
     </Animated.View>
   );
 }

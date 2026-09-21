@@ -9,8 +9,8 @@ import { useKeyboardPadding } from '../../hooks/useKeyboardPadding';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
-import { GlassBar } from '../../components/GlassBar';
-import { GlassButton } from '../../components/GlassButton';
+import { ComposerBar } from '../../components/ComposerBar';
+import { AppButton } from '../../components/AppButton';
 import { PhotoViewer } from '../../components/PhotoViewer';
 import { QuotedMessage } from '../../components/QuotedMessage';
 import { ReplyComposerBar } from '../../components/ReplyComposerBar';
@@ -193,13 +193,13 @@ export function ChatScreen({ route, navigation }: Props) {
       />
       <PhotoViewer imageBase64={zoomedPhoto} onClose={() => setZoomedPhoto(null)} />
 
-      <GlassBar style={styles.composer} onLayout={(event) => setComposerHeight(event.nativeEvent.layout.height)}>
+      <ComposerBar style={styles.composer} onLayout={(event) => setComposerHeight(event.nativeEvent.layout.height)}>
         <ReplyComposerBar quote={replyTo} onCancel={() => setReplyTo(null)} />
 
         <View style={styles.inputRow}>
-          <GlassButton round onPress={handleAttachImage} accessibilityLabel="Enviar una foto">
+          <AppButton round onPress={handleAttachImage} accessibilityLabel="Enviar una foto">
             <Image source={require('../../assets/icons/camera.png')} style={styles.attachButtonIcon} resizeMode="contain" />
-          </GlassButton>
+          </AppButton>
           <TextInput
             style={styles.input}
             value={draft}
@@ -208,11 +208,11 @@ export function ChatScreen({ route, navigation }: Props) {
             placeholderTextColor={theme.colors.textMuted}
             onSubmitEditing={handleSend}
           />
-          <GlassButton variant="accent" onPress={handleSend}>
+          <AppButton variant="accent" onPress={handleSend}>
             <Text style={styles.sendButtonText}>Enviar</Text>
-          </GlassButton>
+          </AppButton>
         </View>
-      </GlassBar>
+      </ComposerBar>
     </Animated.View>
   );
 }

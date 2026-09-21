@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text } from 'react-native';
-import { GlassButton } from './GlassButton';
+import { AppButton } from './AppButton';
 import { useThemedStyles } from '../theme/ThemeContext';
 
 /**
@@ -13,8 +13,8 @@ export function BackLink({ onPress, label = 'Volver' }: { onPress: () => void; l
   }));
 
   return (
-    <GlassButton onPress={onPress} accessibilityLabel={label}>
+    <AppButton onPress={onPress} accessibilityLabel={label}>
       <Text style={styles.text}>‹ {label}</Text>
-    </GlassButton>
+    </AppButton>
   );
 }

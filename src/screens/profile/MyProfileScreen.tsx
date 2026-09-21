@@ -17,7 +17,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
 import { BackLink } from '../../components/BackLink';
-import { GlassButton } from '../../components/GlassButton';
+import { AppButton } from '../../components/AppButton';
 import { VenueLocationChooser } from '../../components/VenueLocationChooser';
 import { useProfileStore } from '../../state/profileStore';
 import { useAvatarStore } from '../../state/avatarStore';
@@ -232,9 +232,9 @@ export function MyProfileScreen({ navigation }: Props) {
           </View>
         )}
 
-        <GlassButton variant="accent" size="lg" style={styles.cta} disabled={!canSave} onPress={handleSave}>
+        <AppButton variant="accent" size="lg" style={styles.cta} disabled={!canSave} onPress={handleSave}>
           <Text style={styles.ctaText}>Guardar cambios</Text>
-        </GlassButton>
+        </AppButton>
 
         <Pressable style={styles.secondaryLink} onPress={() => navigation.navigate('HowItWorks')}>
           <Text style={styles.secondaryLinkText}>Cómo funciona SkyMatch</Text>

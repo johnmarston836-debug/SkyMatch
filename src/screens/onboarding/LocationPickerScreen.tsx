@@ -7,7 +7,7 @@ import { BackLink } from '../../components/BackLink';
 import { LocationPicker } from '../../components/LocationPicker';
 import { VENUES } from '../../venues';
 import { defaultLocation, formatLocation } from '../../utils/location';
-import { GlassButton } from '../../components/GlassButton';
+import { AppButton } from '../../components/AppButton';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import type { UserLocation } from '../../types';
 
@@ -67,14 +67,14 @@ export function LocationPickerScreen({ route, navigation }: Props) {
 
         <LocationPicker location={location} onChange={setLocation} />
 
-        <GlassButton
+        <AppButton
           variant="accent"
           size="lg"
           style={styles.cta}
           onPress={() => navigation.navigate('ProfileSetup', { location })}
         >
           <Text style={styles.ctaText}>Continuar</Text>
-        </GlassButton>
+        </AppButton>
       </ScrollView>
     </KeyboardAvoidingView>
   );

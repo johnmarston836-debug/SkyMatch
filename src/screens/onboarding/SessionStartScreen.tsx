@@ -8,7 +8,7 @@ import { useProfileStore } from '../../state/profileStore';
 import { announceProfileUpdate } from '../../mesh/meshController';
 import { VENUES } from '../../venues';
 import { defaultLocation } from '../../utils/location';
-import { GlassButton } from '../../components/GlassButton';
+import { AppButton } from '../../components/AppButton';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import type { UserLocation } from '../../types';
 
@@ -72,9 +72,9 @@ export function SessionStartScreen({ navigation }: Props) {
 
         <VenueLocationChooser location={location} onChange={setLocation} />
 
-        <GlassButton variant="accent" size="lg" style={styles.cta} onPress={handleEnter}>
+        <AppButton variant="accent" size="lg" style={styles.cta} onPress={handleEnter}>
           <Text style={styles.ctaText}>{venue.enterCta}</Text>
-        </GlassButton>
+        </AppButton>
       </ScrollView>
     </KeyboardAvoidingView>
   );

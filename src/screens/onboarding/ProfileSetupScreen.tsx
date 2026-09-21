@@ -4,7 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/RootNavigator';
 import { useProfileStore } from '../../state/profileStore';
-import { GlassButton } from '../../components/GlassButton';
+import { AppButton } from '../../components/AppButton';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import { formatLocation } from '../../utils/location';
 import { VENUES } from '../../venues';
@@ -82,9 +82,9 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
         compartirlo.
       </Text>
 
-      <GlassButton variant="accent" size="lg" style={styles.cta} disabled={!canContinue} onPress={handleContinue}>
+      <AppButton variant="accent" size="lg" style={styles.cta} disabled={!canContinue} onPress={handleContinue}>
         <Text style={styles.ctaText}>{venue.enterCta}</Text>
-      </GlassButton>
+      </AppButton>
     </View>
   );
 }
