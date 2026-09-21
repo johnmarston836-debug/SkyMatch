@@ -14,9 +14,15 @@ export interface NativeProps extends ViewProps {
   prominent?: WithDefault<boolean, false>;
   enabled?: WithDefault<boolean, true>;
   tint?: ColorValue;
-  onPress?: DirectEventHandler<null>;
+  /**
+   * Named apart from `onPress` on purpose. Every React Native view already
+   * registers `topPress` as a bubbling event, and a component that declares
+   * the same name as a direct one fails to register at all - "Event cannot
+   * be both direct and bubbling".
+   */
+  onGlassPress?: DirectEventHandler<null>;
   /** The size SwiftUI wants; Yoga cannot measure SwiftUI text. */
-  onSizeChange?: DirectEventHandler<Readonly<{ width: Double; height: Double }>>;
+  onGlassSize?: DirectEventHandler<Readonly<{ width: Double; height: Double }>>;
 }
 
 export default codegenNativeComponent<NativeProps>('SkyMatchGlassButton') as HostComponent<NativeProps>;

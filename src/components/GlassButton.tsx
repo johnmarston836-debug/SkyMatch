@@ -150,8 +150,8 @@ export function GlassButton({
         prominent={variant !== 'plain'}
         enabled={!disabled}
         tint={variant === 'plain' ? undefined : accent}
-        onPress={() => !disabled && onPress()}
-        onSizeChange={(event) => setMeasured(event.nativeEvent)}
+        onGlassPress={() => !disabled && onPress()}
+        onGlassSize={(event) => setMeasured(event.nativeEvent)}
         style={[
           // A full-width action stretches; a pill is as wide as its label.
           size === 'lg' ? { height: measured?.height } : measured ?? undefined,

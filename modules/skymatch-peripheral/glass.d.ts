@@ -16,8 +16,9 @@ export interface GlassButtonProps extends ViewProps {
   prominent?: boolean;
   enabled?: boolean;
   tint?: ColorValue;
-  onPress?: (event: NativeSyntheticEvent<null>) => void;
-  onSizeChange?: (event: NativeSyntheticEvent<Readonly<{ width: number; height: number }>>) => void;
+  /** Not `onPress`: that name is already a bubbling event on every view. */
+  onGlassPress?: (event: NativeSyntheticEvent<null>) => void;
+  onGlassSize?: (event: NativeSyntheticEvent<Readonly<{ width: number; height: number }>>) => void;
 }
 
 /** Null where the native pieces aren't available, so callers can draw their own. */

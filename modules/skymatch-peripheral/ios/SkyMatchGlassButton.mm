@@ -46,7 +46,7 @@ using namespace facebook::react;
         return;
       }
       std::static_pointer_cast<SkyMatchGlassButtonEventEmitter const>(self->_eventEmitter)
-          ->onPress(SkyMatchGlassButtonEventEmitter::OnPress{});
+          ->onGlassPress(SkyMatchGlassButtonEventEmitter::OnGlassPress{});
     };
     _button.onMeasured = ^(CGFloat width, CGFloat height) {
       __strong __typeof(weakSelf) self = weakSelf;
@@ -54,7 +54,7 @@ using namespace facebook::react;
         return;
       }
       std::static_pointer_cast<SkyMatchGlassButtonEventEmitter const>(self->_eventEmitter)
-          ->onSizeChange(SkyMatchGlassButtonEventEmitter::OnSizeChange{
+          ->onGlassSize(SkyMatchGlassButtonEventEmitter::OnGlassSize{
               .width = (double)width,
               .height = (double)height,
           });
