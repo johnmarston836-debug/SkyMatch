@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   Pressable,
@@ -69,6 +69,18 @@ export function GlassButton({
   // wants and it is applied back as a style - one extra pass, against a C++
   // shadow node as the only alternative.
   const [measured, setMeasured] = useState<{ width: number; height: number } | null>(null);
+  /**
+   * A native button that never reports a size is a button nobody can see,
+   * and it fails silently: an unregistered component renders as nothing
+   * rather than throwing, so no error boundary catches it. If no size has
+   * arrived shortly after mounting, the drawn button takes over.
+   */
+  const [nativeSilent, setNativeSilent] = useState(false);
+  useEffect(() => {
+    if (measured !== null) return;
+    const timer = setTimeout(() => setNativeSilent(true), 700);
+    return () => clearTimeout(timer);
+  }, [measured]);
   const accent = useAppTheme().colors[variant === 'active' ? 'accentAlt' : 'accent'];
   const styles = useThemedStyles((theme) => {
     const { colors, spacing } = theme;
@@ -181,7 +193,7 @@ export function GlassButton({
     </Animated.View>
   );
 
-  if (GlassButtonView === null || title === undefined) return drawn;
+  if (GlassButtonView === null || title === undefined || nativeSilent) return drawn;
 
   return (
     <NativeFallback fallback={drawn}>

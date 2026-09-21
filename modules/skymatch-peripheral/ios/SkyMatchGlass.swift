@@ -149,7 +149,11 @@ public final class SkyMatchGlassButtonHost: UIView {
    itself and tells the JavaScript side, which applies it back as a style -
    one extra pass, and the alternative is a C++ shadow node.
    */
-  @objc public var onMeasured: ((CGFloat, CGFloat) -> Void)?
+  @objc public var onMeasured: ((CGFloat, CGFloat) -> Void)? {
+    // Assigned after init, so the first measurement happens before there is
+    // anyone to hand it to. Report again the moment there is.
+    didSet { report() }
+  }
 
   private var host: UIHostingController<AnyView>?
   private var lastReported: CGSize = .zero
@@ -205,12 +209,19 @@ public final class SkyMatchGlassButtonHost: UIView {
       fitted = host.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize)
     }
     guard fitted.width > 0, fitted.height > 0 else { return }
+
+    // Bail out before recording anything when there is nobody listening.
+    // Recording it here and returning is what made the button invisible: the
+    // size was marked as delivered, every later pass saw no change, and
+    // JavaScript was left laying out a view of no size at all.
+    guard let onMeasured else { return }
+
     // Only when it actually changed: this runs from layout, and feeding the
     // same size back into layout on every pass is a loop.
     guard abs(fitted.width - lastReported.width) > 0.5 || abs(fitted.height - lastReported.height) > 0.5 else {
       return
     }
     lastReported = fitted
-    onMeasured?(fitted.width, fitted.height)
+    onMeasured(fitted.width, fitted.height)
   }
 }
