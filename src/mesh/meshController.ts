@@ -11,7 +11,7 @@ import { notifyPrivateMessage } from '../notifications/notifier';
 import { requestBlePermissions } from '../utils/permissions';
 import { newId } from '../utils/id';
 import { formatLocation, normalizeLocation } from '../utils/location';
-import { VENUES } from '../venues';
+import { venueOf } from '../venues';
 import type {
   ChatMessage,
   PresenceAlert,
@@ -269,7 +269,7 @@ export async function sendPrivateChatMessage(
 export async function togglePresence(myProfile: Profile) {
   if (!service) return;
   const currentId = usePresenceStore.getState().myActiveAlertId;
-  const status = VENUES[myProfile.location.kind].alertStatus;
+  const status = venueOf(myProfile.location.kind).alertStatus;
 
   if (currentId) {
     const alert: PresenceAlert = {

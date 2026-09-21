@@ -20,6 +20,7 @@ import { useProfileStore } from '../../state/profileStore';
 import { sendPrivateChatMessage, sendReadReceipt } from '../../mesh/meshController';
 import { colorForPeer } from '../../theme';
 import { formatLocation } from '../../utils/location';
+import { t } from '../../i18n';
 import { formatTime, quoteOf } from '../../utils/id';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import type { ChatMessage, ReplyQuote } from '../../types';
@@ -111,7 +112,7 @@ export function ChatScreen({ route, navigation }: Props) {
   }));
 
   useLayoutEffect(() => {
-    navigation.setOptions({ title: peerNickname ?? 'Privado' });
+    navigation.setOptions({ title: peerNickname ?? t.chat.title });
   }, [navigation, peerNickname]);
 
   // While this conversation is on screen its messages are read as they land,
@@ -152,7 +153,7 @@ export function ChatScreen({ route, navigation }: Props) {
     const asset = result.assets?.[0];
     if (!asset?.base64) return;
     autoScroll.stickToEnd();
-    void sendPrivateChatMessage(myProfile, peerId, draft.trim() || 'Foto', asset.base64, replyTo ?? undefined);
+    void sendPrivateChatMessage(myProfile, peerId, draft.trim() || t.common.photo, asset.base64, replyTo ?? undefined);
     setDraft('');
     setReplyTo(null);
   };
@@ -184,7 +185,7 @@ export function ChatScreen({ route, navigation }: Props) {
             <Text style={mine ? styles.bubbleTextMine : styles.bubbleTextTheirs}>{item.body}</Text>
             <Text style={mine ? styles.timeMine : styles.time}>{formatTime(item.sentAt)}</Text>
           </View>
-          {item.id === lastSeenMine && <Text style={styles.seen}>Visto</Text>}
+          {item.id === lastSeenMine && <Text style={styles.seen}>{t.chat.seen}</Text>}
         </View>
       </SwipeToReply>
     );
@@ -202,7 +203,7 @@ export function ChatScreen({ route, navigation }: Props) {
           {peer.profile.contact ? (
             <Text style={styles.peerContact}>{peer.profile.contact}</Text>
           ) : (
-            <Text style={styles.peerContactEmpty}>No ha compartido contacto</Text>
+            <Text style={styles.peerContactEmpty}>{t.chat.noContact}</Text>
           )}
         </View>
       )}
@@ -229,12 +230,12 @@ export function ChatScreen({ route, navigation }: Props) {
           style={styles.input}
           value={draft}
           onChangeText={setDraft}
-          placeholder="Escribe un mensaje…"
+          placeholder={t.chat.placeholder}
           placeholderTextColor={theme.colors.textMuted}
           onSubmitEditing={handleSend}
         />
         <Pressable style={styles.sendButton} onPress={handleSend}>
-          <Text style={styles.sendButtonText}>Enviar</Text>
+          <Text style={styles.sendButtonText}>{t.common.send}</Text>
         </Pressable>
       </View>
     </Animated.View>

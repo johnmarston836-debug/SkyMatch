@@ -3,6 +3,7 @@ import { Image, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/RootNavigator';
+import { t } from '../../i18n';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'Welcome'>;
@@ -45,21 +46,17 @@ export function WelcomeScreen({ navigation }: Props) {
           <Image source={require('../../assets/icons/train.png')} style={styles.badgeIcon} resizeMode="contain" />
           <Image source={require('../../assets/icons/dumbbell.png')} style={styles.badgeIcon} resizeMode="contain" />
           <Image source={require('../../assets/icons/people.png')} style={styles.badgeIcon} resizeMode="contain" />
-          <Text style={styles.badge}>SIN WIFI NI DATOS</Text>
+          <Text style={styles.badge}>{t.welcome.badge}</Text>
         </View>
-        <Text style={styles.title}>El chat de la gente que tienes al lado</Text>
-        <Text style={styles.subtitle}>
-          Un avión, un tren, el gimnasio o un bar: un chat común con quien está cerca de ti,
-          identificado por dónde está o qué lleva puesto, usando el Bluetooth de tu propio móvil
-          para conectar directamente con los demás.
-        </Text>
+        <Text style={styles.title}>{t.welcome.title}</Text>
+        <Text style={styles.subtitle}>{t.welcome.body}</Text>
       </View>
 
       <View style={styles.footer}>
         <Pressable style={styles.cta} onPress={() => navigation.navigate('Tutorial')}>
-          <Text style={styles.ctaText}>Empezar</Text>
+          <Text style={styles.ctaText}>{t.welcome.cta}</Text>
         </Pressable>
-        <Text style={styles.disclaimer}>Nada sale de la sala: todo viaja de móvil a móvil por Bluetooth.</Text>
+        <Text style={styles.disclaimer}>{t.welcome.disclaimer}</Text>
       </View>
     </View>
   );

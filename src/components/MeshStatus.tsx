@@ -2,21 +2,22 @@ import React from 'react';
 import { Text, View } from 'react-native';
 import { useMeshStatusStore } from '../state/meshStatusStore';
 import { USE_MOCK_MESH } from '../mesh/meshController';
+import { t } from '../i18n';
 import { useThemedStyles } from '../theme/ThemeContext';
 
-/** react-native-ble-plx's scanner states, in plain Spanish. */
+/** react-native-ble-plx's scanner states, in words. */
 function describeCentral(state: string | null): string {
   switch (state) {
     case 'PoweredOn':
-      return 'encendido';
+      return t.radio.on;
     case 'PoweredOff':
-      return 'apagado';
+      return t.radio.off;
     case 'Unauthorized':
-      return 'sin permiso';
+      return t.radio.noPermission;
     case 'Unsupported':
-      return 'no disponible';
+      return t.radio.unavailable;
     case null:
-      return 'iniciando…';
+      return t.radio.starting;
     default:
       return state;
   }
@@ -26,17 +27,17 @@ function describeCentral(state: string | null): string {
 function describePeripheral(state: number | null): string {
   switch (state) {
     case 5:
-      return 'encendido';
+      return t.radio.on;
     case 4:
-      return 'apagado';
+      return t.radio.off;
     case 3:
-      return 'sin permiso';
+      return t.radio.noPermission;
     case 2:
-      return 'no disponible';
+      return t.radio.unavailable;
     case null:
-      return 'sin respuesta';
+      return t.radio.noAnswer;
     default:
-      return 'iniciando…';
+      return t.radio.starting;
   }
 }
 
@@ -74,32 +75,32 @@ export function MeshStatus() {
 
   return (
     <View style={styles.card}>
-      <Text style={styles.label}>ESTADO DE LA RADIO</Text>
+      <Text style={styles.label}>{t.radio.panelLabel}</Text>
 
       <View style={styles.row}>
-        <Text style={styles.key}>Te ven (emitiendo)</Text>
+        <Text style={styles.key}>{t.radio.advertising}</Text>
         <Text style={[styles.value, advertisingBroken && styles.valueBad]}>
-          {status.peripheralSupported ? describePeripheral(status.peripheralState) : 'módulo no cargado'}
+          {status.peripheralSupported ? describePeripheral(status.peripheralState) : t.radio.moduleMissing}
         </Text>
       </View>
 
       <View style={styles.row}>
-        <Text style={styles.key}>Tú buscas (escaneo)</Text>
+        <Text style={styles.key}>{t.radio.scanning}</Text>
         <Text style={[styles.value, centralBroken && styles.valueBad]}>{describeCentral(status.centralState)}</Text>
       </View>
 
       <View style={styles.row}>
-        <Text style={styles.key}>Móviles detectados</Text>
+        <Text style={styles.key}>{t.radio.devices}</Text>
         <Text style={styles.value}>{status.nearby}</Text>
       </View>
 
       <View style={styles.row}>
-        <Text style={styles.key}>Conectados</Text>
+        <Text style={styles.key}>{t.radio.connected}</Text>
         <Text style={styles.value}>{status.connected}</Text>
       </View>
 
       <View style={styles.row}>
-        <Text style={styles.key}>Te escuchan</Text>
+        <Text style={styles.key}>{t.radio.listeners}</Text>
         <Text style={styles.value}>{status.subscribers}</Text>
       </View>
     </View>

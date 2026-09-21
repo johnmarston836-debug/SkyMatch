@@ -1,4 +1,5 @@
 import { formatSeat, packSeat, unpackSeat, MAX_ROW, SEAT_LETTERS } from './seat';
+import { t } from '../i18n';
 import type { MuscleGroup, OutfitColor, Seat, SeatLetter, UserLocation, VenueKind } from '../types';
 
 export const MAX_COACH = 20;
@@ -14,29 +15,21 @@ export const MUSCLE_GROUPS: MuscleGroup[] = [
   'fullbody',
 ];
 
-export const MUSCLE_LABELS: Record<MuscleGroup, string> = {
-  chest: 'Pecho',
-  back: 'Espalda',
-  legs: 'Pierna',
-  shoulders: 'Hombro',
-  arms: 'Brazo',
-  core: 'Core',
-  cardio: 'Cardio',
-  fullbody: 'Full body',
-};
-
 export const OUTFIT_COLORS: OutfitColor[] = ['black', 'white', 'grey', 'red', 'blue', 'green', 'yellow', 'pink'];
 
-/** Label and swatch for each colour. The swatch is what makes the list readable at a glance. */
-export const OUTFIT_COLOR_INFO: Record<OutfitColor, { label: string; hex: string }> = {
-  black: { label: 'Negro', hex: '#141414' },
-  white: { label: 'Blanco', hex: '#F5F5F5' },
-  grey: { label: 'Gris', hex: '#8E8E93' },
-  red: { label: 'Rojo', hex: '#E23B3B' },
-  blue: { label: 'Azul', hex: '#2F6BFF' },
-  green: { label: 'Verde', hex: '#2FA84F' },
-  yellow: { label: 'Amarillo', hex: '#E8B800' },
-  pink: { label: 'Rosa', hex: '#E45BA5' },
+/**
+ * The swatch for each colour, which is what makes the list readable at a
+ * glance. Its name is in the dictionaries: "red" is a word like any other.
+ */
+export const OUTFIT_COLOR_HEX: Record<OutfitColor, string> = {
+  black: '#141414',
+  white: '#F5F5F5',
+  grey: '#8E8E93',
+  red: '#E23B3B',
+  blue: '#2F6BFF',
+  green: '#2FA84F',
+  yellow: '#E8B800',
+  pink: '#E45BA5',
 };
 
 export const DEFAULT_SEAT: Seat = { row: 14, letter: 'A' };
@@ -64,11 +57,11 @@ export function formatLocation(location: UserLocation): string {
     case 'plane':
       return formatSeat(location.seat);
     case 'train':
-      return `V${location.coach} · ${formatSeat(location.seat)}`;
+      return `${t.location.coachShort}${location.coach} · ${formatSeat(location.seat)}`;
     case 'gym':
-      return MUSCLE_LABELS[location.muscle];
+      return t.muscles[location.muscle];
     case 'public':
-      return OUTFIT_COLOR_INFO[location.color].label;
+      return t.colors[location.color];
   }
 }
 
@@ -76,21 +69,21 @@ export function formatLocation(location: UserLocation): string {
 export function describeLocation(location: UserLocation): string {
   switch (location.kind) {
     case 'plane':
-      return `Asiento ${formatSeat(location.seat)}`;
+      return t.location.describeSeat(formatSeat(location.seat));
     case 'train':
-      return `Vagón ${location.coach}, asiento ${formatSeat(location.seat)}`;
+      return t.location.describeCoachSeat(location.coach, formatSeat(location.seat));
     case 'gym':
-      return `Hoy entrena ${MUSCLE_LABELS[location.muscle].toLowerCase()}`;
+      return t.location.describeMuscle(t.muscles[location.muscle]);
     case 'public':
       return location.spot
-        ? `${OUTFIT_COLOR_INFO[location.color].label} · ${location.spot}`
-        : `Va de ${OUTFIT_COLOR_INFO[location.color].label.toLowerCase()}`;
+        ? `${t.colors[location.color]} · ${location.spot}`
+        : t.location.describeOutfit(t.colors[location.color]);
   }
 }
 
 /** The colour to tint a badge with, where the location itself is a colour. */
 export function locationSwatch(location: UserLocation): string | null {
-  return location.kind === 'public' ? OUTFIT_COLOR_INFO[location.color].hex : null;
+  return location.kind === 'public' ? OUTFIT_COLOR_HEX[location.color] : null;
 }
 
 const VENUE_CODES: Record<VenueKind, string> = { plane: 'P', train: 'T', gym: 'G', public: 'U' };

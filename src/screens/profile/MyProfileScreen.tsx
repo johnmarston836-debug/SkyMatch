@@ -28,6 +28,7 @@ import {
   notificationsSupported,
   type NotificationPermission,
 } from '../../notifications/notifier';
+import { t } from '../../i18n';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import { defaultLocation } from '../../utils/location';
 
@@ -155,7 +156,7 @@ export function MyProfileScreen({ navigation }: Props) {
     const asset = result.assets?.[0];
     if (!asset?.base64) return;
     if (asset.base64.length > MAX_AVATAR_CHARS) {
-      Alert.alert('Foto demasiado grande', 'Prueba con otra imagen: por Bluetooth solo caben fotos muy pequeñas.');
+      Alert.alert(t.myProfile.photoTooBigTitle, t.myProfile.photoTooBigBody);
       return;
     }
     await setMyAvatar(asset.base64);
@@ -187,9 +188,9 @@ export function MyProfileScreen({ navigation }: Props) {
       >
         <View style={styles.header}>
           <Pressable onPress={() => navigation.goBack()}>
-            <Text style={styles.backLink}>← Volver</Text>
+            <Text style={styles.backLink}>← {t.common.back}</Text>
           </Pressable>
-          <Text style={styles.title}>Mi perfil</Text>
+          <Text style={styles.title}>{t.myProfile.title}</Text>
           <View style={styles.headerSpacer} />
         </View>
 
@@ -197,13 +198,13 @@ export function MyProfileScreen({ navigation }: Props) {
           <Avatar nickname={nickname} size={88} zoomable />
           <View style={styles.photoActions}>
             <Pressable onPress={handlePickPhoto} hitSlop={8}>
-              <Text style={styles.photoAction}>{myAvatar ? 'Cambiar foto' : 'Añadir foto'}</Text>
+              <Text style={styles.photoAction}>{myAvatar ? t.myProfile.changePhoto : t.myProfile.addPhoto}</Text>
             </Pressable>
             {myAvatar !== null && (
               <>
                 <Text style={styles.photoActionDivider}>·</Text>
                 <Pressable onPress={handleRemovePhoto} hitSlop={8}>
-                  <Text style={styles.photoRemove}>Quitar</Text>
+                  <Text style={styles.photoRemove}>{t.common.remove}</Text>
                 </Pressable>
               </>
             )}
@@ -212,43 +213,38 @@ export function MyProfileScreen({ navigation }: Props) {
 
         <VenueLocationChooser location={location} onChange={setLocation} />
 
-        <Text style={styles.fieldLabel}>NOMBRE</Text>
+        <Text style={styles.fieldLabel}>{t.myProfile.nameLabel}</Text>
         <TextInput
           style={styles.input}
           value={nickname}
           onChangeText={setNickname}
-          placeholder="Tu nombre o apodo"
+          placeholder={t.profileSetup.namePlaceholder}
           placeholderTextColor={theme.colors.textMuted}
           maxLength={24}
         />
 
-        <Text style={styles.fieldLabel}>INSTAGRAM / WHATSAPP (OPCIONAL)</Text>
+        <Text style={styles.fieldLabel}>{t.myProfile.contactLabel}</Text>
         <TextInput
           style={styles.input}
           value={contact}
           onChangeText={setContact}
-          placeholder="@tuusuario o tu número"
+          placeholder={t.profileSetup.contactPlaceholder}
           placeholderTextColor={theme.colors.textMuted}
           maxLength={40}
         />
-        <Text style={styles.hint}>
-          Solo lo verá quien abra tu ficha o un chat privado contigo. Déjalo en blanco para no compartirlo.
-        </Text>
+        <Text style={styles.hint}>{t.myProfile.contactHint}</Text>
 
         {mutedIds.length > 0 && (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Silenciados</Text>
-            <Text style={styles.cardBody}>
-              No ves sus mensajes. Tu móvil sigue pasando los suyos a los demás, porque es parte de cómo llegan
-              los mensajes de todos.
-            </Text>
+            <Text style={styles.cardTitle}>{t.myProfile.mutedTitle}</Text>
+            <Text style={styles.cardBody}>{t.myProfile.mutedBody}</Text>
             {mutedIds.map((peerId) => (
               <View key={peerId} style={styles.mutedRow}>
                 <Text style={styles.mutedName} numberOfLines={1}>
-                  {peers[peerId]?.profile?.nickname ?? 'Alguien que ya no está cerca'}
+                  {peers[peerId]?.profile?.nickname ?? t.myProfile.mutedUnknown}
                 </Text>
                 <Pressable onPress={() => void toggleMuted(peerId)} hitSlop={8}>
-                  <Text style={styles.mutedUndo}>Quitar</Text>
+                  <Text style={styles.mutedUndo}>{t.common.remove}</Text>
                 </Pressable>
               </View>
             ))}
@@ -257,16 +253,14 @@ export function MyProfileScreen({ navigation }: Props) {
 
         {notificationsSupported && (
           <View style={styles.card}>
-            <Text style={styles.cardTitle}>Avisos</Text>
+            <Text style={styles.cardTitle}>{t.myProfile.alertsTitle}</Text>
             <Text style={styles.cardBody}>
-              {notifications === 'granted'
-                ? 'Te avisamos de los mensajes privados que lleguen con la app en segundo plano. Si cierras la app del todo, el Bluetooth se apaga y no llega nada.'
-                : 'Activa los avisos para enterarte de los mensajes privados aunque no tengas la app en pantalla.'}
+              {notifications === 'granted' ? t.myProfile.alertsOn : t.myProfile.alertsOff}
             </Text>
             {notifications !== 'granted' && (
               <Pressable onPress={handleNotifications}>
                 <Text style={styles.cardAction}>
-                  {notifications === 'denied' ? 'Abrir Ajustes' : 'Activar avisos'}
+                  {notifications === 'denied' ? t.myProfile.openSettings : t.myProfile.enableAlerts}
                 </Text>
               </Pressable>
             )}
@@ -274,11 +268,11 @@ export function MyProfileScreen({ navigation }: Props) {
         )}
 
         <Pressable style={[styles.cta, !canSave && styles.ctaDisabled]} disabled={!canSave} onPress={handleSave}>
-          <Text style={styles.ctaText}>Guardar cambios</Text>
+          <Text style={styles.ctaText}>{t.myProfile.save}</Text>
         </Pressable>
 
         <Pressable style={styles.secondaryLink} onPress={() => navigation.navigate('HowItWorks')}>
-          <Text style={styles.secondaryLinkText}>Cómo funciona SkyMatch</Text>
+          <Text style={styles.secondaryLinkText}>{t.myProfile.howItWorks}</Text>
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>

@@ -23,7 +23,8 @@ import { ensureNotificationPermission, initNotifications } from '../../notificat
 import { colorForPeer } from '../../theme';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import { formatTime, quoteOf } from '../../utils/id';
-import { VENUES } from '../../venues';
+import { venueOf } from '../../venues';
+import { t } from '../../i18n';
 import type { ChatMessage, ReplyQuote } from '../../types';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'CabinChat'>;
@@ -41,7 +42,7 @@ export function CabinChatScreen({ navigation }: Props) {
   const alertActive = usePresenceStore((state) => state.myActiveAlertId !== null);
   // Every word on this screen belongs to the place the user said they were
   // in; the machinery underneath is identical in all of them.
-  const venue = VENUES[myProfile?.location.kind ?? 'plane'];
+  const venue = venueOf(myProfile?.location.kind ?? 'plane');
   const [draft, setDraft] = useState('');
   const [replyTo, setReplyTo] = useState<ReplyQuote | null>(null);
   const keyboardPadding = useKeyboardPadding(insets.bottom);
@@ -206,7 +207,7 @@ export function CabinChatScreen({ navigation }: Props) {
         <View style={styles.headerSide}>
           <Pressable style={styles.myProfileButton} onPress={() => navigation.navigate('MyProfile')}>
             <Text style={styles.myProfileButtonText} numberOfLines={1}>
-              Mi perfil
+              {t.cabin.myProfile}
             </Text>
           </Pressable>
         </View>
@@ -276,7 +277,7 @@ export function CabinChatScreen({ navigation }: Props) {
           onSubmitEditing={handleSend}
         />
         <Pressable style={styles.sendButton} onPress={handleSend}>
-          <Text style={styles.sendButtonText}>Enviar</Text>
+          <Text style={styles.sendButtonText}>{t.common.send}</Text>
         </Pressable>
       </View>
     </Animated.View>

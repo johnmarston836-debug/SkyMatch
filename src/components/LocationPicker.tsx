@@ -2,13 +2,13 @@ import React from 'react';
 import { FlatList, Pressable, Text, TextInput, View } from 'react-native';
 import { SeatMap } from './SeatMap';
 import { useAppTheme, useThemedStyles } from '../theme/ThemeContext';
-import { VENUES } from '../venues';
+import { venueOf } from '../venues';
+import { t } from '../i18n';
 import {
   MAX_COACH,
   MUSCLE_GROUPS,
-  MUSCLE_LABELS,
   OUTFIT_COLORS,
-  OUTFIT_COLOR_INFO,
+  OUTFIT_COLOR_HEX,
 } from '../utils/location';
 import type { UserLocation } from '../types';
 
@@ -101,7 +101,7 @@ export function LocationPicker({ location, onChange }: Props) {
     hint: { ...typography.subtitle, fontSize: 12, marginTop: spacing(1) },
   }));
 
-  const venue = VENUES[location.kind];
+  const venue = venueOf(location.kind);
 
   if (location.kind === 'plane') {
     return (
@@ -118,7 +118,7 @@ export function LocationPicker({ location, onChange }: Props) {
   if (location.kind === 'train') {
     return (
       <View>
-        <Text style={styles.sectionLabel}>VAGÓN</Text>
+        <Text style={styles.sectionLabel}>{t.picker.coachLabel}</Text>
         <FlatList
           data={COACHES}
           horizontal
@@ -169,7 +169,7 @@ export function LocationPicker({ location, onChange }: Props) {
                 style={[styles.tile, selected && styles.tileSelected]}
                 onPress={() => onChange({ kind: 'gym', muscle })}
               >
-                <Text style={styles.tileText}>{MUSCLE_LABELS[muscle]}</Text>
+                <Text style={styles.tileText}>{t.muscles[muscle]}</Text>
               </Pressable>
             );
           })}
@@ -181,10 +181,7 @@ export function LocationPicker({ location, onChange }: Props) {
   return (
     <View>
       <Text style={styles.sectionLabel}>{venue.locationFieldLabel}</Text>
-      <Text style={styles.fieldHint}>
-        El de la prenda que más se vea: la camiseta, la sudadera o la chaqueta
-        que llevas puesta.
-      </Text>
+      <Text style={styles.fieldHint}>{t.picker.outfitHint}</Text>
       <View style={styles.grid}>
         {OUTFIT_COLORS.map(color => {
           const selected = color === location.color;
@@ -197,32 +194,27 @@ export function LocationPicker({ location, onChange }: Props) {
               <View
                 style={[
                   styles.swatch,
-                  { backgroundColor: OUTFIT_COLOR_INFO[color].hex },
+                  { backgroundColor: OUTFIT_COLOR_HEX[color] },
                 ]}
               />
-              <Text style={styles.tileText}>
-                {OUTFIT_COLOR_INFO[color].label}
-              </Text>
+              <Text style={styles.tileText}>{t.colors[color]}</Text>
             </Pressable>
           );
         })}
       </View>
 
-      <Text style={styles.spotLabel}>¿DÓNDE ESTÁS? (OPCIONAL)</Text>
+      <Text style={styles.spotLabel}>{t.picker.spotLabel}</Text>
       <TextInput
         style={styles.input}
         value={location.spot ?? ''}
         onChangeText={spot =>
           onChange({ ...location, spot: spot || undefined })
         }
-        placeholder="En la barra, la terraza, cerca de la entrada…"
+        placeholder={t.picker.spotPlaceholder}
         placeholderTextColor={theme.colors.textMuted}
         maxLength={28}
       />
-      <Text style={styles.hint}>
-        Un sitio concreto ahorra la mitad de las miradas. Puedes cambiarlo
-        cuando te muevas.
-      </Text>
+      <Text style={styles.hint}>{t.picker.spotHint}</Text>
     </View>
   );
 }

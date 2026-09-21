@@ -1,5 +1,6 @@
 import React from 'react';
 import { Pressable, Text, View } from 'react-native';
+import { t } from '../i18n';
 import { useThemedStyles } from '../theme/ThemeContext';
 import type { ReplyQuote } from '../types';
 
@@ -35,7 +36,7 @@ export function ReplyComposerBar({ quote, onCancel }: Props) {
       <View style={styles.accent} />
       <View style={styles.body}>
         <Text style={styles.title} numberOfLines={1}>
-          Respondiendo a {quote.nickname}
+          {t.chat.replyingTo(quote.nickname)}
         </Text>
         <Text style={styles.excerpt} numberOfLines={1}>
           {quote.excerpt}

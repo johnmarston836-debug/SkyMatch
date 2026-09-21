@@ -6,7 +6,8 @@ import {
   defaultLocation,
   normalizeLocation,
 } from '../src/utils/location';
-import { PRESENCE_COPY, VENUES, VENUE_ORDER } from '../src/venues';
+import { PRESENCE_COUNTDOWN, venueOf, VENUE_ORDER } from '../src/venues';
+import { LANGUAGES, setLanguage } from '../src/i18n';
 import { quoteOf } from '../src/utils/id';
 import {
   decodeFrame,
@@ -17,6 +18,10 @@ import {
   MAX_REPAIR_REQUEST,
 } from '../src/mesh/protocol';
 import type { UserLocation } from '../src/types';
+
+// Every readable string below is language-dependent, so the language is
+// pinned rather than left to whatever locale the runner happens to report.
+beforeEach(() => setLanguage('es'));
 
 const CASES: UserLocation[] = [
   { kind: 'plane', seat: { row: 14, letter: 'A' } },
@@ -73,15 +78,15 @@ describe('the one-tap announcement', () => {
   it('says the useful thing for each kind of place', () => {
     // A gym does not care that someone stood up; it cares that a machine is
     // about to be free.
-    expect(VENUES.plane.alertStatus).toBe('standing');
-    expect(VENUES.train.alertStatus).toBe('standing');
-    expect(VENUES.public.alertStatus).toBe('standing');
-    expect(VENUES.gym.alertStatus).toBe('leavingMachine');
+    expect(venueOf('plane').alertStatus).toBe('standing');
+    expect(venueOf('train').alertStatus).toBe('standing');
+    expect(venueOf('public').alertStatus).toBe('standing');
+    expect(venueOf('gym').alertStatus).toBe('leavingMachine');
   });
 
   it('only counts down where the minutes are the message', () => {
-    expect(PRESENCE_COPY.leavingMachine.countdown).toBe(true);
-    expect(PRESENCE_COPY.standing.countdown).toBe(false);
+    expect(PRESENCE_COUNTDOWN.leavingMachine).toBe(true);
+    expect(PRESENCE_COUNTDOWN.standing).toBe(false);
   });
 });
 
@@ -137,8 +142,11 @@ describe('the four-across venue chips', () => {
     // A label that overflows is rendered as "Espacio públ…", which names
     // nothing. Nine characters is what fits at this size on the narrowest
     // phone the app supports.
-    for (const kind of VENUE_ORDER) {
-      expect(VENUES[kind].shortName.length).toBeLessThanOrEqual(9);
+    for (const language of LANGUAGES) {
+      setLanguage(language);
+      for (const kind of VENUE_ORDER) {
+        expect(venueOf(kind).shortName.length).toBeLessThanOrEqual(9);
+      }
     }
   });
 });

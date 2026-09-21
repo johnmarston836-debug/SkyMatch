@@ -12,6 +12,7 @@ import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { MyProfileScreen } from '../screens/profile/MyProfileScreen';
 import { HowItWorksScreen, TutorialScreen } from '../screens/tutorial/TutorialScreen';
 import { ChatScreen } from '../screens/chat/ChatScreen';
+import { t } from '../i18n';
 import { useAppTheme } from '../theme/ThemeContext';
 import type { UserLocation, VenueKind } from '../types';
 
@@ -68,7 +69,7 @@ function MainNavigator() {
         component={ChatScreen}
         // Without an explicit label the back button falls back to the
         // previous screen's route name, which is code, in English: "Profile".
-        options={{ headerShown: true, title: '', headerBackTitle: 'Volver' }}
+        options={{ headerShown: true, title: '', headerBackTitle: t.common.back }}
       />
     </MainStack.Navigator>
   );

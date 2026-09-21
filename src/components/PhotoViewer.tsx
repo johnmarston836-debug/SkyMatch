@@ -1,6 +1,7 @@
 import React from 'react';
 import { Dimensions, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { t } from '../i18n';
 
 interface Props {
   /** Raw base64 JPEG, as it travels over the mesh. Null closes the viewer. */
@@ -43,7 +44,7 @@ export function PhotoViewer({ imageBase64, onClose }: Props) {
         </ScrollView>
 
         <Pressable style={[styles.close, { top: insets.top + 12 }]} onPress={onClose} hitSlop={12}>
-          <Text style={styles.closeText}>Cerrar</Text>
+          <Text style={styles.closeText}>{t.common.close}</Text>
         </Pressable>
       </View>
     </Modal>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image, Pressable, Text, View } from 'react-native';
 import { LocationPicker } from './LocationPicker';
-import { VENUES, VENUE_ORDER } from '../venues';
+import { venueOf, VENUE_ORDER } from '../venues';
 import { defaultLocation, formatLocation } from '../utils/location';
 import { useThemedStyles } from '../theme/ThemeContext';
 import type { UserLocation, VenueKind } from '../types';
@@ -56,6 +56,7 @@ export function VenueLocationChooser({ location, onChange }: Props) {
     <View>
       <View style={styles.venueRow}>
         {VENUE_ORDER.map((kind: VenueKind) => {
+          const venue = venueOf(kind);
           const selected = kind === location.kind;
           return (
             <Pressable
@@ -65,9 +66,9 @@ export function VenueLocationChooser({ location, onChange }: Props) {
               // nothing in a gym, and a muscle group means nothing on a train.
               onPress={() => onChange(defaultLocation(kind))}
             >
-              <Image source={VENUES[kind].icon} style={styles.venueIcon} resizeMode="contain" />
+              <Image source={venue.icon} style={styles.venueIcon} resizeMode="contain" />
               <Text style={[styles.venueName, selected && styles.venueNameSelected]} numberOfLines={1}>
-                {VENUES[kind].shortName}
+                {venue.shortName}
               </Text>
             </Pressable>
           );
@@ -79,7 +80,7 @@ export function VenueLocationChooser({ location, onChange }: Props) {
       </View>
 
       <View style={styles.helpCard}>
-        <Text style={styles.helpText}>{VENUES[location.kind].locationHelp}</Text>
+        <Text style={styles.helpText}>{venueOf(location.kind).locationHelp}</Text>
       </View>
 
       <LocationPicker location={location} onChange={onChange} />

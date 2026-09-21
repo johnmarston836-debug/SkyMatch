@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { t } from '../i18n';
 import type { ChatMessage } from '../types';
 
 const STORAGE_KEY = '@skymatch/chats';
@@ -76,7 +77,7 @@ function forStorage(messages: ChatMessage[]): ChatMessage[] {
       // most of the app's storage.
       const withoutPhoto = { ...message };
       delete withoutPhoto.imageBase64;
-      return { ...withoutPhoto, body: withoutPhoto.body || 'Foto' };
+      return { ...withoutPhoto, body: withoutPhoto.body || t.common.photo };
     })
     .reverse();
 }
@@ -131,7 +132,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
             peerId,
             messageId: message.id,
             nickname: message.fromNickname,
-            body: message.imageBase64 && !message.body ? 'Foto' : message.body,
+            body: message.imageBase64 && !message.body ? t.common.photo : message.body,
           }
         : state.notice,
     }));

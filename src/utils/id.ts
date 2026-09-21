@@ -1,4 +1,5 @@
 import 'react-native-get-random-values';
+import { t } from '../i18n';
 
 /** RFC 4122 v4 UUID, built directly on the crypto.getRandomValues polyfill to avoid the 'uuid' package's ESM-only build (breaks Jest/Metro CJS resolution). */
 export function newId(): string {
@@ -16,7 +17,7 @@ const EXCERPT_CHARS = 70;
 
 /** Builds the quote a reply carries, from the message being answered. */
 export function quoteOf(message: { fromNickname: string; body: string; imageBase64?: string }) {
-  const text = message.imageBase64 && !message.body ? 'Foto' : message.body;
+  const text = message.imageBase64 && !message.body ? t.common.photo : message.body;
   return {
     nickname: message.fromNickname,
     excerpt: text.length > EXCERPT_CHARS ? `${text.slice(0, EXCERPT_CHARS - 1)}…` : text,

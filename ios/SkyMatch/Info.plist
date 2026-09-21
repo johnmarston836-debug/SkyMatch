@@ -37,11 +37,11 @@
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>SkyMatch usa Bluetooth para encontrar y chatear con otros pasajeros cerca de ti, sin necesidad de wifi ni datos.</string>
+	<string>SkyMatch uses Bluetooth to find and chat with the people near you, with no Wi-Fi and no mobile data.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>SkyMatch usa Bluetooth para encontrar y chatear con otros pasajeros cerca de ti, sin necesidad de wifi ni datos.</string>
+	<string>SkyMatch uses Bluetooth to find and chat with the people near you, with no Wi-Fi and no mobile data.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>SkyMatch necesita acceso a tus fotos para que puedas enviar una imagen en un chat privado.</string>
+	<string>SkyMatch needs access to your photos so you can send an image in a private chat.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>

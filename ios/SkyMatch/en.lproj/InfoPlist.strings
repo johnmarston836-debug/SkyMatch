@@ -1,0 +1,6 @@
+/* What iOS shows in its own permission dialogs. Same text as the base
+   Info.plist, kept here so the development language is a localisation like
+   any other rather than a special case. */
+"NSBluetoothAlwaysUsageDescription" = "SkyMatch uses Bluetooth to find and chat with the people near you, with no Wi-Fi and no mobile data.";
+"NSBluetoothPeripheralUsageDescription" = "SkyMatch uses Bluetooth to find and chat with the people near you, with no Wi-Fi and no mobile data.";
+"NSPhotoLibraryUsageDescription" = "SkyMatch needs access to your photos so you can send an image in a private chat.";

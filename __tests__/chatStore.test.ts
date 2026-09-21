@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useChatStore } from '../src/state/chatStore';
+import { t } from '../src/i18n';
 import type { ChatMessage } from '../src/types';
 
 const ME = 'me';
@@ -96,8 +97,9 @@ describe('conversations kept on the phone', () => {
 
     expect(kept).toHaveLength(10);
     expect(kept.filter((m) => m.imageBase64 !== undefined)).toHaveLength(6);
-    // The ones that lost their photo still say what they were.
-    expect(kept[0].body).toBe('Foto');
+    // The ones that lost their photo still say what they were, in whatever
+    // language the phone was in when the photo was dropped.
+    expect(kept[0].body).toBe(t.common.photo);
   });
 
   it('does not lose what arrived while the disk was being read', async () => {

@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { Animated, Pressable, Text, View } from 'react-native';
 import { Avatar } from './Avatar';
 import { useChatStore } from '../state/chatStore';
+import { t } from '../i18n';
 import { useThemedStyles } from '../theme/ThemeContext';
 
 /** How long a private message stays on screen before it goes quiet again. */
@@ -72,7 +73,7 @@ export function PrivateMessageToast({ onOpen }: Props) {
             {notice.body}
           </Text>
         </View>
-        <Text style={styles.tag}>Privado</Text>
+        <Text style={styles.tag}>{t.common.private}</Text>
       </Pressable>
     </Animated.View>
   );

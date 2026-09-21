@@ -2,22 +2,23 @@ import React from 'react';
 import { Linking, Pressable, Text, View } from 'react-native';
 import { useMeshStatusStore } from '../state/meshStatusStore';
 import { USE_MOCK_MESH } from '../mesh/meshController';
+import { t } from '../i18n';
 import { useThemedStyles } from '../theme/ThemeContext';
 
 /** What is wrong with the radio, in the order it is worth telling someone about. */
 function diagnose(central: string | null, peripheralSupported: boolean, peripheralState: number | null) {
   if (central === 'Unauthorized') {
-    return { title: 'SkyMatch no tiene permiso de Bluetooth', action: 'Dáselo en Ajustes' };
+    return { title: t.radio.deniedTitle, action: t.radio.deniedAction };
   }
   if (central === 'PoweredOff' || peripheralState === 4) {
-    return { title: 'El Bluetooth está apagado', action: 'Enciéndelo para ver a quien tienes cerca' };
+    return { title: t.radio.poweredOffTitle, action: t.radio.poweredOffAction };
   }
   if (central === 'Unsupported') {
-    return { title: 'Este móvil no puede usar Bluetooth de bajo consumo', action: null };
+    return { title: t.radio.unsupportedTitle, action: null };
   }
   // Scanning but invisible: everyone else's list will never show us.
   if (central === 'PoweredOn' && !peripheralSupported) {
-    return { title: 'Puedes ver a los demás, pero ellos no te ven', action: null };
+    return { title: t.radio.invisibleTitle, action: null };
   }
   return null;
 }

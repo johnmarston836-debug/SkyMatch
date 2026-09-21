@@ -4,7 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/RootNavigator';
 import { LocationPicker } from '../../components/LocationPicker';
-import { VENUES } from '../../venues';
+import { venueOf } from '../../venues';
+import { t } from '../../i18n';
 import { defaultLocation, formatLocation } from '../../utils/location';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import type { UserLocation } from '../../types';
@@ -14,7 +15,7 @@ type Props = NativeStackScreenProps<OnboardingStackParamList, 'LocationPicker'>;
 export function LocationPickerScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
-  const venue = VENUES[route.params.venue];
+  const venue = venueOf(route.params.venue);
   const [location, setLocation] = useState<UserLocation>(defaultLocation(route.params.venue));
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
@@ -57,7 +58,7 @@ export function LocationPickerScreen({ route, navigation }: Props) {
           <Text style={styles.backLink}>← {venue.name}</Text>
         </Pressable>
 
-        <Text style={styles.label}>PASO 2 DE 3</Text>
+        <Text style={styles.label}>{t.locationStep.step}</Text>
         <Text style={styles.title}>{venue.locationTitle}</Text>
         <Text style={styles.subtitle}>{venue.locationSubtitle}</Text>
 
@@ -72,7 +73,7 @@ export function LocationPickerScreen({ route, navigation }: Props) {
         <LocationPicker location={location} onChange={setLocation} />
 
         <Pressable style={styles.cta} onPress={() => navigation.navigate('ProfileSetup', { location })}>
-          <Text style={styles.ctaText}>Continuar</Text>
+          <Text style={styles.ctaText}>{t.common.continue}</Text>
         </Pressable>
       </ScrollView>
     </KeyboardAvoidingView>

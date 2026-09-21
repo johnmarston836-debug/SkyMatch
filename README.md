@@ -36,6 +36,31 @@ src/mesh/
 - Discovered peers (`src/state/discoveryStore.ts`) and messages (`src/state/chatStore.ts`: `groupMessages` plus `privateMessagesByPeer`) are in-memory per session — there is no server, so there's nothing to sync history from once the app is closed.
 - Presence alerts (`src/state/presenceStore.ts`) are even more ephemeral: each one carries its own `expiresAt` and the UI (`PresenceBanner`) prunes expired ones on a timer, same as the button that raises them (`announceBathroomBreak`) being a plain manual toggle rather than any kind of sensor-based detection.
 
+### Languages
+
+The app follows the phone's language: Spanish, English and Catalan, with English as the fallback for anything else (an aeroplane is the one place where that is the likelier shared language, not Spanish).
+
+```
+src/i18n/
+  es.ts     the Spanish copy, and the shape every other dictionary must match
+  en.ts     English - also what a phone set to any other language gets
+  ca.ts     Catalan
+  index.ts  which language the phone is in, and the `t` every screen reads
+```
+
+`es.ts` is the source of truth: `Strings` is inferred from it, so adding a key there makes `en.ts` and `ca.ts` fail to compile until they have it too. `__tests__/i18n.test.ts` covers what the compiler can't see - a leaf that is a function in one language and a bare string in another, an empty value, a venue chip name too long to fit in a quarter of the screen.
+
+Everything with a value in it is a function rather than a template glued together at the call site (`t.sessionStart.greeting(name)`, `t.presence.countdown(minutes)`), because where the value lands in the sentence belongs to the language.
+
+Two places hold words that are not in the dictionaries because they are not words the app says:
+
+- `src/venues.ts` keeps only what doesn't change with the language - the icon, which alert the one-tap button raises, whether the place has seats. `venueOf(kind)` merges it with that venue's copy, per call, so a change of language reaches it.
+- `ios/SkyMatch/*.lproj/InfoPlist.strings` holds the Bluetooth and photo-library prompts, because iOS draws those itself before any JavaScript runs.
+
+**Adding a language** is a new file next to `es.ts`, one entry in `LANGUAGES` and `DICTIONARIES` in `src/i18n/index.ts`, and - if its permission prompts should be translated too - a `<code>.lproj/InfoPlist.strings` added to the Xcode target.
+
+Detection has no dependency behind it: iOS's ordered `AppleLanguages`, Android's `I18nManager.localeIdentifier`, then Hermes' `Intl`, each guarded, falling through to English. `setLanguage()` switches everything at runtime; nothing calls it in production yet, which is what an in-app language picker would use.
+
 ## Getting Started
 
 > **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.

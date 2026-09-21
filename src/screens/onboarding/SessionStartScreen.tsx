@@ -6,7 +6,8 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import { VenueLocationChooser } from '../../components/VenueLocationChooser';
 import { useProfileStore } from '../../state/profileStore';
 import { announceProfileUpdate } from '../../mesh/meshController';
-import { VENUES } from '../../venues';
+import { venueOf } from '../../venues';
+import { t } from '../../i18n';
 import { defaultLocation } from '../../utils/location';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import type { UserLocation } from '../../types';
@@ -28,7 +29,7 @@ export function SessionStartScreen({ navigation }: Props) {
   const profile = useProfileStore((state) => state.profile);
   const save = useProfileStore((state) => state.save);
   const [location, setLocation] = useState<UserLocation>(profile?.location ?? defaultLocation('plane'));
-  const venue = VENUES[location.kind];
+  const venue = venueOf(location.kind);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
     content: { paddingHorizontal: spacing(3), flexGrow: 1 },
@@ -69,11 +70,9 @@ export function SessionStartScreen({ navigation }: Props) {
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.greeting}>HOLA, {profile.nickname.toUpperCase()}</Text>
-        <Text style={styles.title}>¿Dónde estás ahora?</Text>
-        <Text style={styles.subtitle}>
-          Es lo único que cambia de un día para otro. Tu nombre, tu contacto y tu foto siguen guardados.
-        </Text>
+        <Text style={styles.greeting}>{t.sessionStart.greeting(profile.nickname)}</Text>
+        <Text style={styles.title}>{t.sessionStart.title}</Text>
+        <Text style={styles.subtitle}>{t.sessionStart.subtitle}</Text>
 
         <VenueLocationChooser location={location} onChange={setLocation} />
 

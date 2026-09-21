@@ -3,7 +3,8 @@ import { Image, Pressable, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { OnboardingStackParamList } from '../../navigation/RootNavigator';
-import { VENUES, VENUE_ORDER } from '../../venues';
+import { venueOf, VENUE_ORDER } from '../../venues';
+import { t } from '../../i18n';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'VenuePicker'>;
@@ -44,15 +45,12 @@ export function VenuePickerScreen({ navigation }: Props) {
           { paddingTop: insets.top + theme.spacing(4), paddingBottom: insets.bottom + theme.spacing(3) },
         ]}
       >
-        <Text style={styles.label}>PASO 1 DE 3</Text>
-        <Text style={styles.title}>¿Dónde estás?</Text>
-        <Text style={styles.subtitle}>
-          Cambia solo una cosa: cómo te encuentran los demás sin saber tu nombre. El resto de la app es igual
-          en los cuatro.
-        </Text>
+        <Text style={styles.label}>{t.venuePicker.step}</Text>
+        <Text style={styles.title}>{t.venuePicker.title}</Text>
+        <Text style={styles.subtitle}>{t.venuePicker.subtitle}</Text>
 
         {VENUE_ORDER.map((kind) => {
-          const venue = VENUES[kind];
+          const venue = venueOf(kind);
           return (
             <Pressable key={kind} style={styles.card} onPress={() => navigation.navigate('LocationPicker', { venue: kind })}>
               <Image source={venue.icon} style={styles.icon} resizeMode="contain" />

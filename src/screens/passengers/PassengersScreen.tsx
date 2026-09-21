@@ -12,7 +12,8 @@ import { useProfileStore } from '../../state/profileStore';
 import { formatTime } from '../../utils/id';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import { formatLocation } from '../../utils/location';
-import { VENUES } from '../../venues';
+import { venueOf } from '../../venues';
+import { t } from '../../i18n';
 import type { ChatMessage, DiscoveredPeer } from '../../types';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Passengers'>;
@@ -24,8 +25,8 @@ interface Conversation {
 }
 
 function preview(message: ChatMessage, myId: string | undefined): string {
-  const body = message.imageBase64 && !message.body ? 'Foto' : message.body;
-  return message.fromId === myId ? `Tú: ${body}` : body;
+  const body = message.imageBase64 && !message.body ? t.common.photo : message.body;
+  return message.fromId === myId ? t.passengers.ownPreview(body) : body;
 }
 
 /** The cabin's conversation list: everyone nearby, with the chat you already have with them. */
@@ -37,7 +38,7 @@ export function PassengersScreen({ navigation }: Props) {
   const unreadByPeer = useChatStore((state) => state.unreadByPeer);
   const myId = useProfileStore((state) => state.profile?.id);
   const myVenue = useProfileStore((state) => state.profile?.location.kind) ?? 'plane';
-  const venue = VENUES[myVenue];
+  const venue = venueOf(myVenue);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing(3) },
     header: { flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'space-between' as const, marginBottom: spacing(2) },
@@ -123,7 +124,7 @@ export function PassengersScreen({ navigation }: Props) {
               {preview(lastMessage, myId)}
             </Text>
           ) : (
-            <Text style={styles.rowPreviewEmpty}>Sin mensajes todavía</Text>
+            <Text style={styles.rowPreviewEmpty}>{t.passengers.noMessagesYet}</Text>
           )}
         </View>
         {unread > 0 && (
@@ -139,7 +140,7 @@ export function PassengersScreen({ navigation }: Props) {
     <View style={[styles.container, { paddingTop: insets.top + themeSpacing(2) }]}>
       <View style={styles.header}>
         <Pressable onPress={() => navigation.goBack()}>
-          <Text style={styles.backLink}>← Volver</Text>
+          <Text style={styles.backLink}>← {t.common.back}</Text>
         </Pressable>
         <Text style={styles.title}>{venue.peopleLabel}</Text>
         <View style={styles.headerSpacer} />

@@ -4,7 +4,8 @@ import { ReactionsSheet } from './ReactionsSheet';
 import { REACTION_ICONS, REACTION_ORDER } from './reactionIcons';
 import { usePresenceStore } from '../state/presenceStore';
 import { useProfileStore } from '../state/profileStore';
-import { PRESENCE_COPY } from '../venues';
+import { PRESENCE_COUNTDOWN } from '../venues';
+import { t } from '../i18n';
 import { sendPresenceReaction } from '../mesh/meshController';
 import { useThemedStyles } from '../theme/ThemeContext';
 import type { PresenceReaction, PresenceStatus, ReactionKind } from '../types';
@@ -115,9 +116,9 @@ export function PresenceBanner({ onOpenChat }: Props) {
         const isOwnAlert = alert.fromId === myProfile?.id;
         // An alert renders by the meaning its sender gave it, not by the
         // venue of whoever is reading: a gym and a bar can share a room.
-        const copy = PRESENCE_COPY[alert.status] ?? PRESENCE_COPY.standing;
+        const copy = t.presence.byStatus[alert.status] ?? t.presence.byStatus.standing;
         const minutesLeft = Math.max(1, Math.ceil((alert.expiresAt - now) / 60_000));
-        const countdown = copy.countdown ? ` en ${minutesLeft} min` : '';
+        const countdown = PRESENCE_COUNTDOWN[alert.status] ? t.presence.countdown(minutesLeft) : '';
         const counts = REACTION_ORDER.map((kind) => ({
           kind,
           count: reactions.filter((reaction) => reaction.kind === kind).length,
@@ -159,7 +160,7 @@ export function PresenceBanner({ onOpenChat }: Props) {
                       <Text style={styles.chipCount}>{entry.count}</Text>
                     </View>
                   ))}
-                  <Text style={styles.chipsHint}>Ver</Text>
+                  <Text style={styles.chipsHint}>{t.common.see}</Text>
                 </Pressable>
               )}
             </View>

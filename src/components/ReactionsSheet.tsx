@@ -7,6 +7,7 @@ import { REACTION_ICONS } from './reactionIcons';
 import { useDiscoveryStore } from '../state/discoveryStore';
 import { usePresenceStore } from '../state/presenceStore';
 import { useProfileStore } from '../state/profileStore';
+import { t } from '../i18n';
 import { useThemedStyles } from '../theme/ThemeContext';
 import type { PresenceReaction } from '../types';
 
@@ -80,11 +81,11 @@ export function ReactionsSheet({ alertId, onClose, onOpenChat }: Props) {
         <View style={styles.rowBody}>
           <View style={styles.rowTop}>
             <Text style={styles.rowName} numberOfLines={1}>
-              {mine ? 'Tú' : name}
+              {mine ? t.common.you : name}
             </Text>
             <LocationBadge label={item.fromLabel} location={profile?.location} />
           </View>
-          {!mine && <Text style={styles.rowHint}>Toca para escribirle</Text>}
+          {!mine && <Text style={styles.rowHint}>{t.reactions.tapToWrite}</Text>}
         </View>
         <Image source={REACTION_ICONS[item.kind]} style={styles.reactionIcon} resizeMode="contain" />
       </Pressable>
@@ -97,16 +98,14 @@ export function ReactionsSheet({ alertId, onClose, onOpenChat }: Props) {
         {/* Swallows taps so pressing inside the sheet doesn't close it. */}
         <Pressable style={[styles.sheet, { paddingBottom: insets.bottom + 8 }]} onPress={() => {}}>
           <View style={styles.grabber} />
-          <Text style={styles.title}>
-            {reactions.length === 1 ? '1 reacción' : `${reactions.length} reacciones`}
-          </Text>
+          <Text style={styles.title}>{t.reactions.count(reactions.length)}</Text>
           {reactions.length === 0 ? (
-            <Text style={styles.empty}>Todavía no ha reaccionado nadie.</Text>
+            <Text style={styles.empty}>{t.reactions.empty}</Text>
           ) : (
             <FlatList data={reactions} keyExtractor={(item) => item.id} renderItem={renderItem} />
           )}
           <Pressable style={styles.close} onPress={onClose}>
-            <Text style={styles.closeText}>Cerrar</Text>
+            <Text style={styles.closeText}>{t.common.close}</Text>
           </Pressable>
         </Pressable>
       </Pressable>

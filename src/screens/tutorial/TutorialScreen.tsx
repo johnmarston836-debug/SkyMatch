@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList, OnboardingStackParamList } from '../../navigation/RootNavigator';
 import { MeshDiagram } from '../../components/MeshDiagram';
+import { t } from '../../i18n';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 
 interface CarouselProps {
@@ -70,7 +71,7 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
     <View style={[styles.container, { paddingTop: insets.top + theme.spacing(2) }]}>
       {onBack && (
         <Pressable onPress={onBack}>
-          <Text style={styles.backLink}>← Volver</Text>
+          <Text style={styles.backLink}>← {t.common.back}</Text>
         </Pressable>
       )}
 
@@ -82,53 +83,30 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
         onMomentumScrollEnd={(event) => setPage(Math.round(event.nativeEvent.contentOffset.x / width))}
       >
         <View style={[styles.page, { width }]}>
-          <Text style={styles.label}>CÓMO FUNCIONA · 1 DE 2</Text>
-          <Text style={styles.title}>Los mensajes van saltando de móvil en móvil</Text>
-          <Text style={styles.body}>
-            SkyMatch no usa internet ni wifi. Tu teléfono habla por Bluetooth directamente con
-            los teléfonos que tienes cerca.
-          </Text>
+          <Text style={styles.label}>{t.tutorial.page1Label}</Text>
+          <Text style={styles.title}>{t.tutorial.page1Title}</Text>
+          <Text style={styles.body}>{t.tutorial.page1Body}</Text>
 
           <MeshDiagram variant="relay" />
-          <Text style={styles.diagramCaption}>
-            El móvil de la derecha está demasiado lejos para oírte, pero el de en medio repite tu mensaje.
-          </Text>
+          <Text style={styles.diagramCaption}>{t.tutorial.page1Caption}</Text>
 
-          <Text style={styles.bodySpaced}>
-            El Bluetooth llega a pocos metros, así que los móviles que hay en medio van pasando
-            los mensajes hasta que llegan a su destino. Cuanta más gente lleve la app abierta,
-            más lejos llega todo.
-          </Text>
+          <Text style={styles.bodySpaced}>{t.tutorial.page1Body2}</Text>
         </View>
 
         <View style={[styles.page, { width }]}>
-          <Text style={styles.label}>CÓMO FUNCIONA · 2 DE 2</Text>
-          <Text style={styles.title}>Deja la app abierta</Text>
-          <Text style={styles.body}>
-            Tu móvil solo envía y recibe mientras la app está en pantalla. Si la cierras o te
-            vas a otra aplicación, dejas de recibir mensajes y también dejas de servir de
-            puente para los demás.
-          </Text>
+          <Text style={styles.label}>{t.tutorial.page2Label}</Text>
+          <Text style={styles.title}>{t.tutorial.page2Title}</Text>
+          <Text style={styles.body}>{t.tutorial.page2Body}</Text>
 
           <MeshDiagram variant="broken" />
-          <Text style={styles.diagramCaption}>
-            El móvil de en medio ha cerrado la app: deja de emitir y el mensaje ya no llega al otro lado.
-          </Text>
+          <Text style={styles.diagramCaption}>{t.tutorial.page2Caption}</Text>
 
           <View style={styles.callout}>
-            <Text style={styles.calloutTitle}>Si sales de la app, te pierdes la conversación</Text>
-            <Text style={styles.calloutText}>
-              No hay servidor: los mensajes solo existen en los móviles que tienes
-              alrededor, y lo que se diga mientras no estés no lo podrás recuperar después.
-              Tus chats privados sí se quedan guardados en tu propio móvil, para que no
-              pierdas a quien conociste al cerrar la app.
-            </Text>
+            <Text style={styles.calloutTitle}>{t.tutorial.calloutTitle}</Text>
+            <Text style={styles.calloutText}>{t.tutorial.calloutBody}</Text>
           </View>
 
-          <Text style={styles.bodySpaced}>
-            En un avión, el modo avión no es problema: puedes dejarlo activado y encender el
-            Bluetooth por separado. No hace falta wifi, ni datos, ni cobertura en ningún sitio.
-          </Text>
+          <Text style={styles.bodySpaced}>{t.tutorial.page2Body2}</Text>
         </View>
       </ScrollView>
 
@@ -138,7 +116,7 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
           <View style={[styles.dot, page === 1 && styles.dotActive]} />
         </View>
         <Pressable style={styles.cta} onPress={goNext}>
-          <Text style={styles.ctaText}>{page === 0 ? 'Siguiente' : finishLabel}</Text>
+          <Text style={styles.ctaText}>{page === 0 ? t.common.next : finishLabel}</Text>
         </Pressable>
       </View>
     </View>
@@ -148,7 +126,7 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
 type OnboardingProps = NativeStackScreenProps<OnboardingStackParamList, 'Tutorial'>;
 
 export function TutorialScreen({ navigation }: OnboardingProps) {
-  return <TutorialCarousel finishLabel="Entendido" onFinish={() => navigation.navigate('VenuePicker')} />;
+  return <TutorialCarousel finishLabel={t.tutorial.understood} onFinish={() => navigation.navigate('VenuePicker')} />;
 }
 
 type MainProps = NativeStackScreenProps<MainStackParamList, 'HowItWorks'>;
@@ -157,7 +135,7 @@ type MainProps = NativeStackScreenProps<MainStackParamList, 'HowItWorks'>;
 export function HowItWorksScreen({ navigation }: MainProps) {
   return (
     <TutorialCarousel
-      finishLabel="Cerrar"
+      finishLabel={t.common.close}
       onFinish={() => navigation.goBack()}
       onBack={() => navigation.goBack()}
     />

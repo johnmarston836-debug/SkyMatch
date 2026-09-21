@@ -10,6 +10,7 @@ import { useBlockStore } from '../../state/blockStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
 import { colorForPeer } from '../../theme';
 import { describeLocation, formatLocation } from '../../utils/location';
+import { t } from '../../i18n';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Profile'>;
@@ -64,13 +65,13 @@ export function ProfileScreen({ route, navigation }: Props) {
   return (
     <View style={[styles.container, { paddingTop: insets.top + themeSpacing(2), paddingBottom: insets.bottom + themeSpacing(3) }]}>
       <Pressable onPress={() => navigation.goBack()}>
-        <Text style={styles.backLink}>← Volver</Text>
+        <Text style={styles.backLink}>← {t.common.back}</Text>
       </Pressable>
 
       {!profile ? (
         <View style={styles.emptyState}>
           <Image source={require('../../assets/icons/standing.png')} style={styles.emptyIcon} resizeMode="contain" />
-          <Text style={styles.emptySubtitle}>Todavía no ha llegado su perfil.</Text>
+          <Text style={styles.emptySubtitle}>{t.profile.notArrivedYet}</Text>
         </View>
       ) : (
         <>
@@ -82,27 +83,27 @@ export function ProfileScreen({ route, navigation }: Props) {
           </View>
 
           <View style={styles.contactCard}>
-            <Text style={styles.label}>CONTACTO</Text>
+            <Text style={styles.label}>{t.profile.contactLabel}</Text>
             {profile.contact ? (
               <Text style={styles.contactValue}>{profile.contact}</Text>
             ) : (
-              <Text style={styles.contactEmpty}>No ha compartido ningún contacto.</Text>
+              <Text style={styles.contactEmpty}>{t.profile.noContactShared}</Text>
             )}
           </View>
 
           {hasConversation ? (
             <Pressable style={styles.openChat} onPress={() => navigation.navigate('Chat', { peerId })}>
-              <Text style={styles.openChatText}>Abrir conversación</Text>
+              <Text style={styles.openChatText}>{t.profile.openConversation}</Text>
             </Pressable>
           ) : (
             <Pressable style={styles.cta} onPress={() => navigation.navigate('Chat', { peerId })}>
-              <Text style={styles.ctaText}>Enviar mensaje privado</Text>
+              <Text style={styles.ctaText}>{t.profile.sendPrivateMessage}</Text>
             </Pressable>
           )}
 
           <Pressable style={styles.mute} onPress={() => void toggleMuted(peerId)}>
             <Text style={muted ? styles.muteUndo : styles.muteText}>
-              {muted ? 'Dejar de silenciar' : 'Silenciar a esta persona'}
+              {muted ? t.profile.unmute : t.profile.mute}
             </Text>
           </Pressable>
         </>

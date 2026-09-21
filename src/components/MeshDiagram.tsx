@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Text, View } from 'react-native';
+import { t } from '../i18n';
 import { useThemedStyles } from '../theme/ThemeContext';
 
 const NODE = 58;
@@ -177,7 +178,7 @@ export function MeshDiagram({ variant }: Props) {
 
   return (
     <View style={styles.row}>
-      <MeshNode label="TÚ" mine phase={0} />
+      <MeshNode label={t.tutorial.diagramYou} mine phase={0} />
       <Hop delay={150} />
       <MeshNode label="14C" offline={broken} phase={400} />
       <Hop delay={1000} silent={broken} />

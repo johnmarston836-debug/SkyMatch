@@ -1,5 +1,6 @@
 import React, { useCallback, useRef } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
+import { t } from '../i18n';
 import { useThemedStyles } from '../theme/ThemeContext';
 import { MAX_ROW } from '../utils/seat';
 import type { Seat, SeatLetter } from '../types';
@@ -105,9 +106,9 @@ export function SeatMap({ seat, onChange }: Props) {
           );
         })}
       </View>
-      <Text style={styles.helperText}>Toca tu letra de asiento</Text>
+      <Text style={styles.helperText}>{t.picker.seatLetterHint}</Text>
 
-      <Text style={styles.rowLabel}>FILA</Text>
+      <Text style={styles.rowLabel}>{t.picker.rowLabel}</Text>
       <FlatList
         ref={rowListRef}
         data={ROWS}

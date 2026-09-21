@@ -6,7 +6,8 @@ import type { OnboardingStackParamList } from '../../navigation/RootNavigator';
 import { useProfileStore } from '../../state/profileStore';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import { formatLocation } from '../../utils/location';
-import { VENUES } from '../../venues';
+import { venueOf } from '../../venues';
+import { t } from '../../i18n';
 
 type Props = NativeStackScreenProps<OnboardingStackParamList, 'ProfileSetup'>;
 
@@ -17,7 +18,7 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
   const [nickname, setNickname] = useState('');
   const [contact, setContact] = useState('');
   const { location } = route.params;
-  const venue = VENUES[location.kind];
+  const venue = venueOf(location.kind);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing(3) },
     label: typography.label,
@@ -57,36 +58,33 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + theme.spacing(4), paddingBottom: insets.bottom + theme.spacing(4) }]}>
-      <Text style={styles.label}>PASO 3 DE 3</Text>
-      <Text style={styles.title}>¿Cómo te llamamos?</Text>
+      <Text style={styles.label}>{t.profileSetup.step}</Text>
+      <Text style={styles.title}>{t.profileSetup.title}</Text>
       <Text style={styles.subtitle}>
-        {venue.identityNote} <Text style={styles.previewLabel}>{formatLocation(location)}</Text> — el nombre es solo
-        para acompañarlo.
+        {venue.identityNote} <Text style={styles.previewLabel}>{formatLocation(location)}</Text>{' '}
+        {t.profileSetup.identitySuffix}
       </Text>
 
       <TextInput
         style={styles.input}
         value={nickname}
         onChangeText={setNickname}
-        placeholder="Tu nombre o apodo"
+        placeholder={t.profileSetup.namePlaceholder}
         placeholderTextColor={theme.colors.textMuted}
         maxLength={24}
         autoFocus
       />
 
-      <Text style={styles.fieldLabel}>Instagram / WhatsApp (opcional)</Text>
+      <Text style={styles.fieldLabel}>{t.profileSetup.contactLabel}</Text>
       <TextInput
         style={styles.input}
         value={contact}
         onChangeText={setContact}
-        placeholder="@tuusuario o tu número"
+        placeholder={t.profileSetup.contactPlaceholder}
         placeholderTextColor={theme.colors.textMuted}
         maxLength={40}
       />
-      <Text style={styles.hint}>
-        Solo lo verá quien toque tu nombre en el chat para abrir tu ficha. Déjalo en blanco si prefieres no
-        compartirlo.
-      </Text>
+      <Text style={styles.hint}>{t.profileSetup.contactHint}</Text>
 
       <Pressable style={[styles.cta, !canContinue && styles.ctaDisabled]} disabled={!canContinue} onPress={handleContinue}>
         <Text style={styles.ctaText}>{venue.enterCta}</Text>
