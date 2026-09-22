@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.platforms    = { :ios => min_ios_version_supported }
   s.source       = { :path => "." }
   s.source_files = "ios/**/*.{h,m}"
-  s.frameworks   = "CoreBluetooth", "UserNotifications"
+  s.frameworks   = "CoreBluetooth", "UserNotifications", "UIKit"
 
   install_modules_dependencies(s)
 end

@@ -36,6 +36,35 @@ src/mesh/
 - Discovered peers (`src/state/discoveryStore.ts`) and messages (`src/state/chatStore.ts`: `groupMessages` plus `privateMessagesByPeer`) are in-memory per session — there is no server, so there's nothing to sync history from once the app is closed.
 - Presence alerts (`src/state/presenceStore.ts`) are even more ephemeral: each one carries its own `expiresAt` and the UI (`PresenceBanner`) prunes expired ones on a timer, same as the button that raises them (`announceBathroomBreak`) being a plain manual toggle rather than any kind of sensor-based detection.
 
+### Profile photos
+
+Two sizes of the same picture, because what a face costs on a Bluetooth mesh
+is not what a portrait costs:
+
+| | size | ~frames on the wire | who gets it |
+| --- | --- | --- | --- |
+| face | 64px, q0.5 | ~22 | everyone nearby, automatically |
+| portrait | 256px, q0.6 | ~119 | only someone who opened your card or your chat |
+
+The portrait is 256 because the profile card draws it at 88 points, which on
+a current iPhone is 264 pixels; the 128px photo an earlier build sent was
+visibly stretched there. The face is 64 because the lists draw it at 40-48
+points, where nobody can tell the difference.
+
+Nothing is pushed. A profile beat carries the fingerprint of the owner's
+photo (`avatarHash`, always the portrait's — hashing the face would give an
+answer nobody could match). A phone that doesn't hold that fingerprint asks
+for the **face**; `requestFullAvatar` asks for the portrait, and only
+`ProfileScreen` and `ChatScreen` call it. At most two faces are requested at
+once (`MAX_AVATARS_IN_FLIGHT`): walking into a full carriage otherwise puts
+a few hundred frames into the radio before anyone has typed a word, and the
+beat comes round every ten seconds to ask for whoever didn't fit.
+
+The image picker returns one size per pick, so the second one is made by
+`SkyMatchImage.resize` in the native module. Where that isn't available
+(Android, or a build without the pod) the portrait does both jobs: more
+expensive on the radio, never a blank face.
+
 ### Languages
 
 The app follows the phone's language: Spanish, English, Catalan, French, German, Italian and Portuguese, with English as the fallback for anything else (an aeroplane is the one place where that is the likelier shared language, not Spanish).

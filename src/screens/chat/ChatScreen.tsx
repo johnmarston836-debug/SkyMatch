@@ -15,9 +15,10 @@ import { ReplyComposerBar } from '../../components/ReplyComposerBar';
 import { SwipeToReply } from '../../components/SwipeToReply';
 import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
+import { useAvatarStore } from '../../state/avatarStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
 import { useProfileStore } from '../../state/profileStore';
-import { sendPrivateChatMessage, sendReadReceipt } from '../../mesh/meshController';
+import { requestFullAvatar, sendPrivateChatMessage, sendReadReceipt } from '../../mesh/meshController';
 import { colorForPeer } from '../../theme';
 import { formatLocation } from '../../utils/location';
 import { t } from '../../i18n';
@@ -48,6 +49,8 @@ export function ChatScreen({ route, navigation }: Props) {
   const keyboardPadding = useKeyboardPadding(insets.bottom);
   const autoScroll = useChatAutoScroll<ChatMessage>();
   const [zoomedPhoto, setZoomedPhoto] = useState<string | null>(null);
+  const avatarHash = useAvatarStore((state) => state.peerAvatars[peerId]?.hash);
+  const hasFace = useAvatarStore((state) => state.peerAvatars[peerId]?.thumb !== undefined);
   const [replyTo, setReplyTo] = useState<ReplyQuote | null>(null);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
@@ -130,6 +133,14 @@ export function ChatScreen({ route, navigation }: Props) {
   useEffect(() => {
     if (myProfile) void sendReadReceipt(myProfile, peerId);
   }, [myProfile, peerId, messages]);
+
+  // Their photo here is small, but it can be opened full screen, and someone
+  // deep in a conversation with one person is exactly who the portrait is
+  // worth sending to. Same reason as ProfileScreen for asking again when
+  // their face lands rather than only when the screen opens.
+  useEffect(() => {
+    void requestFullAvatar(peerId);
+  }, [peerId, avatarHash, hasFace]);
 
   if (!myProfile) return null;
 

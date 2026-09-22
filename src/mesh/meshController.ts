@@ -10,6 +10,7 @@ import { useBlockStore } from '../state/blockStore';
 import { notifyPrivateMessage } from '../notifications/notifier';
 import { requestBlePermissions } from '../utils/permissions';
 import { newId } from '../utils/id';
+import { shortHash } from '../utils/hash';
 import { formatLocation, normalizeLocation } from '../utils/location';
 import { venueOf } from '../venues';
 import type {
@@ -42,6 +43,24 @@ const AVATAR_REQUEST_COOLDOWN_MS = 45_000;
 
 /** Same idea in the other direction: one photo per asker per window, however often they ask. */
 const AVATAR_SEND_COOLDOWN_MS = 20_000;
+
+/**
+ * How many photos may be on their way to us at once.
+ *
+ * Walking into a full carriage means seeing twenty profiles in the same
+ * second, and asking all twenty for their face at once puts a few hundred
+ * frames into the radio before anybody has typed a word. Two at a time
+ * costs nothing in perceived speed - the faces still fill in within
+ * seconds - and leaves the link free for what people actually came for.
+ */
+const MAX_AVATARS_IN_FLIGHT = 2;
+
+/**
+ * How long a request counts as still in flight. Long enough for a slow
+ * answer to arrive over several hops, short enough that a phone that walked
+ * away doesn't hold a slot until the app is closed.
+ */
+const AVATAR_IN_FLIGHT_MS = 30_000;
 
 let service: MeshService | null = null;
 let announceTimer: ReturnType<typeof setInterval> | null = null;
@@ -82,6 +101,17 @@ const greeted = new Set<string>();
 /** profile id -> when we last asked them for their photo / last sent them ours. */
 const avatarRequestedAt = new Map<string, number>();
 const avatarSentAt = new Map<string, number>();
+/** profile id -> when a thumbnail request went out and hasn't been answered yet. */
+const avatarsInFlight = new Map<string, number>();
+
+/** Forgets the requests that were never answered, so their slots come back. */
+function inFlightCount(): number {
+  const cutoff = Date.now() - AVATAR_IN_FLIGHT_MS;
+  for (const [peerId, at] of avatarsInFlight) {
+    if (at < cutoff) avatarsInFlight.delete(peerId);
+  }
+  return avatarsInFlight.size;
+}
 /** The last moment we told each person we had read up to, so we don't repeat ourselves. */
 const lastReceiptSent = new Map<string, number>();
 
@@ -140,24 +170,47 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
       useAvatarStore.getState().clearPeerAvatar(profile.id);
       return;
     }
-    if (useAvatarStore.getState().peerAvatarHashes[profile.id] === avatarHash) return;
+    // Only ever the thumbnail here: twenty frames, and it is what the
+    // lists and the bubbles show. The big portrait is asked for by the one
+    // screen that can actually show it - see requestFullAvatar.
+    // Any size of the right photo is enough to leave them alone: a portrait
+    // read off disk from the build that knew one size counts, and asking for
+    // a face we would never show is 22 frames each, for everyone at once.
+    const held = useAvatarStore.getState().peerAvatars[profile.id];
+    if (held?.hash === avatarHash && (held.thumb !== undefined || held.full !== undefined)) return;
 
     const askedAt = avatarRequestedAt.get(profile.id) ?? 0;
     if (Date.now() - askedAt < AVATAR_REQUEST_COOLDOWN_MS) return;
+    // Nobody is waiting on any one face, so a queue would only add a way to
+    // get stuck: the profile beat comes round every ten seconds and asks
+    // again for whoever didn't fit this time.
+    if (inFlightCount() >= MAX_AVATARS_IN_FLIGHT) return;
+
     avatarRequestedAt.set(profile.id, Date.now());
+    avatarsInFlight.set(profile.id, Date.now());
     void service?.requestAvatar(profile.id);
   });
 
-  service.on('avatarRequest', (fromId) => {
-    const sentAt = avatarSentAt.get(fromId) ?? 0;
+  service.on('avatarRequest', (fromId, full) => {
+    // One cooldown per size: someone who just took our face and then opened
+    // our card is asking for something they genuinely don't have, and making
+    // them wait twenty seconds for it would look like the card was broken.
+    const key = full ? `${fromId}:full` : fromId;
+    const sentAt = avatarSentAt.get(key) ?? 0;
     if (Date.now() - sentAt < AVATAR_SEND_COOLDOWN_MS) return;
-    avatarSentAt.set(fromId, Date.now());
-    void sendMyAvatarTo(fromId);
+    avatarSentAt.set(key, Date.now());
+    void sendMyAvatarTo(fromId, full);
   });
 
   service.on('avatar', (avatar) => {
     if (useBlockStore.getState().isMuted(avatar.fromId)) return;
-    useAvatarStore.getState().setPeerAvatar(avatar.fromId, avatar.imageBase64);
+    if (typeof avatar.imageBase64 !== 'string' || avatar.imageBase64.length === 0) return;
+    avatarsInFlight.delete(avatar.fromId);
+    // A photo from a phone running the build before thumbnails existed
+    // carries no fingerprint. Hashing what arrived is right there and only
+    // there: that build sent the one photo its own hash was made from.
+    const hash = typeof avatar.hash === 'string' && avatar.hash.length > 0 ? avatar.hash : shortHash(avatar.imageBase64);
+    useAvatarStore.getState().setPeerAvatar(avatar.fromId, hash, avatar.imageBase64, avatar.full === true);
   });
 
   service.on('message', (packet) => {
@@ -303,11 +356,37 @@ export async function togglePresence(myProfile: Profile) {
 }
 
 /** Answers one person's request for our photo. Nothing else ever puts a photo on the radio. */
-async function sendMyAvatarTo(toId: string) {
-  const myAvatar = useAvatarStore.getState().myAvatar;
+async function sendMyAvatarTo(toId: string, full: boolean) {
+  const { myAvatar, myThumb, myAvatarHash } = useAvatarStore.getState();
   const myProfile = useProfileStore.getState().profile;
-  if (!service || !myAvatar || !myProfile) return;
-  await service.sendAvatar({ fromId: myProfile.id, imageBase64: myAvatar, sentAt: Date.now() }, toId);
+  const image = full ? myAvatar : myThumb;
+  const hash = myAvatarHash();
+  if (!service || !image || !myProfile || !hash) return;
+  await service.sendAvatar({ fromId: myProfile.id, imageBase64: image, hash, full, sentAt: Date.now() }, toId);
+}
+
+/**
+ * Asks someone for the big version of their photo, which only the screens
+ * that show it large ever do.
+ *
+ * Everyone nearby gets the 64px face automatically; the 256px portrait is
+ * five times the frames and would be wasted on the twenty people whose card
+ * nobody opens. Doing nothing when the portrait is already here is what
+ * keeps reopening a card free.
+ */
+export async function requestFullAvatar(peerId: string) {
+  const held = useAvatarStore.getState().peerAvatars[peerId];
+  // No hash yet means their profile hasn't arrived; the beat will bring it
+  // and the thumbnail request that follows.
+  if (!held || held.full !== undefined) return;
+  const key = `${peerId}:full`;
+  const askedAt = avatarRequestedAt.get(key) ?? 0;
+  if (Date.now() - askedAt < AVATAR_REQUEST_COOLDOWN_MS) return;
+  avatarRequestedAt.set(key, Date.now());
+  // Deliberately outside the in-flight budget: this one was asked for by
+  // someone looking at the screen right now, unlike the faces that fill
+  // themselves in.
+  await service?.requestAvatar(peerId, true);
 }
 
 /**
@@ -322,6 +401,7 @@ export async function announceAvatarChange() {
   // Let them ask again straight away rather than sitting out the cooldown
   // from the previous photo.
   avatarSentAt.clear();
+  avatarsInFlight.clear();
   await service.broadcastProfile(myProfile, useAvatarStore.getState().myAvatarHash());
 }
 

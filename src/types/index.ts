@@ -127,12 +127,32 @@ export interface ReadReceipt {
   upTo: number;
 }
 
-/** A profile photo, sent on its own because it is orders of magnitude bigger than everything else on the mesh. */
+/**
+ * A profile photo, sent on its own because it is orders of magnitude bigger
+ * than everything else on the mesh - and in one of two sizes, because the
+ * face in a list and the portrait on a card are not worth the same number
+ * of Bluetooth frames.
+ */
 export interface AvatarPacket {
   fromId: string;
   /** Small base64 JPEG - see sendAvatar for the size ceiling and why it exists. */
   imageBase64: string;
+  /**
+   * The sender's fingerprint of their photo, the same one their profile
+   * announces, and the same for both sizes. It travels with the image
+   * because the receiver cannot work it out: hashing a thumbnail gives a
+   * different answer from hashing the portrait it was made from.
+   */
+  hash?: string;
+  /** true for the 256px portrait, absent or false for the 64px thumbnail. */
+  full?: boolean;
   sentAt: number;
+}
+
+/** What someone is asking for when they want a photo. */
+export interface AvatarRequest {
+  /** true asks for the portrait; anything else asks for the thumbnail. */
+  full?: boolean;
 }
 
 /** Deliberately a short fixed list: each one is a hand-drawn icon, because emoji render as tofu boxes on some devices. */

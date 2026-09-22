@@ -1,7 +1,8 @@
 import { MeshService } from '../src/mesh/MeshService';
 import type { BleTransport } from '../src/mesh/BleTransport';
 import { shortHash } from '../src/utils/hash';
-import { FLOOD_LIMIT, FLOOD_WINDOW_MS } from '../src/mesh/protocol';
+import { encodeEnvelope, frameChunks, newFrameId, FLOOD_LIMIT, FLOOD_WINDOW_MS } from '../src/mesh/protocol';
+import { BROADCAST_ID } from '../src/mesh/protocol';
 import type { AvatarPacket, UserLocation } from '../src/types';
 
 /**
@@ -63,6 +64,16 @@ function linked() {
 const LOCATION: UserLocation = { kind: 'plane', seat: { row: 14, letter: 'A' } };
 const PHOTO = 'photo-bytes-in-base64';
 
+/**
+ * Measured, not guessed: a 64px face and a 256px portrait of the same
+ * picture, re-encoded at the qualities MyProfileScreen asks the picker and
+ * the rescaler for. What matters here is the ratio between them, which is
+ * what decides whether a full carriage is affordable.
+ */
+const THUMB_CHARS = 1708;
+const PORTRAIT_CHARS = 9500;
+const fakePhoto = (chars: number) => 'x'.repeat(chars);
+
 describe('avatar exchange', () => {
   it('carries the photo fingerprint in the profile announcement', async () => {
     const { a, b } = linked();
@@ -88,6 +99,39 @@ describe('avatar exchange', () => {
     expect(received[0].imageBase64).toBe(PHOTO);
   });
 
+  it('asks for the face by default and the portrait only when said so', async () => {
+    const { a, b } = linked();
+    const asked: boolean[] = [];
+    a.on('avatarRequest', (_fromId, full) => asked.push(full));
+
+    await b.requestAvatar('peer-a');
+    await b.requestAvatar('peer-a', true);
+
+    // The default matters more than it looks: it is what every profile beat
+    // in a crowded room triggers, twenty times over.
+    expect(asked).toEqual([false, true]);
+  });
+
+  it('is understood by a phone running the build before thumbnails', async () => {
+    // That build sent {fromId, imageBase64, sentAt} and asked with an empty
+    // payload. Neither side may fall over.
+    const { a, b } = linked();
+    const asked: boolean[] = [];
+    const received: AvatarPacket[] = [];
+    a.on('avatarRequest', (_fromId, full) => asked.push(full));
+    b.on('avatar', (avatar) => received.push(avatar));
+
+    await b.requestAvatar('peer-a');
+    await a.sendAvatar({ fromId: 'peer-a', imageBase64: PHOTO, sentAt: 1 }, 'peer-b');
+
+    expect(asked).toEqual([false]);
+    // No fingerprint and no size. The receiving side hashes what arrived -
+    // which matches what that build announces, because it is the same photo
+    // - and files it as a face, so the lists fill in exactly as before.
+    expect(received[0].hash).toBeUndefined();
+    expect(received[0].full).toBeUndefined();
+  });
+
   it('still converges when the first answer is lost', async () => {
     const { a, aTransport, b } = linked();
     const received: AvatarPacket[] = [];
@@ -104,6 +148,47 @@ describe('avatar exchange', () => {
     // ask again - which is the whole point of asking rather than pushing.
     await b.requestAvatar('peer-a');
     expect(received).toHaveLength(1);
+  });
+});
+
+describe('what a full carriage costs', () => {
+  /** The frames one photo of this size actually becomes on the wire. */
+  const framesFor = (chars: number, full: boolean) => {
+    const envelope = encodeEnvelope({
+      id: 'abcdef12-3456-7890-abcd-ef1234567890',
+      kind: 'avatar',
+      fromId: 'peer-a',
+      toId: 'peer-b',
+      ttl: 6,
+      payload: { fromId: 'peer-a', imageBase64: fakePhoto(chars), hash: 'abcd1234', full, sentAt: 1 },
+    });
+    return frameChunks(envelope, newFrameId()).length;
+  };
+
+  it('sends a face for a fraction of what a portrait costs', () => {
+    const face = framesFor(THUMB_CHARS, false);
+    const portrait = framesFor(PORTRAIT_CHARS, true);
+
+    // This ratio is the whole point of the two sizes. Twenty people around
+    // you is twenty faces either way; at portrait size that is a few
+    // thousand frames before anybody has typed a word.
+    expect(portrait / face).toBeGreaterThan(4);
+    expect(face * 20).toBeLessThan(portrait * 5);
+  });
+
+  it('keeps a profile beat small enough to carry every ten seconds', () => {
+    // The temptation is to put the face inside the profile and be done with
+    // it. This is why it can't go there: the beat is broadcast to the whole
+    // room six times a minute.
+    const beat = encodeEnvelope({
+      id: 'abcdef12-3456-7890-abcd-ef1234567890',
+      kind: 'profile',
+      fromId: 'peer-a',
+      toId: BROADCAST_ID,
+      ttl: 6,
+      payload: { id: 'peer-a', location: LOCATION, nickname: 'Ana', avatarHash: 'abcd1234' },
+    });
+    expect(frameChunks(beat, newFrameId()).length).toBeLessThanOrEqual(3);
   });
 });
 

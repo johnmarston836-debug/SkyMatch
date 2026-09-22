@@ -3,6 +3,7 @@ import { MeshRouter } from './MeshRouter';
 import { BROADCAST_ID, type MeshEnvelope } from './protocol';
 import type {
   AvatarPacket,
+  AvatarRequest,
   ChatMessage,
   PresenceAlert,
   PresenceReaction,
@@ -21,8 +22,11 @@ type Listeners = {
   presence: (alert: PresenceAlert) => void;
   reaction: (reaction: PresenceReaction) => void;
   avatar: (avatar: AvatarPacket) => void;
-  /** Someone is missing our photo, or holding an outdated one, and is asking for it. */
-  avatarRequest: (fromId: string) => void;
+  /**
+   * Someone is missing our photo, or holding an outdated one, and is asking
+   * for it - `full` when they have opened our card and want the portrait.
+   */
+  avatarRequest: (fromId: string, full: boolean) => void;
   /** Someone has read what we sent them. */
   read: (receipt: ReadReceipt) => void;
 };
@@ -127,14 +131,18 @@ export class MeshService {
   }
 
   /**
-   * Asks one peer for their photo. Tiny, and safe to repeat: it is sent
-   * again on every profile beat until their photo actually arrives, which
-   * is what makes a photo survive the frames a Bluetooth link loses - the
-   * old fire-and-forget push had no second chance, so a photo either made
-   * it the first time or never appeared at all.
+   * Asks one peer for their photo: the thumbnail by default, the portrait
+   * only when someone has actually opened their card.
+   *
+   * Tiny, and safe to repeat: it is sent again on every profile beat until
+   * their photo actually arrives, which is what makes a photo survive the
+   * frames a Bluetooth link loses - the old fire-and-forget push had no
+   * second chance, so a photo either made it the first time or never
+   * appeared at all.
    */
-  async requestAvatar(toId: string) {
-    await this.router.send({ id: newId(), kind: 'avatarRequest', fromId: this.myPeerId, toId, payload: {} });
+  async requestAvatar(toId: string, full = false) {
+    const payload: AvatarRequest = full ? { full: true } : {};
+    await this.router.send({ id: newId(), kind: 'avatarRequest', fromId: this.myPeerId, toId, payload });
   }
 
   /** Tells one person we have read up to a point in what they sent us. */
@@ -168,7 +176,7 @@ export class MeshService {
         this.emit('avatar', envelope.payload as AvatarPacket);
         break;
       case 'avatarRequest':
-        this.emit('avatarRequest', envelope.fromId);
+        this.emit('avatarRequest', envelope.fromId, (envelope.payload as AvatarRequest)?.full === true);
         break;
       case 'read':
         this.emit('read', envelope.payload as ReadReceipt);

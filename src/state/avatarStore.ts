@@ -3,42 +3,62 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { shortHash } from '../utils/hash';
 
 const STORAGE_KEY = '@skymatch/avatar';
+const THUMB_KEY = '@skymatch/avatar-thumb';
 const PEERS_KEY = '@skymatch/peer-avatars';
 
 /**
- * How many people's photos are kept on disk. A photo is a few kilobytes and
- * crossing one costs hundreds of Bluetooth frames, so keeping them is worth
- * far more than the space; the cap is only there to stop a frequent traveller
+ * How many people's faces are kept on disk. A thumbnail is about a kilobyte
+ * and crossing one still costs twenty-odd Bluetooth frames, so keeping them
+ * is worth far more than the space; the cap only stops a frequent traveller
  * accumulating hundreds of strangers.
  */
 const MAX_CACHED_PEERS = 24;
 
-interface CachedAvatar {
-  image: string;
+/**
+ * How many of those also keep the big portrait. It is five times the size
+ * of a thumbnail and can always be asked for again the moment someone opens
+ * that person's card, so only the people most recently around keep theirs.
+ */
+const MAX_CACHED_PORTRAITS = 8;
+
+/**
+ * What one person's photo looks like on this phone.
+ *
+ * Both sizes carry the *owner's* fingerprint, never their own: the hash is
+ * what the owner announces for their photo, and it has to mean "this is
+ * which photo of theirs I hold", not "this is which file I happen to have".
+ * Hashing the thumbnail would give a different answer from hashing the
+ * portrait and nothing would ever match.
+ */
+export interface PeerAvatar {
   hash: string;
+  /** 64px, sent to everyone who asks; what the lists and bubbles show. */
+  thumb?: string;
+  /** 256px, only ever sent to someone who opened this person's card. */
+  full?: string;
   seenAt: number;
 }
 
 /**
  * Photos live apart from the profile on purpose. The profile is re-announced
  * every few seconds to keep the passenger list fresh, and it has to stay
- * small enough to cross a Bluetooth link in a couple of frames; a photo is
- * hundreds of frames and would swamp the cabin if it rode along.
+ * small enough to cross a Bluetooth link in a couple of frames; even a
+ * thumbnail is twenty of them and would swamp the cabin if it rode along.
  */
 interface AvatarState {
-  myAvatar: string | null; // base64 JPEG, persisted across launches
-  peerAvatars: Record<string, string>; // by profile id
-  /**
-   * Fingerprint of each photo we hold, so a profile announcement tells us
-   * straight away whether ours is the photo that person is showing.
-   */
-  peerAvatarHashes: Record<string, string>;
+  /** The 256px portrait: what you see of yourself, and what others ask for. */
+  myAvatar: string | null;
+  /** The 64px thumbnail of the same photo - what everyone nearby receives. */
+  myThumb: string | null;
+  peerAvatars: Record<string, PeerAvatar>;
   /** False until the photos are off disk; see `myAvatarHash`. */
   hydrated: boolean;
 
   hydrate: () => Promise<void>;
-  setMyAvatar: (base64: string | null) => Promise<void>;
-  setPeerAvatar: (peerId: string, base64: string) => void;
+  /** Stores both sizes of your own photo, or clears it when given null. */
+  setMyAvatar: (full: string | null, thumb: string | null) => Promise<void>;
+  /** Files an arrived photo under the hash its owner announced for it. */
+  setPeerAvatar: (peerId: string, hash: string, image: string, full: boolean) => void;
   /** They took their photo down: stop showing the copy we kept. */
   clearPeerAvatar: (peerId: string) => void;
   /**
@@ -53,87 +73,126 @@ interface AvatarState {
   myAvatarHash: () => string | undefined;
 }
 
-/** Keeps the most recently seen faces and drops the rest. */
-function trim(cache: Record<string, CachedAvatar>): Record<string, CachedAvatar> {
-  const entries = Object.entries(cache);
-  if (entries.length <= MAX_CACHED_PEERS) return cache;
-  return Object.fromEntries(
-    entries.sort(([, a], [, b]) => b.seenAt - a.seenAt).slice(0, MAX_CACHED_PEERS),
-  );
+/** The best picture we hold of someone: their portrait if it has arrived, else their face. */
+export function bestImage(entry: PeerAvatar | undefined): string | undefined {
+  return entry?.full ?? entry?.thumb;
 }
 
-async function persistPeers(peerAvatars: Record<string, string>, peerAvatarHashes: Record<string, string>) {
-  const now = Date.now();
-  const cache: Record<string, CachedAvatar> = {};
-  for (const [peerId, image] of Object.entries(peerAvatars)) {
-    cache[peerId] = { image, hash: peerAvatarHashes[peerId] ?? shortHash(image), seenAt: now };
-  }
+/**
+ * Keeps the most recently seen faces, and the portraits of the few most
+ * recent of those.
+ */
+function trim(cache: Record<string, PeerAvatar>): Record<string, PeerAvatar> {
+  const entries = Object.entries(cache).sort(([, a], [, b]) => b.seenAt - a.seenAt);
+  const kept: Record<string, PeerAvatar> = {};
+  entries.slice(0, MAX_CACHED_PEERS).forEach(([peerId, entry], index) => {
+    kept[peerId] = index < MAX_CACHED_PORTRAITS ? entry : { ...entry, full: undefined };
+  });
+  return kept;
+}
+
+async function persistPeers(peerAvatars: Record<string, PeerAvatar>) {
   try {
-    await AsyncStorage.setItem(PEERS_KEY, JSON.stringify(trim(cache)));
+    await AsyncStorage.setItem(PEERS_KEY, JSON.stringify(trim(peerAvatars)));
   } catch {
     // A full disk is no reason to lose the photo we are already showing.
   }
 }
 
+/**
+ * Reads the cache off disk, including the one written by the build that
+ * knew a single size. Its `image` was that build's whole photo, so it
+ * becomes the portrait: dropping it would make every face in the app
+ * disappear on the update and cross the radio all over again.
+ */
+function readCache(raw: string | null): Record<string, PeerAvatar> {
+  if (!raw) return {};
+  const peerAvatars: Record<string, PeerAvatar> = {};
+  try {
+    const stored = JSON.parse(raw) as Record<string, Partial<PeerAvatar> & { image?: string }>;
+    for (const [peerId, entry] of Object.entries(stored)) {
+      if (typeof entry?.hash !== 'string') continue;
+      const full = typeof entry.full === 'string' ? entry.full : entry.image;
+      const thumb = typeof entry.thumb === 'string' ? entry.thumb : undefined;
+      if (typeof full !== 'string' && thumb === undefined) continue;
+      peerAvatars[peerId] = {
+        hash: entry.hash,
+        thumb,
+        full: typeof full === 'string' ? full : undefined,
+        seenAt: typeof entry.seenAt === 'number' ? entry.seenAt : Date.now(),
+      };
+    }
+  } catch {
+    // Unreadable cache: start over rather than refuse to launch.
+  }
+  return peerAvatars;
+}
+
 export const useAvatarStore = create<AvatarState>((set, get) => ({
   myAvatar: null,
+  myThumb: null,
   peerAvatars: {},
-  peerAvatarHashes: {},
   hydrated: false,
 
   hydrate: async () => {
-    const [mine, peers] = await Promise.all([
+    const [mine, myThumb, peers] = await Promise.all([
       AsyncStorage.getItem(STORAGE_KEY),
+      AsyncStorage.getItem(THUMB_KEY),
       AsyncStorage.getItem(PEERS_KEY),
     ]);
 
     // Faces from the last time the app was open. Without this every photo
-    // has to cross hundreds of Bluetooth frames again on every launch, which
-    // is why they seemed to come and go.
-    const peerAvatars: Record<string, string> = {};
-    const peerAvatarHashes: Record<string, string> = {};
-    if (peers) {
-      try {
-        const cache = JSON.parse(peers) as Record<string, CachedAvatar>;
-        for (const [peerId, entry] of Object.entries(cache)) {
-          if (typeof entry?.image !== 'string' || typeof entry?.hash !== 'string') continue;
-          peerAvatars[peerId] = entry.image;
-          peerAvatarHashes[peerId] = entry.hash;
-        }
-      } catch {
-        // Unreadable cache: start over rather than refuse to launch.
-      }
+    // has to cross the radio again on every launch, which is why they
+    // seemed to come and go.
+    set({
+      myAvatar: mine ?? null,
+      // A photo saved by the build before thumbnails existed has none; the
+      // portrait stands in until the next time it is picked, which is
+      // wasteful on the radio but never wrong on screen.
+      myThumb: myThumb ?? mine ?? null,
+      peerAvatars: readCache(peers),
+      hydrated: true,
+    });
+  },
+
+  setMyAvatar: async (full, thumb) => {
+    if (full === null) {
+      await Promise.all([AsyncStorage.removeItem(STORAGE_KEY), AsyncStorage.removeItem(THUMB_KEY)]);
+      set({ myAvatar: null, myThumb: null });
+      return;
     }
-
-    set({ myAvatar: mine ?? null, peerAvatars, peerAvatarHashes, hydrated: true });
+    // The thumbnail can be missing when the rescaler isn't there (Android,
+    // or a build without the native module). The portrait then does both
+    // jobs: bigger on the radio than it should be, but never a blank face.
+    const face = thumb ?? full;
+    await Promise.all([AsyncStorage.setItem(STORAGE_KEY, full), AsyncStorage.setItem(THUMB_KEY, face)]);
+    set({ myAvatar: full, myThumb: face });
   },
 
-  setMyAvatar: async (base64) => {
-    if (base64 === null) await AsyncStorage.removeItem(STORAGE_KEY);
-    else await AsyncStorage.setItem(STORAGE_KEY, base64);
-    set({ myAvatar: base64 });
-  },
-
-  setPeerAvatar: (peerId, base64) => {
-    set((state) => ({
-      peerAvatars: { ...state.peerAvatars, [peerId]: base64 },
-      peerAvatarHashes: { ...state.peerAvatarHashes, [peerId]: shortHash(base64) },
-    }));
-    const { peerAvatars, peerAvatarHashes } = get();
-    void persistPeers(peerAvatars, peerAvatarHashes);
+  setPeerAvatar: (peerId, hash, image, full) => {
+    set((state) => {
+      const previous = state.peerAvatars[peerId];
+      // A photo for a hash we no longer expect is the old one arriving late;
+      // starting from scratch stops it being paired with the new face.
+      const base = previous?.hash === hash ? previous : { hash, seenAt: 0 };
+      return {
+        peerAvatars: {
+          ...state.peerAvatars,
+          [peerId]: { ...base, hash, [full ? 'full' : 'thumb']: image, seenAt: Date.now() },
+        },
+      };
+    });
+    void persistPeers(get().peerAvatars);
   },
 
   clearPeerAvatar: (peerId) => {
     if (get().peerAvatars[peerId] === undefined) return;
     set((state) => {
       const peerAvatars = { ...state.peerAvatars };
-      const peerAvatarHashes = { ...state.peerAvatarHashes };
       delete peerAvatars[peerId];
-      delete peerAvatarHashes[peerId];
-      return { peerAvatars, peerAvatarHashes };
+      return { peerAvatars };
     });
-    const { peerAvatars, peerAvatarHashes } = get();
-    void persistPeers(peerAvatars, peerAvatarHashes);
+    void persistPeers(get().peerAvatars);
   },
 
   myAvatarHash: () => {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Image, Pressable, Text, View } from 'react-native';
 import { PhotoViewer } from './PhotoViewer';
-import { useAvatarStore } from '../state/avatarStore';
+import { bestImage, useAvatarStore } from '../state/avatarStore';
 import { useThemedStyles } from '../theme/ThemeContext';
 
 interface Props {
@@ -16,9 +16,15 @@ interface Props {
 /** Someone's photo if it has made it across the mesh, their initial if it hasn't. */
 export function Avatar({ peerId, nickname, size, zoomable = false }: Props) {
   const myAvatar = useAvatarStore((state) => state.myAvatar);
-  const peerAvatars = useAvatarStore((state) => state.peerAvatars);
+  // The one person's entry, not the whole record: a selector that returned
+  // the record would re-render every avatar on screen each time any face
+  // arrived.
+  const theirs = useAvatarStore((state) => (peerId === undefined ? undefined : state.peerAvatars[peerId]));
   const [zoomed, setZoomed] = useState(false);
-  const image = peerId === undefined ? myAvatar : peerAvatars[peerId];
+  // Whichever size has arrived. A face shown at 40 points looks the same
+  // either way, so the thumbnail standing in until the portrait lands is
+  // invisible here and saves five sixths of the frames.
+  const image = peerId === undefined ? myAvatar : bestImage(theirs);
   const styles = useThemedStyles(({ colors, radii }) => ({
     circle: {
       borderRadius: radii.pill,

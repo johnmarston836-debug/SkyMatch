@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Image, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -7,7 +7,9 @@ import { Avatar } from '../../components/Avatar';
 import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useBlockStore } from '../../state/blockStore';
+import { useAvatarStore } from '../../state/avatarStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
+import { requestFullAvatar } from '../../mesh/meshController';
 import { colorForPeer } from '../../theme';
 import { describeLocation, formatLocation } from '../../utils/location';
 import { t } from '../../i18n';
@@ -27,6 +29,22 @@ export function ProfileScreen({ route, navigation }: Props) {
   const hasConversation = useChatStore((state) => (state.privateMessagesByPeer[peerId]?.length ?? 0) > 0);
   const muted = useBlockStore((state) => state.muted[peerId] === true);
   const toggleMuted = useBlockStore((state) => state.toggle);
+
+  // This is the one screen that shows a photo big enough for the portrait to
+  // be worth its frames, so this is where it is asked for. Everywhere else
+  // makes do with the face everyone receives anyway.
+  //
+  // Asked again when their face lands, not only when the screen opens:
+  // opening the card of someone whose photo hasn't arrived yet is the normal
+  // case in a room you just walked into, and there is nothing to ask for
+  // until their fingerprint is known. The hash and a boolean rather than the
+  // images themselves - a dependency list is compared on every render, and
+  // these are kilobytes of base64.
+  const avatarHash = useAvatarStore((state) => state.peerAvatars[peerId]?.hash);
+  const hasFace = useAvatarStore((state) => state.peerAvatars[peerId]?.thumb !== undefined);
+  useEffect(() => {
+    void requestFullAvatar(peerId);
+  }, [peerId, avatarHash, hasFace]);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background, paddingHorizontal: spacing(3) },
     backLink: { color: colors.text, fontWeight: '600' as const, marginBottom: spacing(3) },
