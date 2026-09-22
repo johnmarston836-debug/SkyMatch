@@ -28,7 +28,7 @@ export const de: Strings = {
 
   tutorial: {
     diagramYou: 'DU',
-    page1Label: 'SO FUNKTIONIERT’S · 1 VON 2',
+    page1Label: 'SO FUNKTIONIERT’S · 1 VON 3',
     page1Title: 'Nachrichten springen von Handy zu Handy',
     page1Body:
       'SkyMatch nutzt weder Internet noch WLAN. Dein Handy spricht per Bluetooth direkt mit den Handys in deiner Nähe.',
@@ -36,7 +36,7 @@ export const de: Strings = {
     page1Body2:
       'Bluetooth reicht nur wenige Meter, also reichen die Handys dazwischen die Nachrichten weiter, bis sie ' +
       'ankommen. Je mehr Leute die App offen haben, desto weiter kommt alles.',
-    page2Label: 'SO FUNKTIONIERT’S · 2 VON 2',
+    page2Label: 'SO FUNKTIONIERT’S · 2 VON 3',
     page2Title: 'Lass die App offen',
     page2Body:
       'Dein Handy sendet und empfängt nur, solange die App auf dem Bildschirm ist. Schließt du sie oder wechselst ' +
@@ -50,6 +50,15 @@ export const de: Strings = {
     page2Body2:
       'Im Flugzeug ist der Flugmodus kein Problem: du kannst ihn anlassen und Bluetooth einzeln einschalten. ' +
       'Kein WLAN, keine mobilen Daten, nirgends Empfang nötig.',
+    page3Label: 'SO FUNKTIONIERT’S · 3 VON 3',
+    page3Title: 'Eure privaten Chats könnt nur ihr beide lesen',
+    page3Body:
+      'Private Nachrichten sind Ende-zu-Ende-verschlüsselt. Die Handys, die sie weiterreichen, können sie nicht lesen: weder den Text noch die Fotos.',
+    page3Body2:
+      'Außerdem ist alles, was du sendest, von deinem Handy signiert. Niemand kann schreiben und sich dabei als dich ausgeben.',
+    securityCalloutTitle: 'Achte auf den Kopf des Chats',
+    securityCalloutBody:
+      'Nutzt die andere Person eine ältere Version von SkyMatch, ist euer privater Chat nicht verschlüsselt, und wir weisen dich in Rot darauf hin. Den Sitzplatz gibt dagegen jeder selbst an: Das kann niemand überprüfen.',
     understood: 'Verstanden',
   },
 

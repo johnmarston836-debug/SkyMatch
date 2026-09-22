@@ -36,7 +36,7 @@ export const es = {
 
   tutorial: {
     diagramYou: 'TÚ',
-    page1Label: 'CÓMO FUNCIONA · 1 DE 2',
+    page1Label: 'CÓMO FUNCIONA · 1 DE 3',
     page1Title: 'Los mensajes van saltando de móvil en móvil',
     page1Body:
       'SkyMatch no usa internet ni wifi. Tu teléfono habla por Bluetooth directamente con los teléfonos que tienes cerca.',
@@ -44,7 +44,7 @@ export const es = {
     page1Body2:
       'El Bluetooth llega a pocos metros, así que los móviles que hay en medio van pasando los mensajes hasta que ' +
       'llegan a su destino. Cuanta más gente lleve la app abierta, más lejos llega todo.',
-    page2Label: 'CÓMO FUNCIONA · 2 DE 2',
+    page2Label: 'CÓMO FUNCIONA · 2 DE 3',
     page2Title: 'Deja la app abierta',
     page2Body:
       'Tu móvil solo envía y recibe mientras la app está en pantalla. Si la cierras o te vas a otra aplicación, ' +
@@ -58,6 +58,15 @@ export const es = {
     page2Body2:
       'En un avión, el modo avión no es problema: puedes dejarlo activado y encender el Bluetooth por separado. ' +
       'No hace falta wifi, ni datos, ni cobertura en ningún sitio.',
+    page3Label: 'CÓMO FUNCIONA · 3 DE 3',
+    page3Title: 'Tus chats privados solo los leéis vosotros dos',
+    page3Body:
+      'Los mensajes privados van cifrados de extremo a extremo. Los móviles que hacen de puente los pasan sin poder leerlos: ni el texto ni las fotos.',
+    page3Body2:
+      'Además, todo lo que envías va firmado por tu móvil, así que nadie puede escribir haciéndose pasar por ti.',
+    securityCalloutTitle: 'Fíjate en la cabecera del chat',
+    securityCalloutBody:
+      'Si la otra persona usa una versión antigua de SkyMatch, vuestro chat privado no va cifrado y te lo avisamos en rojo. El asiento, en cambio, lo indica cada uno: eso no lo puede comprobar nadie.',
     understood: 'Entendido',
   },
 

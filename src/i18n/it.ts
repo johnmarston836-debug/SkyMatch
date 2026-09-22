@@ -28,7 +28,7 @@ export const it: Strings = {
 
   tutorial: {
     diagramYou: 'TU',
-    page1Label: 'COME FUNZIONA · 1 DI 2',
+    page1Label: 'COME FUNZIONA · 1 DI 3',
     page1Title: 'I messaggi saltano di telefono in telefono',
     page1Body:
       'SkyMatch non usa internet né wifi. Il tuo telefono parla via Bluetooth direttamente con i telefoni che hai vicino.',
@@ -36,7 +36,7 @@ export const it: Strings = {
     page1Body2:
       'Il Bluetooth arriva a pochi metri, quindi i telefoni che stanno in mezzo si passano i messaggi finché ' +
       'non arrivano a destinazione. Più gente tiene l’app aperta, più lontano arriva tutto.',
-    page2Label: 'COME FUNZIONA · 2 DI 2',
+    page2Label: 'COME FUNZIONA · 2 DI 3',
     page2Title: 'Lascia l’app aperta',
     page2Body:
       'Il tuo telefono invia e riceve solo mentre l’app è sullo schermo. Se la chiudi o passi a un’altra ' +
@@ -50,6 +50,15 @@ export const it: Strings = {
     page2Body2:
       'In aereo la modalità aereo non è un problema: puoi lasciarla attiva e accendere il Bluetooth a parte. ' +
       'Non serve wifi, né dati, né campo da nessuna parte.',
+    page3Label: 'COME FUNZIONA · 3 DI 3',
+    page3Title: 'Le vostre chat private le leggete solo voi due',
+    page3Body:
+      'I messaggi privati hanno la crittografia end-to-end. I telefoni che fanno da ponte li passano senza poterli leggere: né il testo né le foto.',
+    page3Body2:
+      'Inoltre, tutto ciò che invii è firmato dal tuo telefono, quindi nessuno può scrivere fingendo di essere te.',
+    securityCalloutTitle: 'Guarda l’intestazione della chat',
+    securityCalloutBody:
+      'Se l’altra persona usa una versione vecchia di SkyMatch, la vostra chat privata non è crittografata e te lo segnaliamo in rosso. Il posto, invece, lo indica ognuno: quello non può verificarlo nessuno.',
     understood: 'Ho capito',
   },
 

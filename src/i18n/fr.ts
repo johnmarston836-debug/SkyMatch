@@ -28,7 +28,7 @@ export const fr: Strings = {
 
   tutorial: {
     diagramYou: 'TOI',
-    page1Label: 'COMMENT ÇA MARCHE · 1 SUR 2',
+    page1Label: 'COMMENT ÇA MARCHE · 1 SUR 3',
     page1Title: 'Les messages sautent de téléphone en téléphone',
     page1Body:
       'SkyMatch n’utilise ni internet ni wifi. Ton téléphone parle en Bluetooth directement aux téléphones qui sont près de toi.',
@@ -36,7 +36,7 @@ export const fr: Strings = {
     page1Body2:
       'Le Bluetooth ne porte qu’à quelques mètres, alors les téléphones au milieu se passent les messages ' +
       'jusqu’à ce qu’ils arrivent à destination. Plus il y a de gens avec l’appli ouverte, plus tout va loin.',
-    page2Label: 'COMMENT ÇA MARCHE · 2 SUR 2',
+    page2Label: 'COMMENT ÇA MARCHE · 2 SUR 3',
     page2Title: 'Laisse l’appli ouverte',
     page2Body:
       'Ton téléphone n’envoie et ne reçoit que pendant que l’appli est à l’écran. Si tu la fermes ou que tu passes ' +
@@ -50,6 +50,15 @@ export const fr: Strings = {
     page2Body2:
       'Dans un avion, le mode avion n’est pas un problème : tu peux le laisser activé et allumer le Bluetooth ' +
       'séparément. Pas besoin de wifi, ni de données, ni de réseau où que ce soit.',
+    page3Label: 'COMMENT ÇA MARCHE · 3 SUR 3',
+    page3Title: 'Vos discussions privées ne sont lisibles que par vous deux',
+    page3Body:
+      'Les messages privés sont chiffrés de bout en bout. Les téléphones qui les relaient les transmettent sans pouvoir les lire : ni le texte, ni les photos.',
+    page3Body2:
+      'Et tout ce que vous envoyez est signé par votre téléphone : personne ne peut écrire en se faisant passer pour vous.',
+    securityCalloutTitle: 'Regardez le haut de la discussion',
+    securityCalloutBody:
+      'Si l’autre personne utilise une ancienne version de SkyMatch, votre discussion privée n’est pas chiffrée, et nous vous le signalons en rouge. Le siège, en revanche, c’est chacun qui l’indique : personne ne peut le vérifier.',
     understood: 'Compris',
   },
 

@@ -14,10 +14,14 @@ interface CarouselProps {
 }
 
 /**
- * Two pages explaining the one thing users cannot guess and that breaks the
- * app for everyone when they get it wrong: messages travel phone to phone,
- * so leaving the app stops both receiving and relaying for others.
+ * Three pages. The first two explain the one thing users cannot guess and
+ * that breaks the app for everyone when they get it wrong: messages travel
+ * phone to phone, so leaving the app stops both receiving and relaying for
+ * others. The third answers what that raises straight away - if strangers'
+ * phones carry my messages, can they read them?
  */
+const PAGES = 3;
+
 function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
@@ -60,8 +64,8 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
   }));
 
   const goNext = () => {
-    if (page === 0) {
-      scrollRef.current?.scrollTo({ x: width, animated: true });
+    if (page < PAGES - 1) {
+      scrollRef.current?.scrollTo({ x: width * (page + 1), animated: true });
       return;
     }
     onFinish();
@@ -108,15 +112,28 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
 
           <Text style={styles.bodySpaced}>{t.tutorial.page2Body2}</Text>
         </View>
+
+        <View style={[styles.page, { width }]}>
+          <Text style={styles.label}>{t.tutorial.page3Label}</Text>
+          <Text style={styles.title}>{t.tutorial.page3Title}</Text>
+          <Text style={styles.body}>{t.tutorial.page3Body}</Text>
+          <Text style={styles.bodySpaced}>{t.tutorial.page3Body2}</Text>
+
+          <View style={styles.callout}>
+            <Text style={styles.calloutTitle}>{t.tutorial.securityCalloutTitle}</Text>
+            <Text style={styles.calloutText}>{t.tutorial.securityCalloutBody}</Text>
+          </View>
+        </View>
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing(3) }]}>
         <View style={styles.dots}>
-          <View style={[styles.dot, page === 0 && styles.dotActive]} />
-          <View style={[styles.dot, page === 1 && styles.dotActive]} />
+          {Array.from({ length: PAGES }, (_, index) => (
+            <View key={index} style={[styles.dot, page === index && styles.dotActive]} />
+          ))}
         </View>
         <Pressable style={styles.cta} onPress={goNext}>
-          <Text style={styles.ctaText}>{page === 0 ? t.common.next : finishLabel}</Text>
+          <Text style={styles.ctaText}>{page < PAGES - 1 ? t.common.next : finishLabel}</Text>
         </Pressable>
       </View>
     </View>
@@ -131,7 +148,7 @@ export function TutorialScreen({ navigation }: OnboardingProps) {
 
 type MainProps = NativeStackScreenProps<MainStackParamList, 'HowItWorks'>;
 
-/** Same two pages, reachable again from the profile once onboarding is long past. */
+/** Same pages, reachable again from the profile once onboarding is long past. */
 export function HowItWorksScreen({ navigation }: MainProps) {
   return (
     <TutorialCarousel

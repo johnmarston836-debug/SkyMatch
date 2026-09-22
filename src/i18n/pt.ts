@@ -31,7 +31,7 @@ export const pt: Strings = {
 
   tutorial: {
     diagramYou: 'TU',
-    page1Label: 'COMO FUNCIONA · 1 DE 2',
+    page1Label: 'COMO FUNCIONA · 1 DE 3',
     page1Title: 'As mensagens vão saltando de telemóvel em telemóvel',
     page1Body:
       'O SkyMatch não usa internet nem wifi. O teu telemóvel fala por Bluetooth diretamente com os telemóveis que tens perto.',
@@ -39,7 +39,7 @@ export const pt: Strings = {
     page1Body2:
       'O Bluetooth chega a poucos metros, por isso os telemóveis que estão pelo meio vão passando as mensagens ' +
       'até chegarem ao destino. Quanto mais gente tiver a app aberta, mais longe chega tudo.',
-    page2Label: 'COMO FUNCIONA · 2 DE 2',
+    page2Label: 'COMO FUNCIONA · 2 DE 3',
     page2Title: 'Deixa a app aberta',
     page2Body:
       'O teu telemóvel só envia e recebe enquanto a app está no ecrã. Se a fechares ou fores para outra ' +
@@ -53,6 +53,15 @@ export const pt: Strings = {
     page2Body2:
       'Num avião, o modo avião não é problema: podes deixá-lo ligado e ligar o Bluetooth à parte. ' +
       'Não é preciso wifi, nem dados, nem rede em lado nenhum.',
+    page3Label: 'COMO FUNCIONA · 3 DE 3',
+    page3Title: 'As tuas conversas privadas só vocês os dois as podem ler',
+    page3Body:
+      'As mensagens privadas têm encriptação ponta a ponta. Os telemóveis que fazem de ponte passam-nas sem as conseguir ler: nem o texto nem as fotos.',
+    page3Body2:
+      'Além disso, tudo o que envias vai assinado pelo teu telemóvel, por isso ninguém pode escrever a fazer-se passar por ti.',
+    securityCalloutTitle: 'Repara no topo da conversa',
+    securityCalloutBody:
+      'Se a outra pessoa usa uma versão antiga do SkyMatch, a vossa conversa privada não está encriptada e avisamos-te a vermelho. O lugar, pelo contrário, é cada um que o indica: isso ninguém consegue verificar.',
     understood: 'Percebido',
   },
 

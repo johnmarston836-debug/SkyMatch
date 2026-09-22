@@ -28,7 +28,7 @@ export const ca: Strings = {
 
   tutorial: {
     diagramYou: 'TU',
-    page1Label: 'COM FUNCIONA · 1 DE 2',
+    page1Label: 'COM FUNCIONA · 1 DE 3',
     page1Title: 'Els missatges van saltant de mòbil en mòbil',
     page1Body:
       'SkyMatch no fa servir internet ni wifi. El teu telèfon parla per Bluetooth directament amb els telèfons que tens a prop.',
@@ -36,7 +36,7 @@ export const ca: Strings = {
     page1Body2:
       'El Bluetooth arriba a pocs metres, així que els mòbils que hi ha al mig van passant els missatges fins que ' +
       'arriben a destí. Com més gent porti l’app oberta, més lluny arriba tot.',
-    page2Label: 'COM FUNCIONA · 2 DE 2',
+    page2Label: 'COM FUNCIONA · 2 DE 3',
     page2Title: 'Deixa l’app oberta',
     page2Body:
       'El teu mòbil només envia i rep mentre l’app és a la pantalla. Si la tanques o te’n vas a una altra aplicació, ' +
@@ -50,6 +50,15 @@ export const ca: Strings = {
     page2Body2:
       'En un avió, el mode avió no és cap problema: el pots deixar activat i encendre el Bluetooth a part. ' +
       'No cal wifi, ni dades, ni cobertura enlloc.',
+    page3Label: 'COM FUNCIONA · 3 DE 3',
+    page3Title: 'Els teus xats privats només els llegiu vosaltres dos',
+    page3Body:
+      'Els missatges privats van xifrats d’extrem a extrem. Els mòbils que fan de pont els passen sense poder-los llegir: ni el text ni les fotos.',
+    page3Body2:
+      'A més, tot el que envies va signat pel teu mòbil, així que ningú no pot escriure fent-se passar per tu.',
+    securityCalloutTitle: 'Fixa’t en la capçalera del xat',
+    securityCalloutBody:
+      'Si l’altra persona fa servir una versió antiga de SkyMatch, el vostre xat privat no va xifrat i t’ho avisem en vermell. El seient, en canvi, l’indica cadascú: això no ho pot comprovar ningú.',
     understood: 'Entesos',
   },
 

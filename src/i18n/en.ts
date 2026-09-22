@@ -28,7 +28,7 @@ export const en: Strings = {
 
   tutorial: {
     diagramYou: 'YOU',
-    page1Label: 'HOW IT WORKS · 1 OF 2',
+    page1Label: 'HOW IT WORKS · 1 OF 3',
     page1Title: 'Messages hop from phone to phone',
     page1Body:
       'SkyMatch uses no internet and no Wi-Fi. Your phone talks over Bluetooth straight to the phones around you.',
@@ -36,7 +36,7 @@ export const en: Strings = {
     page1Body2:
       'Bluetooth only reaches a few metres, so the phones in between keep handing messages along until they get ' +
       'where they are going. The more people have the app open, the further everything travels.',
-    page2Label: 'HOW IT WORKS · 2 OF 2',
+    page2Label: 'HOW IT WORKS · 2 OF 3',
     page2Title: 'Leave the app open',
     page2Body:
       'Your phone only sends and receives while the app is on screen. If you close it or switch to another app, ' +
@@ -50,6 +50,15 @@ export const en: Strings = {
     page2Body2:
       'On a plane, flight mode is no problem: you can leave it on and switch Bluetooth on separately. No Wi-Fi, ' +
       'no data and no signal needed anywhere.',
+    page3Label: 'HOW IT WORKS · 3 OF 3',
+    page3Title: 'Only the two of you can read your private chats',
+    page3Body:
+      'Private messages are end-to-end encrypted. The phones that relay them pass them on without being able to read them: neither the text nor the photos.',
+    page3Body2:
+      'And everything you send is signed by your phone, so nobody can write pretending to be you.',
+    securityCalloutTitle: 'Check the top of the chat',
+    securityCalloutBody:
+      'If the other person is on an older version of SkyMatch, your private chat is not encrypted, and we warn you in red. Seats, on the other hand, are whatever each person says: nobody can check those.',
     understood: 'Got it',
   },
 
