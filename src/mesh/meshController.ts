@@ -99,17 +99,30 @@ function labelOf(packet: { fromLabel?: string; label?: string; fromSeat?: unknow
 
 /** Bluetooth device ids already greeted, so the duplicate scan hits don't re-announce endlessly. */
 const greeted = new Set<string>();
-/** profile id -> when we last asked them for their photo / last sent them ours. */
+/**
+ * When we last asked for a photo, keyed by *which* photo - person, size and
+ * fingerprint - and when we last sent someone ours.
+ *
+ * Keyed by the photo rather than the person on purpose. Someone who changes
+ * their picture a moment after we fetched the old one is showing us
+ * something we have never asked for; a cooldown per person made their new
+ * face wait out the rest of the 45 seconds, plus a beat, before anyone even
+ * asked for it.
+ */
 const avatarRequestedAt = new Map<string, number>();
 const avatarSentAt = new Map<string, number>();
-/** profile id -> when a thumbnail request went out and hasn't been answered yet. */
-const avatarsInFlight = new Map<string, number>();
+/** profile id -> the thumbnail request that went out and hasn't been answered yet. */
+const avatarsInFlight = new Map<string, { at: number; hash: string }>();
+
+function requestKey(peerId: string, hash: string, full = false) {
+  return `${peerId}:${full ? 'full' : 'thumb'}:${hash}`;
+}
 
 /** Forgets the requests that were never answered, so their slots come back. */
 function inFlightCount(): number {
   const cutoff = Date.now() - AVATAR_IN_FLIGHT_MS;
-  for (const [peerId, at] of avatarsInFlight) {
-    if (at < cutoff) avatarsInFlight.delete(peerId);
+  for (const [peerId, request] of avatarsInFlight) {
+    if (request.at < cutoff) avatarsInFlight.delete(peerId);
   }
   return avatarsInFlight.size;
 }
@@ -182,15 +195,19 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
     const held = useAvatarStore.getState().peerAvatars[profile.id];
     if (held?.hash === avatarHash && (held.thumb !== undefined || held.full !== undefined)) return;
 
-    const askedAt = avatarRequestedAt.get(profile.id) ?? 0;
+    const key = requestKey(profile.id, avatarHash);
+    const askedAt = avatarRequestedAt.get(key) ?? 0;
     if (Date.now() - askedAt < AVATAR_REQUEST_COOLDOWN_MS) return;
+    // A request still out for their *previous* photo is not worth waiting
+    // for: its slot goes to the one they are showing now.
+    if (avatarsInFlight.get(profile.id)?.hash !== avatarHash) avatarsInFlight.delete(profile.id);
     // Nobody is waiting on any one face, so a queue would only add a way to
     // get stuck: the profile beat comes round every ten seconds and asks
     // again for whoever didn't fit this time.
     if (inFlightCount() >= MAX_AVATARS_IN_FLIGHT) return;
 
-    avatarRequestedAt.set(profile.id, Date.now());
-    avatarsInFlight.set(profile.id, Date.now());
+    avatarRequestedAt.set(key, Date.now());
+    avatarsInFlight.set(profile.id, { at: Date.now(), hash: avatarHash });
     void service?.requestAvatar(profile.id);
   });
 
@@ -382,7 +399,7 @@ export async function requestFullAvatar(peerId: string) {
   // No hash yet means their profile hasn't arrived; the beat will bring it
   // and the thumbnail request that follows.
   if (!held || held.full !== undefined) return;
-  const key = `${peerId}:full`;
+  const key = requestKey(peerId, held.hash, true);
   const askedAt = avatarRequestedAt.get(key) ?? 0;
   if (Date.now() - askedAt < AVATAR_REQUEST_COOLDOWN_MS) return;
   avatarRequestedAt.set(key, Date.now());
