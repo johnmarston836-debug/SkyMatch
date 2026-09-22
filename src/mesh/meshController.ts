@@ -7,6 +7,7 @@ import { usePresenceStore } from '../state/presenceStore';
 import { useProfileStore } from '../state/profileStore';
 import { useAvatarStore } from '../state/avatarStore';
 import { useBlockStore } from '../state/blockStore';
+import { useIdentityStore } from '../state/identityStore';
 import { notifyPrivateMessage } from '../notifications/notifier';
 import { requestBlePermissions } from '../utils/permissions';
 import { newId } from '../utils/id';
@@ -122,7 +123,9 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   if (!USE_MOCK_MESH) await requestBlePermissions();
 
   const transport = USE_MOCK_MESH ? new MockBleTransport() : new RealBleTransport();
-  service = new MeshService(transport, myProfile.id);
+  // Keys come from App.tsx, loaded before anything could get here; the
+  // service only uses them if they match the profile id.
+  service = new MeshService(transport, myProfile.id, useIdentityStore.getState().identity ?? undefined);
 
   service.on('peerSeen', (peerId) => {
     // Greet each newly spotted phone once. This is only a fast path: the
@@ -155,7 +158,7 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
     // the passenger list stores who someone is, not what their photo looks
     // like.
     const { avatarHash } = packet;
-    useDiscoveryStore.getState().setProfile(profile);
+    useDiscoveryStore.getState().setProfile(profile, service?.isSecureWith(profile.id) ?? false);
     // Their announcement carries the fingerprint of the photo they are
     // showing. If it isn't the one we hold, ask for it - now, and again on
     // every beat until it arrives. Photos used to be pushed once, the first

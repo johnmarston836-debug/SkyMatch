@@ -8,18 +8,19 @@ interface DiscoveryState {
   /** Keyed by profile id, which is also the address private messages are sent to. */
   peers: Record<string, DiscoveredPeer>;
 
-  setProfile: (profile: Profile) => void;
+  /** `secure`: they announced keys we checked, so what we send them privately is sealed. */
+  setProfile: (profile: Profile, secure?: boolean) => void;
   pruneStale: () => void;
 }
 
 export const useDiscoveryStore = create<DiscoveryState>((set, get) => ({
   peers: {},
 
-  setProfile: (profile) =>
+  setProfile: (profile, secure = false) =>
     set((state) => ({
       peers: {
         ...state.peers,
-        [profile.id]: { peerId: profile.id, profile, lastSeenAt: Date.now() },
+        [profile.id]: { peerId: profile.id, profile, lastSeenAt: Date.now(), secure },
       },
     })),
 

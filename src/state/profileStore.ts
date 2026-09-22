@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { Profile, Seat } from '../types';
 import { newId } from '../utils/id';
+import { useIdentityStore } from './identityStore';
 import { defaultLocation, normalizeLocation } from '../utils/location';
 
 const STORAGE_KEY = '@skymatch/profile';
@@ -34,6 +35,11 @@ interface ProfileState {
   hydrated: boolean;
   hydrate: () => Promise<void>;
   save: (profile: Omit<Profile, 'id'>) => Promise<void>;
+  /**
+   * Moves the profile to the id its keys give it. Returns the id it had,
+   * or null when there was nothing to move.
+   */
+  adoptId: (id: string) => Promise<string | null>;
   clear: () => Promise<void>;
 }
 
@@ -55,9 +61,20 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
 
   save: async (partial) => {
     const existing = get().profile;
-    const profile: Profile = { id: existing?.id ?? newId(), ...partial };
+    // A new profile takes the id its keys were made for; newId() is only
+    // there for a phone whose keys haven't loaded, which App.tsx prevents.
+    const profile: Profile = { id: existing?.id ?? useIdentityStore.getState().identity?.id ?? newId(), ...partial };
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
     set({ profile });
+  },
+
+  adoptId: async (id) => {
+    const existing = get().profile;
+    if (!existing || existing.id === id) return null;
+    const profile: Profile = { ...existing, id };
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+    set({ profile });
+    return existing.id;
   },
 
   clear: async () => {

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar, View, StyleSheet, ActivityIndicator, Image, Text } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -7,6 +7,7 @@ import { useProfileStore } from './src/state/profileStore';
 import { useAvatarStore } from './src/state/avatarStore';
 import { useBlockStore } from './src/state/blockStore';
 import { useChatStore } from './src/state/chatStore';
+import { useIdentityStore } from './src/state/identityStore';
 import { ThemeProvider, useAppTheme } from './src/theme/ThemeContext';
 
 function App() {
@@ -31,17 +32,27 @@ function AppContent() {
   const hydrateChats = useChatStore((state) => state.hydrate);
   const avatarsHydrated = useAvatarStore((state) => state.hydrated);
 
+  const [keysReady, setKeysReady] = useState(false);
+
   useEffect(() => {
-    void hydrate();
     void hydrateAvatar();
     void hydrateMuted();
-    void hydrateChats();
+    // The keys, and the profile id made from them, before anything can
+    // reach the mesh. A profile set up before keys existed has a random id;
+    // it moves to its keyed one here, once, along with the messages we sent
+    // under the old one - otherwise they would show as someone else's.
+    void (async () => {
+      const [identity] = await Promise.all([useIdentityStore.getState().hydrate(), hydrate(), hydrateChats()]);
+      const oldId = await useProfileStore.getState().adoptId(identity.id);
+      if (oldId) useChatStore.getState().renameSelf(oldId, identity.id);
+      setKeysReady(true);
+    })().catch(() => setKeysReady(true));
   }, [hydrate, hydrateAvatar, hydrateMuted, hydrateChats]);
 
-  // Both, not just the profile: the mesh starts as soon as this screen goes
-  // away, and starting it before the photos are off disk means announcing
-  // that we have none.
-  if (!hydrated || !avatarsHydrated) {
+  // All of it, not just the profile: the mesh starts as soon as this screen
+  // goes away, and starting it before the photos are off disk means
+  // announcing that we have none - or, before the keys, unsigned.
+  if (!hydrated || !avatarsHydrated || !keysReady) {
     return (
       <View style={[styles.loading, { backgroundColor: colors.background }]}>
         <Image

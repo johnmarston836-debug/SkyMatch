@@ -90,6 +90,8 @@ export const ca: Strings = {
     placeholder: 'Escriu un missatge…',
     seen: 'Vist',
     replyingTo: (nickname: string) => `Responent a ${nickname}`,
+    encrypted: 'Xifrat d’extrem a extrem: només vosaltres dos podeu llegir aquest xat',
+    notEncrypted: 'Sense xifrar: aquesta persona fa servir una versió antiga de SkyMatch',
   },
 
   passengers: {

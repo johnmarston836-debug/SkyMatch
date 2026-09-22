@@ -90,6 +90,8 @@ export const de: Strings = {
     placeholder: 'Schreib eine Nachricht…',
     seen: 'Gelesen',
     replyingTo: (nickname: string) => `Antwort an ${nickname}`,
+    encrypted: 'Ende-zu-Ende-verschlüsselt: Nur ihr beide könnt diesen Chat lesen',
+    notEncrypted: 'Nicht verschlüsselt: Diese Person nutzt eine ältere Version von SkyMatch',
   },
 
   passengers: {

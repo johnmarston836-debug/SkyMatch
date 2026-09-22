@@ -64,6 +64,12 @@ interface ChatState {
   noteReadUpTo: (peerId: string, upTo: number) => void;
   /** The newest message they sent us, or 0 - what a receipt of ours would cover. */
   newestIncoming: (peerId: string, myId: string) => number;
+  /**
+   * Re-labels what we sent under our old id as sent by our new one.
+   * Conversations are filed by the other person, but which side of a bubble
+   * a message sits on is decided by comparing its sender with our id.
+   */
+  renameSelf: (oldId: string, newId: string) => void;
 }
 
 /** Trims a conversation to what is worth keeping on disk. */
@@ -208,6 +214,17 @@ export const useChatStore = create<ChatState>((set, get) => ({
     // one must never un-see a message.
     if ((get().readUpToByPeer[peerId] ?? 0) >= upTo) return;
     set((state) => ({ readUpToByPeer: { ...state.readUpToByPeer, [peerId]: upTo } }));
+  },
+
+  renameSelf: (oldId, newId) => {
+    const rename = (message: ChatMessage) => (message.fromId === oldId ? { ...message, fromId: newId } : message);
+    set((state) => ({
+      groupMessages: state.groupMessages.map(rename),
+      privateMessagesByPeer: Object.fromEntries(
+        Object.entries(state.privateMessagesByPeer).map(([peerId, messages]) => [peerId, messages.map(rename)]),
+      ),
+    }));
+    if (get().hydrated) void persist(get().privateMessagesByPeer);
   },
 
   newestIncoming: (peerId, myId) => {

@@ -47,6 +47,12 @@ export interface Profile {
 export interface ProfilePacket extends Profile {
   /** shortHash() of the base64 photo, or absent when that person has none. */
   avatarHash?: string;
+  /**
+   * The sender's public keys (see src/crypto/identity.ts). The id is made
+   * from the signing one, which is how a receiver knows they are really
+   * theirs; absent from builds before signing existed.
+   */
+  keys?: { sign: string; box: string };
 }
 
 export type MessageScope = 'group' | 'private';
@@ -178,4 +184,6 @@ export interface DiscoveredPeer {
   profile: Profile;
   /** When their last profile announcement arrived; they're dropped once it goes stale. */
   lastSeenAt: number;
+  /** They announced keys this phone checked: private messages to them are sealed end to end. */
+  secure?: boolean;
 }

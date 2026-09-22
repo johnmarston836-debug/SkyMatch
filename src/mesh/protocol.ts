@@ -61,6 +61,12 @@ export interface MeshEnvelope<TPayload = unknown> {
   toId: string; // BROADCAST_ID, or the final recipient's peer id
   ttl: number;
   payload: TPayload;
+  /**
+   * Ed25519 signature over signedText() (src/crypto/secure.ts), base64.
+   * Always present from a phone whose id is keyed; absent from the builds
+   * before signing existed.
+   */
+  sig?: string;
 }
 
 /** Advertisement payload: the ~24 bytes broadcast on every BLE advert. */

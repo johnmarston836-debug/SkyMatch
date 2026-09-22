@@ -99,6 +99,9 @@ export const es = {
     placeholder: 'Escribe un mensaje…',
     seen: 'Visto',
     replyingTo: (nickname: string) => `Respondiendo a ${nickname}`,
+    /** Under the header of a private chat, depending on whether the other phone announced keys. */
+    encrypted: 'Cifrado de extremo a extremo: solo vosotros dos podéis leer este chat',
+    notEncrypted: 'Sin cifrar: esta persona usa una versión antigua de SkyMatch',
   },
 
   passengers: {

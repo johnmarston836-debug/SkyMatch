@@ -90,6 +90,8 @@ export const fr: Strings = {
     placeholder: 'Écris un message…',
     seen: 'Vu',
     replyingTo: (nickname: string) => `Réponse à ${nickname}`,
+    encrypted: 'Chiffré de bout en bout : vous seuls pouvez lire cette discussion',
+    notEncrypted: 'Non chiffré : cette personne utilise une ancienne version de SkyMatch',
   },
 
   passengers: {

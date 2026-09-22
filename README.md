@@ -25,6 +25,17 @@ src/mesh/
   meshController.ts    wires MeshService into the zustand stores
 ```
 
+### Identity, signatures and sealed private messages
+
+Every install makes two key pairs on first launch (`src/crypto/identity.ts`, kept by `src/state/identityStore.ts`): Ed25519 to sign, X25519 to receive sealed messages. The crypto is `tweetnacl` - pure JavaScript, audited, no native code.
+
+- **The id comes from the key.** A profile id is the first 16 bytes of the SHA-512 of the signing key, written as a version-8 UUID. Nobody can speak as you without your secret key, and there is no "first to announce wins" moment for an impostor to race. A profile made before keys existed moves to its keyed id on the first launch of this build, along with the messages it sent.
+- **Everything is signed.** Every packet from a keyed id carries an Ed25519 signature over its kind, sender, recipient and payload (`signedText`). An unsigned packet claiming a keyed id, or one whose signature doesn't check out, is dropped. Keys arrive with the sender's profile announcement; a packet that gets there first waits for it (up to 30s).
+- **Private messages are sealed** (`SecureChannel.seal`) to the recipient's X25519 key: the phones that relay them can pass them on, not read them. What is sealed is what was said - text, photo, quote; the nickname and seat are announced to the room anyway and stay in the clear, covered by the signature.
+- **Older builds still work.** Their random v4 ids carry no keys and are taken on trust, as before; a private message to one of them goes in the clear, and the chat says so under the header.
+- **Cost.** Signatures are cached, so an unchanged profile beat costs a string comparison after the first check (signing ~17ms, checking ~26ms in Hermes). On the radio, a profile beat grows from 4 frames to 7, a group message by 1, a private text by 2; a photo barely changes.
+- **What it doesn't do:** prove that someone really sits where they say they do - no cryptography can without a server - or protect a phone whose storage is compromised.
+
 ### Mock vs. real mesh
 
 `USE_MOCK_MESH` in `src/mesh/meshController.ts` is `false`: the app runs on the real radio. Set it to `true` to run against `MockBleTransport` instead, which simulates a handful of nearby passengers (profile broadcasts, a couple of group chat lines, private-message echoes) - the only way to see the UI work in a simulator, since real Bluetooth needs two physical phones.

@@ -93,6 +93,8 @@ export const pt: Strings = {
     placeholder: 'Escreve uma mensagem…',
     seen: 'Visto',
     replyingTo: (nickname: string) => `A responder a ${nickname}`,
+    encrypted: 'Encriptação ponta a ponta: só vocês os dois podem ler esta conversa',
+    notEncrypted: 'Sem encriptação: esta pessoa usa uma versão antiga do SkyMatch',
   },
 
   passengers: {

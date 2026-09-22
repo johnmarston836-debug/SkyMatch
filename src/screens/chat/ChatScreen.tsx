@@ -77,6 +77,8 @@ export function ChatScreen({ route, navigation }: Props) {
     peerName: { fontSize: 15, fontWeight: '700' as const },
     peerContact: { ...typography.body, fontSize: 14 },
     peerContactEmpty: { ...typography.subtitle, fontSize: 13 },
+    security: { ...typography.subtitle, fontSize: 12 },
+    securityOff: { ...typography.subtitle, fontSize: 12, color: colors.danger },
     list: { padding: spacing(2), gap: spacing(1) },
     bubbleRow: { flexDirection: 'row' as const, marginBottom: spacing(1) },
     bubbleRowMine: { justifyContent: 'flex-end' as const },
@@ -237,6 +239,11 @@ export function ChatScreen({ route, navigation }: Props) {
             <Text style={styles.peerContact}>{peer.profile.contact}</Text>
           ) : (
             <Text style={styles.peerContactEmpty}>{t.chat.noContact}</Text>
+          )}
+          {peer.secure ? (
+            <Text style={styles.security}>{t.chat.encrypted}</Text>
+          ) : (
+            <Text style={styles.securityOff}>{t.chat.notEncrypted}</Text>
           )}
         </View>
       )}
