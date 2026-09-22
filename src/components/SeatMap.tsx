@@ -25,16 +25,21 @@ export function SeatMap({ seat, onChange }: Props) {
       borderWidth: 1,
       borderColor: colors.border,
       paddingVertical: spacing(3),
-      paddingHorizontal: spacing(2),
+      paddingHorizontal: spacing(1.5),
     },
+    // Six seats and an aisle at a fixed 44 points came to about 370 points,
+    // wider than a typical Android phone's content area: A and F spilled out
+    // of the cabin. They now share whatever width there is, and stop growing
+    // at 44 on a phone wide enough for that.
     seat: {
-      width: 44,
-      height: 44,
+      flex: 1,
+      maxWidth: 44,
+      aspectRatio: 1,
       borderRadius: radii.sm,
       backgroundColor: colors.surfaceAlt,
       alignItems: 'center' as const,
       justifyContent: 'center' as const,
-      marginHorizontal: 4,
+      marginHorizontal: 3,
       borderWidth: 1,
       borderColor: colors.border,
     },
@@ -44,7 +49,7 @@ export function SeatMap({ seat, onChange }: Props) {
     },
     seatText: { color: colors.textMuted, fontWeight: '700' as const },
     seatTextSelected: { color: colors.background },
-    aisle: { width: spacing(3) },
+    aisle: { width: spacing(2) },
     helperText: {
       ...typography.subtitle,
       textAlign: 'center' as const,

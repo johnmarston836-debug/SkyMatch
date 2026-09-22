@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dark mode: the same logo in white on black, as iOS does. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@android:color/black" />
+    <item>
+        <bitmap
+            android:src="@drawable/launch_splash"
+            android:gravity="center" />
+    </item>
+</layer-list>
