@@ -170,6 +170,8 @@ export const es = {
 
   notifications: {
     sentPhoto: 'Te ha enviado una foto',
+    /** What Android lists this app's notifications under, in Settings. */
+    channelName: 'Mensajes privados',
   },
 
   presence: {

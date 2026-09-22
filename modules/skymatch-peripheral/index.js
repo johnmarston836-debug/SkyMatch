@@ -15,8 +15,8 @@ function getEmitter() {
   return emitter;
 }
 
-/** True only where the native peripheral role actually exists (iOS). */
-const isSupported = Platform.OS === 'ios' && native != null;
+/** True where the native peripheral role exists: CoreBluetooth on iOS, BluetoothGattServer on Android. */
+const isSupported = (Platform.OS === 'ios' || Platform.OS === 'android') && native != null;
 
 /**
  * Starts advertising `serviceUUID` and publishes the writable/notifiable
@@ -51,7 +51,7 @@ function addWriteListener(listener) {
 
 /**
  * Fires with CoreBluetooth's CBManagerState whenever the radio's state
- * changes. Receiving anything at all also proves the native module loaded,
+ * changes (Android reports the same numbers). Receiving anything at all also proves the native module loaded,
  * which is otherwise invisible: every call here no-ops when it didn't.
  */
 function addStateListener(listener) {

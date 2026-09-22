@@ -18,23 +18,46 @@ src/mesh/
   protocol.ts        wire format: advert payload, envelope shape, chunking
   BleTransport.ts     the interface the rest of the app codes against
   MockBleTransport.ts  simulated peers - no hardware needed, used by default
-  RealBleTransport.ts  real hardware: react-native-ble-plx (central) + react-native-ble-advertiser (peripheral)
-  MeshRouter.ts        store-and-forward flood routing, dedup cache
+  RealBleTransport.ts  real hardware: react-native-ble-plx (central) + skymatch-peripheral (peripheral)
+  MeshRouter.ts        store-and-forward flood routing, dedup cache, per-sender flood limit
   MeshService.ts       turns raw envelopes into typed app events
+  validate.ts          checks every payload another phone sends before the app sees it
   meshController.ts    wires MeshService into the zustand stores
 ```
 
 ### Mock vs. real mesh
 
-`USE_MOCK_MESH` in `src/mesh/meshController.ts` defaults to `true`: the app runs against `MockBleTransport`, which simulates a handful of nearby passengers (profile broadcasts, a couple of group chat lines, private-message echoes) so the full cabin chat → private chat flow can be built, demoed and tested on a single device or simulator. Flip it to `false` to switch to `RealBleTransport` on real hardware.
+`USE_MOCK_MESH` in `src/mesh/meshController.ts` is `false`: the app runs on the real radio. Set it to `true` to run against `MockBleTransport` instead, which simulates a handful of nearby passengers (profile broadcasts, a couple of group chat lines, private-message echoes) - the only way to see the UI work in a simulator, since real Bluetooth needs two physical phones.
 
-**Read this before testing on real phones:** `react-native-ble-plx` only implements the BLE central role. Peripheral/advertising support comes from `react-native-ble-advertiser`, which is solid on Android but not reliable for background/foreground GATT serving on iOS — a production iOS build needs a small native module around `CBPeripheralManager` (Swift). `RealBleTransport` is written and type-checked but, like any BLE code, can only really be verified on two physical phones — treat it as a reviewed reference implementation, not a tested one, until you've done that.
+### The two Bluetooth roles
+
+Every phone is both ends of the link at once:
+
+| role | iOS | Android |
+| --- | --- | --- |
+| central (scan, connect, write, subscribe) | `react-native-ble-plx` | `react-native-ble-plx`, asking for a 247-byte MTU |
+| peripheral (advertise, host the characteristic, notify) | `skymatch-peripheral`: `CBPeripheralManager` | `skymatch-peripheral`: `BluetoothGattServer` + `BluetoothLeAdvertiser` |
+
+`react-native-ble-plx` only does the central role, so the peripheral is the local native module in `modules/skymatch-peripheral`, the same JavaScript API over both platforms. Two details that matter on the wire:
+
+- **Where the advert says you are.** iOS puts the packed location in the local name. Android can't choose its local name (that is the phone's Bluetooth name), so it sends the same string as manufacturer data in the scan response; `locationFromAdvert` reads either.
+- **MTU.** A frame is sized for about 180 bytes. Android starts every link at 23 and never raises it unless the central asks, so the Android central asks on connect, and both peripherals stitch back together a long write that arrives in pieces.
+
+The Android module is compiled against the Android 16 framework; like any BLE code, the radio paths themselves can only really be verified on physical phones.
+
+### What another phone sends is untrusted
+
+Every packet is written by whatever build the other person runs, and whatever this phone accepts it also relays to everyone else in the room. So:
+
+- `decodeEnvelope` and `decodeFrame` refuse anything malformed, clamp the TTL, and cap a send at 4096 chunks.
+- `validate.ts` checks every payload type (a message whose body isn't a string used to be able to take down the chat screen), caps lengths, refuses a message whose author isn't who the mesh says, and keeps photos out of the group chat.
+- The router drops duplicates *before* counting a sender against the flood limit, so ordinary people in a full room - whose every packet reaches you once through each neighbour - aren't silenced.
 
 ### Data model
 
 - `Profile` (seat, nickname) is created once during onboarding and stored locally (`src/state/profileStore.ts`, AsyncStorage) — the seat is the real identity; the nickname just labels it in chat.
-- Discovered peers (`src/state/discoveryStore.ts`) and messages (`src/state/chatStore.ts`: `groupMessages` plus `privateMessagesByPeer`) are in-memory per session — there is no server, so there's nothing to sync history from once the app is closed.
-- Presence alerts (`src/state/presenceStore.ts`) are even more ephemeral: each one carries its own `expiresAt` and the UI (`PresenceBanner`) prunes expired ones on a timer, same as the button that raises them (`announceBathroomBreak`) being a plain manual toggle rather than any kind of sensor-based detection.
+- Discovered peers (`src/state/discoveryStore.ts`) and the group chat (`groupMessages` in `src/state/chatStore.ts`, the last 500 lines) are in-memory per session — there is no server, so there's nothing to sync history from once the app is closed. Private conversations (`privateMessagesByPeer`) are kept on the phone: the last 150 messages per person, the photos of only the newest six.
+- Presence alerts (`src/state/presenceStore.ts`) are even more ephemeral: each one carries its own `expiresAt` and the UI (`PresenceBanner`) prunes expired ones on a timer, same as the button that raises them (`togglePresence`) being a plain manual toggle rather than any kind of sensor-based detection.
 
 ### Profile photos
 
@@ -61,9 +84,9 @@ a few hundred frames into the radio before anyone has typed a word, and the
 beat comes round every ten seconds to ask for whoever didn't fit.
 
 The image picker returns one size per pick, so the second one is made by
-`SkyMatchImage.resize` in the native module. Where that isn't available
-(Android, or a build without the pod) the portrait does both jobs: more
-expensive on the radio, never a blank face.
+`SkyMatchImage.resize` in the native module, on iOS and Android. Where that
+isn't available (a build without the native module) the portrait does both
+jobs: more expensive on the radio, never a blank face.
 
 ### Languages
 

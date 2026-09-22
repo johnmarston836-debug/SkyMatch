@@ -7,7 +7,9 @@ import { useThemedStyles } from '../theme/ThemeContext';
 
 /** What is wrong with the radio, in the order it is worth telling someone about. */
 function diagnose(central: string | null, peripheralSupported: boolean, peripheralState: number | null) {
-  if (central === 'Unauthorized') {
+  // 3 is CBManagerStateUnauthorized, which the Android module reports too
+  // when the Bluetooth permissions were refused.
+  if (central === 'Unauthorized' || peripheralState === 3) {
     return { title: t.radio.deniedTitle, action: t.radio.deniedAction };
   }
   if (central === 'PoweredOff' || peripheralState === 4) {

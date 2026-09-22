@@ -2,8 +2,8 @@ const { NativeModules, Platform } = require('react-native');
 
 const native = NativeModules.SkyMatchImage;
 
-/** Rescaling exists only where the native module does (iOS). */
-const isSupported = Platform.OS === 'ios' && native != null;
+/** Rescaling exists wherever the native module does (iOS and Android). */
+const isSupported = (Platform.OS === 'ios' || Platform.OS === 'android') && native != null;
 
 /**
  * Scales a base64 JPEG so its longest side is at most `maxSide` and

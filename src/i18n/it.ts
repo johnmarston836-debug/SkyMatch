@@ -160,6 +160,7 @@ export const it: Strings = {
 
   notifications: {
     sentPhoto: 'Ti ha mandato una foto',
+    channelName: 'Messaggi privati',
   },
 
   presence: {

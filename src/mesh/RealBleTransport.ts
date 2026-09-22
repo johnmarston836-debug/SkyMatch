@@ -1,5 +1,4 @@
 import { BleManager, type Device, type Subscription } from 'react-native-ble-plx';
-import BLEAdvertiser from 'react-native-ble-advertiser';
 import * as Peripheral from 'skymatch-peripheral';
 import { Platform } from 'react-native';
 import { Buffer } from 'buffer';
@@ -18,15 +17,28 @@ import {
   type Frame,
   SERVICE_UUID,
   PROFILE_CHAR_UUID,
+  MANUFACTURER_ID,
+  PEER_STALE_MS,
 } from './protocol';
 import { packLocation, unpackLocation } from '../utils/location';
-import { packSeat } from '../utils/seat';
 
-// react-native-ble-advertiser injects these as runtime constants on its native
-// module, but its type declarations don't expose them - values match the
-// underlying Android AdvertiseSettings constants.
-const ADVERTISE_MODE_LOW_LATENCY = 2;
-const ADVERTISE_TX_POWER_MEDIUM = 2;
+/**
+ * The MTU an Android central asks for when it connects.
+ *
+ * Android starts every link at 23 bytes and never raises it unless asked,
+ * while a frame is sized for about 180 (see CHUNK_SIZE in protocol.ts).
+ * Notifications longer than the MTU are cut short without a word, so an
+ * Android phone connected to anyone received nothing but torn frames, and
+ * its own writes reached iOS in pieces. iOS negotiates this by itself.
+ */
+const ANDROID_MTU = 247;
+
+/**
+ * Most half-arrived sends kept at once. Each is a photo at most, and a
+ * phone that opens hundreds of sends it never finishes is not someone we
+ * owe the memory to.
+ */
+const MAX_PENDING_SENDS = 64;
 
 /**
  * How long a partly-arrived send is kept before its chunks are thrown away.
@@ -68,6 +80,22 @@ function locationFromLocalName(localName: string | null): UserLocation | null {
 }
 
 /**
+ * Where an advertisement says its phone is.
+ *
+ * iOS puts it in the local name. Android can't choose its local name - that
+ * is the phone's Bluetooth name, for every app - so the same string travels
+ * as manufacturer data in the scan response instead: two bytes of company
+ * id, little-endian, then the characters.
+ */
+export function locationFromAdvert(localName: string | null, manufacturerData: string | null): UserLocation | null {
+  const fromName = locationFromLocalName(localName);
+  if (fromName || !manufacturerData) return fromName;
+  const bytes = Buffer.from(manufacturerData, 'base64');
+  if (bytes.length < 3 || bytes.readUInt16LE(0) !== MANUFACTURER_ID) return null;
+  return locationFromLocalName(bytes.toString('latin1', 2));
+}
+
+/**
  * Real hardware transport. Every phone plays both BLE roles at once, because
  * neither role alone is enough for a mesh:
  *
@@ -76,9 +104,9 @@ function locationFromLocalName(localName: string | null): UserLocation | null {
  *   for notifications back.
  * - Peripheral: advertises so others can find us, and hosts the
  *   characteristic they write into. react-native-ble-plx cannot do this at
- *   all. On Android react-native-ble-advertiser handles the advertisement;
- *   on iOS the `skymatch-peripheral` native module wraps
- *   CBPeripheralManager and also serves the GATT characteristic.
+ *   all, so the `skymatch-peripheral` native module does: it wraps
+ *   CBPeripheralManager on iOS and BluetoothGattServer plus
+ *   BluetoothLeAdvertiser on Android, behind the same calls.
  *
  * So a link between two phones is: A connects to B as a central, writes to
  * B's characteristic, and B answers by notifying its subscribers. Only one
@@ -144,15 +172,7 @@ export class RealBleTransport implements BleTransport {
     this.removeSubscriberListener?.();
     this.removeSubscriberListener = null;
     useMeshStatusStore.getState().reset();
-    if (Platform.OS === 'android') {
-      try {
-        await BLEAdvertiser.stopBroadcast();
-      } catch {
-        // advertiser was never started (e.g. permission denied); nothing to clean up
-      }
-    } else {
-      await Peripheral.stop();
-    }
+    await Peripheral.stop().catch(() => {});
     if (this.staleCheckTimer) clearInterval(this.staleCheckTimer);
     if (this.repairTimer) clearInterval(this.repairTimer);
     this.connectedDevices.clear();
@@ -263,23 +283,6 @@ export class RealBleTransport implements BleTransport {
   }
 
   private async startAdvertising(location: UserLocation | null) {
-    if (Platform.OS === 'android') {
-      // Android's manufacturer-data slot only has room for the seat byte,
-      // and only a plane or a train has one; elsewhere peers fall back to
-      // the profile, which arrives seconds later anyway.
-      const seatByte =
-        location && (location.kind === 'plane' || location.kind === 'train') ? packSeat(location.seat) : 0xff;
-      await BLEAdvertiser.setCompanyId(0xffff);
-      await BLEAdvertiser.broadcast(SERVICE_UUID, [seatByte], {
-        advertiseMode: ADVERTISE_MODE_LOW_LATENCY,
-        txPowerLevel: ADVERTISE_TX_POWER_MEDIUM,
-        connectable: true,
-        includeDeviceName: false,
-        includeTxPowerLevel: false,
-      });
-      return;
-    }
-
     useMeshStatusStore.getState().setPeripheralSupported(Peripheral.isSupported);
     this.removeStateListener = Peripheral.addStateListener(({ state }) => {
       useMeshStatusStore.getState().setPeripheralState(state);
@@ -308,9 +311,8 @@ export class RealBleTransport implements BleTransport {
   private handleDeviceSeen(device: Device) {
     // iOS peers pack their whole location into the local name (see
     // SkyMatchPeripheral.m on why manufacturer data is not an option there);
-    // Android peers can only fit a seat byte, which the local name covers
-    // too when they have one.
-    const location = locationFromLocalName(device.localName);
+    // Android peers send the same string as manufacturer data.
+    const location = locationFromAdvert(device.localName, device.manufacturerData);
 
     this.lastSeenAt.set(device.id, Date.now());
     useMeshStatusStore.getState().setNearby(this.lastSeenAt.size);
@@ -332,7 +334,7 @@ export class RealBleTransport implements BleTransport {
   }
 
   private async connectAndSubscribe(device: Device) {
-    const connected = await device.connect();
+    const connected = await device.connect(Platform.OS === 'android' ? { requestMTU: ANDROID_MTU } : undefined);
     await connected.discoverAllServicesAndCharacteristics();
 
     // Confirm the characteristic is really there before treating this as a
@@ -368,23 +370,42 @@ export class RealBleTransport implements BleTransport {
       return;
     }
 
-    const pending = this.pendingFrames.get(frame.id) ?? {
-      parts: new Map<number, string>(),
-      touchedAt: 0,
-      total: frame.total,
-      from: fromPeerId,
-      rounds: 0,
-    };
+    // The common case - a text message, a profile beat - is one chunk, and
+    // has nothing to wait for.
+    if (frame.total === 1) {
+      this.envelopeListeners.forEach((listener) => listener(frame.part, fromPeerId));
+      return;
+    }
+
+    let pending = this.pendingFrames.get(frame.id);
+    if (!pending) {
+      if (this.pendingFrames.size >= MAX_PENDING_SENDS) this.dropOldestPending();
+      pending = { parts: new Map<number, string>(), touchedAt: 0, total: frame.total, from: fromPeerId, rounds: 0 };
+      this.pendingFrames.set(frame.id, pending);
+    }
+    // Every chunk of a send states the same total; one that doesn't is not
+    // part of it, and letting it through would make the send unfinishable.
+    if (frame.total !== pending.total) return;
     pending.parts.set(frame.index, frame.part);
     pending.touchedAt = Date.now();
-    pending.total = frame.total;
     pending.from = fromPeerId;
-    this.pendingFrames.set(frame.id, pending);
 
-    const raw = reassembleFrames(pending.parts, frame.total);
+    const raw = reassembleFrames(pending.parts, pending.total);
     if (raw === null) return; // still waiting on more chunks of this frame
     this.pendingFrames.delete(frame.id);
     this.envelopeListeners.forEach((listener) => listener(raw, fromPeerId));
+  }
+
+  private dropOldestPending() {
+    let oldestId: string | null = null;
+    let oldestAt = Infinity;
+    this.pendingFrames.forEach((pending, frameId) => {
+      if (pending.touchedAt < oldestAt) {
+        oldestAt = pending.touchedAt;
+        oldestId = frameId;
+      }
+    });
+    if (oldestId !== null) this.pendingFrames.delete(oldestId);
   }
 
   /** Keeps an outgoing send around in case the other end asks for parts of it again. */
@@ -472,7 +493,7 @@ export class RealBleTransport implements BleTransport {
   private pruneStalePeers() {
     const now = Date.now();
     this.lastSeenAt.forEach((seenAt, peerId) => {
-      if (now - seenAt > 15_000) {
+      if (now - seenAt > PEER_STALE_MS) {
         this.lastSeenAt.delete(peerId);
         this.peerLostListeners.forEach((listener) => listener(peerId));
       }

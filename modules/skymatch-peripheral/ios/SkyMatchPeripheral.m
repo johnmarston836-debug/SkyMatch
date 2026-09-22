@@ -202,21 +202,62 @@ RCT_EXPORT_METHOD(notify:(NSString *)base64Value
 - (void)peripheralManager:(CBPeripheralManager *)peripheral
   didReceiveWriteRequests:(NSArray<CBATTRequest *> *)requests
 {
+  // A write longer than the link's MTU - an Android central that never
+  // raised it, say - arrives as several requests for the same central with
+  // increasing offsets. Each one is only a piece of a frame; handing the
+  // pieces up one by one made every one of them unreadable. Stitch them
+  // back together per central, in order, and emit whole frames.
+  NSMutableArray<NSString *> *order = [NSMutableArray new];
+  NSMutableDictionary<NSString *, NSMutableData *> *pending = [NSMutableDictionary new];
+  NSMutableArray<NSDictionary *> *frames = [NSMutableArray new];
+  BOOL torn = NO;
+
   for (CBATTRequest *request in requests) {
     if (request.value.length == 0) {
       continue;
     }
-    if (_hasListeners) {
+    NSString *centralId = request.central.identifier.UUIDString ?: @"";
+    NSMutableData *current = pending[centralId];
+    if (request.offset == 0 || current == nil) {
+      if (current != nil) {
+        [frames addObject:@{ @"centralId" : centralId, @"data" : [current copy] }];
+      }
+      if (request.offset != 0) {
+        continue; // the start of this one never reached us
+      }
+      pending[centralId] = [request.value mutableCopy];
+      if (![order containsObject:centralId]) {
+        [order addObject:centralId];
+      }
+    } else if (request.offset == current.length) {
+      [current appendData:request.value];
+    } else {
+      [pending removeObjectForKey:centralId]; // a gap: the frame can't be trusted
+      torn = YES;
+    }
+  }
+  for (NSString *centralId in order) {
+    NSData *data = pending[centralId];
+    if (data != nil) {
+      [frames addObject:@{ @"centralId" : centralId, @"data" : data }];
+    }
+  }
+
+  if (_hasListeners) {
+    for (NSDictionary *frame in frames) {
       [self sendEventWithName:kWriteEvent
                          body:@{
-                           @"value" : [request.value base64EncodedStringWithOptions:0],
-                           @"centralId" : request.central.identifier.UUIDString ?: @"",
+                           @"value" : [frame[@"data"] base64EncodedStringWithOptions:0],
+                           @"centralId" : frame[@"centralId"],
                          }];
     }
   }
   // CoreBluetooth wants exactly one response, for the first request only.
+  // A torn write is reported as failed, so the sender's write rejects and
+  // the router floods the packet instead of believing it was delivered.
   if (requests.count > 0) {
-    [peripheral respondToRequest:requests.firstObject withResult:CBATTErrorSuccess];
+    [peripheral respondToRequest:requests.firstObject
+                      withResult:torn ? CBATTErrorInvalidOffset : CBATTErrorSuccess];
   }
 }
 

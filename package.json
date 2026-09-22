@@ -16,7 +16,6 @@
     "buffer": "^6.0.3",
     "react": "19.2.3",
     "react-native": "0.87.1",
-    "react-native-ble-advertiser": "^0.0.17",
     "react-native-ble-plx": "^3.5.0",
     "react-native-gesture-handler": "^2.22.0",
     "react-native-get-random-values": "^1.11.0",

@@ -1,7 +1,7 @@
 {
   "name": "skymatch-peripheral",
   "version": "1.0.0",
-  "description": "iOS BLE peripheral role, local notifications and JPEG rescaling for SkyMatch: advertises the mesh service, hosts the GATT characteristic peers write to, posts alerts for messages that land while the app is in the background, and makes the second size of a profile photo that JavaScript cannot.",
+  "description": "BLE peripheral role (iOS and Android), local notifications and JPEG rescaling for SkyMatch: advertises the mesh service, hosts the GATT characteristic peers write to, posts alerts for messages that land while the app is in the background, and makes the second size of a profile photo that JavaScript cannot.",
   "main": "index.js",
   "types": "index.d.ts",
   "private": true,
@@ -11,6 +11,8 @@
     "notifications.js",
     "notifications.d.ts",
     "ios",
+    "android",
+    "react-native.config.js",
     "skymatch-peripheral.podspec",
     "image.js",
     "image.d.ts"

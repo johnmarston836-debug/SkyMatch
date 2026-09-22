@@ -67,7 +67,7 @@ export async function notifyPrivateMessage(message: ChatMessage) {
   if (status !== 'granted') return;
 
   const body = message.imageBase64 && !message.body ? t.notifications.sentPhoto : message.body;
-  await Native.present(`${message.fromNickname} · ${message.fromLabel}`, body, message.fromId);
+  await Native.present(`${message.fromNickname} · ${message.fromLabel}`, body, message.fromId, t.notifications.channelName);
 
   const unread = useChatStore.getState().unreadByPeer;
   await Native.setBadge(Object.values(unread).reduce((total, count) => total + count, 0));

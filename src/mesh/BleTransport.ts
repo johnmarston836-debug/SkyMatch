@@ -7,7 +7,7 @@ import type { UserLocation } from '../types';
  *    builds and in the simulator (Web Bluetooth/iOS simulator/most Android
  *    emulators can't do real BLE peripheral+central at once anyway).
  *  - `RealBleTransport`: talks to actual hardware via react-native-ble-plx
- *    (central role) and react-native-ble-advertiser (peripheral role). See
+ *    (central role) and the `skymatch-peripheral` native module (peripheral role). See
  *    that file for the platform caveats — this is the hard part of the app.
  */
 export interface BleTransport {
