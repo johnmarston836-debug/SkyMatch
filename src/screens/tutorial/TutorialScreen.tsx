@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Pressable, ScrollView, Text, useWindowDimensions, View, type ScrollViewInstance } from 'react-native';
+import { Platform, Pressable, ScrollView, Text, useWindowDimensions, View, type ScrollViewInstance } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList, OnboardingStackParamList } from '../../navigation/RootNavigator';
@@ -21,6 +21,9 @@ interface CarouselProps {
  * phones carry my messages, can they read them?
  */
 const PAGES = 3;
+
+/** Android stays on the mesh with the app in the background; iOS does not, so page 2 says different things. */
+const ANDROID = Platform.OS === 'android';
 
 function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
   const insets = useSafeAreaInsets();
@@ -99,14 +102,14 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
 
         <View style={[styles.page, { width }]}>
           <Text style={styles.label}>{t.tutorial.page2Label}</Text>
-          <Text style={styles.title}>{t.tutorial.page2Title}</Text>
-          <Text style={styles.body}>{t.tutorial.page2Body}</Text>
+          <Text style={styles.title}>{ANDROID ? t.tutorial.page2TitleAndroid : t.tutorial.page2Title}</Text>
+          <Text style={styles.body}>{ANDROID ? t.tutorial.page2BodyAndroid : t.tutorial.page2Body}</Text>
 
           <MeshDiagram variant="broken" />
           <Text style={styles.diagramCaption}>{t.tutorial.page2Caption}</Text>
 
           <View style={styles.callout}>
-            <Text style={styles.calloutTitle}>{t.tutorial.calloutTitle}</Text>
+            <Text style={styles.calloutTitle}>{ANDROID ? t.tutorial.calloutTitleAndroid : t.tutorial.calloutTitle}</Text>
             <Text style={styles.calloutText}>{t.tutorial.calloutBody}</Text>
           </View>
 

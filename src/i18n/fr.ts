@@ -50,6 +50,10 @@ export const fr: Strings = {
     page2Body2:
       'Dans un avion, le mode avion n’est pas un problème : tu peux le laisser activé et allumer le Bluetooth ' +
       'séparément. Pas besoin de wifi, ni de données, ni de réseau où que ce soit.',
+    page2TitleAndroid: 'Ne fermez pas l’app',
+    page2BodyAndroid:
+      'Sur Android, SkyMatch reste connecté quand vous quittez l’app : une notification l’indique. Si vous la fermez complètement depuis les apps récentes, ou touchez « Déconnecter », vous ne recevez plus de messages et ne relayez plus ceux des autres.',
+    calloutTitleAndroid: 'Si vous fermez l’app, vous manquez la conversation',
     page3Label: 'COMMENT ÇA MARCHE · 3 SUR 3',
     page3Title: 'Vos discussions privées ne sont lisibles que par vous deux',
     page3Body:
@@ -101,11 +105,17 @@ export const fr: Strings = {
     replyingTo: (nickname: string) => `Réponse à ${nickname}`,
     encrypted: 'Chiffré de bout en bout : vous seuls pouvez lire cette discussion',
     notEncrypted: 'Non chiffré : cette personne utilise une ancienne version de SkyMatch',
+    away: (minutes: number) =>
+      minutes < 1
+        ? 'Vient de quitter l’app : vos messages ne lui parviennent pas pour l’instant'
+        : `Hors de l’app depuis ${minutes} min : vos messages ne lui parviennent pas pour l’instant`,
   },
 
   passengers: {
     ownPreview: (body: string) => `Toi : ${body}`,
     noMessagesYet: 'Pas encore de messages',
+    away: (minutes: number) =>
+      minutes < 1 ? 'Hors de l’app · à l’instant' : `Hors de l’app · il y a ${minutes} min`,
   },
 
   profile: {
@@ -167,6 +177,14 @@ export const fr: Strings = {
     poweredOffAction: 'Allume-le pour voir qui est près de toi',
     unsupportedTitle: 'Ce téléphone ne peut pas utiliser le Bluetooth basse consommation',
     invisibleTitle: 'Tu vois les autres, mais eux ne te voient pas',
+  },
+
+  background: {
+    title: 'SkyMatch reste connecté',
+    body:
+      'Vous recevez vos messages et relayez ceux des autres même hors de l’app.',
+    stop: 'Déconnecter',
+    channelName: 'Connexion en arrière-plan',
   },
 
   notifications: {

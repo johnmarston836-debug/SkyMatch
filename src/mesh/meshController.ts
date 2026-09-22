@@ -9,6 +9,9 @@ import { useAvatarStore } from '../state/avatarStore';
 import { useBlockStore } from '../state/blockStore';
 import { useIdentityStore } from '../state/identityStore';
 import { notifyPrivateMessage } from '../notifications/notifier';
+import * as Background from 'skymatch-peripheral/background';
+import { AppState } from 'react-native';
+import { t } from '../i18n';
 import { requestBlePermissions } from '../utils/permissions';
 import { newId } from '../utils/id';
 import { shortHash } from '../utils/hash';
@@ -276,6 +279,8 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   // seat inside) while the passenger list stayed empty. Re-announcing on a
   // timer fixes that, and keeps the list fresh for people who join later
   // or who edit their profile.
+  if (!USE_MOCK_MESH) keepRunningInBackground();
+
   if (announceTimer) clearInterval(announceTimer);
   announceTimer = setInterval(() => {
     void service?.broadcastProfile(
@@ -286,6 +291,34 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   }, PROFILE_ANNOUNCE_MS);
 
   return service;
+}
+
+/**
+ * On Android, keeps this phone on the mesh while the app is not on screen:
+ * a foreground service with its notification (see SkyMatchBackgroundService).
+ * Started here, while the app is in front, because Android refuses to start
+ * one from the background.
+ *
+ * "Disconnect" on the notification stops it; coming back to the app starts
+ * it again, since being in the app is the clearest sign of wanting to be on
+ * the mesh.
+ */
+let backgroundWired = false;
+function keepRunningInBackground() {
+  if (!Background.isSupported) return;
+  const start = () =>
+    void Background.start({
+      title: t.background.title,
+      body: t.background.body,
+      stopLabel: t.background.stop,
+      channelName: t.background.channelName,
+    });
+  start();
+  if (backgroundWired) return;
+  backgroundWired = true;
+  AppState.addEventListener('change', (status) => {
+    if (status === 'active' && service && !Background.isRunning()) start();
+  });
 }
 
 export async function sendGroupChatMessage(myProfile: Profile, body: string, replyTo?: ReplyQuote) {

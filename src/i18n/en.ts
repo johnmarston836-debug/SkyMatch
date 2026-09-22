@@ -50,6 +50,10 @@ export const en: Strings = {
     page2Body2:
       'On a plane, flight mode is no problem: you can leave it on and switch Bluetooth on separately. No Wi-Fi, ' +
       'no data and no signal needed anywhere.',
+    page2TitleAndroid: 'Don’t close the app',
+    page2BodyAndroid:
+      'On Android, SkyMatch stays connected when you leave the app - you’ll see it in a notification. If you close it for good from the recent apps, or tap “Disconnect”, you stop getting messages and stop relaying them for others.',
+    calloutTitleAndroid: 'If you close the app, you miss the conversation',
     page3Label: 'HOW IT WORKS · 3 OF 3',
     page3Title: 'Only the two of you can read your private chats',
     page3Body:
@@ -101,11 +105,17 @@ export const en: Strings = {
     replyingTo: (nickname: string) => `Replying to ${nickname}`,
     encrypted: 'End-to-end encrypted: only the two of you can read this chat',
     notEncrypted: 'Not encrypted: this person is on an older version of SkyMatch',
+    away: (minutes: number) =>
+      minutes < 1
+        ? 'Just left the app: your messages won’t reach them for now'
+        : `Out of the app for ${minutes} min: your messages won’t reach them for now`,
   },
 
   passengers: {
     ownPreview: (body: string) => `You: ${body}`,
     noMessagesYet: 'No messages yet',
+    away: (minutes: number) =>
+      minutes < 1 ? 'Out of the app · just now' : `Out of the app · ${minutes} min ago`,
   },
 
   profile: {
@@ -167,6 +177,14 @@ export const en: Strings = {
     poweredOffAction: 'Turn it on to see who is nearby',
     unsupportedTitle: 'This phone can’t use Bluetooth Low Energy',
     invisibleTitle: 'You can see everyone else, but they can’t see you',
+  },
+
+  background: {
+    title: 'SkyMatch is still connected',
+    body:
+      'You keep getting messages and relaying them for others while you are out of the app.',
+    stop: 'Disconnect',
+    channelName: 'Background connection',
   },
 
   notifications: {

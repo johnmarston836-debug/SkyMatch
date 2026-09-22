@@ -50,6 +50,10 @@ export const ca: Strings = {
     page2Body2:
       'En un avió, el mode avió no és cap problema: el pots deixar activat i encendre el Bluetooth a part. ' +
       'No cal wifi, ni dades, ni cobertura enlloc.',
+    page2TitleAndroid: 'No tanquis l’app',
+    page2BodyAndroid:
+      'A Android, SkyMatch continua connectat encara que surtis de l’app: ho veuràs en una notificació. Si la tanques del tot des de la multitasca, o toques «Desconnectar», deixes de rebre missatges i de fer de pont per als altres.',
+    calloutTitleAndroid: 'Si tanques l’app, et perds la conversa',
     page3Label: 'COM FUNCIONA · 3 DE 3',
     page3Title: 'Els teus xats privats només els llegiu vosaltres dos',
     page3Body:
@@ -101,11 +105,17 @@ export const ca: Strings = {
     replyingTo: (nickname: string) => `Responent a ${nickname}`,
     encrypted: 'Xifrat d’extrem a extrem: només vosaltres dos podeu llegir aquest xat',
     notEncrypted: 'Sense xifrar: aquesta persona fa servir una versió antiga de SkyMatch',
+    away: (minutes: number) =>
+      minutes < 1
+        ? 'Acaba de sortir de l’app: ara no li arriben els teus missatges'
+        : `Fora de l’app des de fa ${minutes} min: ara no li arriben els teus missatges`,
   },
 
   passengers: {
     ownPreview: (body: string) => `Tu: ${body}`,
     noMessagesYet: 'Encara no hi ha missatges',
+    away: (minutes: number) =>
+      minutes < 1 ? 'Fora de l’app · ara mateix' : `Fora de l’app · fa ${minutes} min`,
   },
 
   profile: {
@@ -167,6 +177,14 @@ export const ca: Strings = {
     poweredOffAction: 'Encén-lo per veure qui tens a prop',
     unsupportedTitle: 'Aquest mòbil no pot fer servir Bluetooth de baix consum',
     invisibleTitle: 'Pots veure els altres, però ells no et veuen',
+  },
+
+  background: {
+    title: 'SkyMatch continua connectat',
+    body:
+      'Reps missatges i continues fent de pont per als altres encara que surtis de l’app.',
+    stop: 'Desconnectar',
+    channelName: 'Connexió en segon pla',
   },
 
   notifications: {

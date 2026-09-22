@@ -16,6 +16,7 @@ class SkyMatchPeripheralPackage : ReactPackage {
           SkyMatchPeripheralModule(reactContext),
           SkyMatchImageModule(reactContext),
           SkyMatchNotificationsModule(reactContext),
+          SkyMatchBackgroundModule(reactContext),
       )
 
   override fun createViewManagers(

@@ -7,7 +7,8 @@ import { Avatar } from '../../components/Avatar';
 import { CabinSeats } from '../../components/CabinSeats';
 import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
-import { useDiscoveryStore } from '../../state/discoveryStore';
+import { isAway, minutesAway, useDiscoveryStore } from '../../state/discoveryStore';
+import { useNow } from '../../hooks/useNow';
 import { useProfileStore } from '../../state/profileStore';
 import { formatTime } from '../../utils/id';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
@@ -34,6 +35,9 @@ export function PassengersScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { spacing: themeSpacing } = useAppTheme();
   const peers = useDiscoveryStore((state) => state.peers);
+  // Away is worked out from the clock, not stored: it changes with nobody
+  // sending anything.
+  const now = useNow(15_000);
   const messagesByPeer = useChatStore((state) => state.privateMessagesByPeer);
   const unreadByPeer = useChatStore((state) => state.unreadByPeer);
   const myId = useProfileStore((state) => state.profile?.id);
@@ -76,6 +80,8 @@ export function PassengersScreen({ navigation }: Props) {
       justifyContent: 'center' as const,
     },
     unreadBadgeText: { color: '#FFFFFF', fontSize: 12, fontWeight: '800' as const },
+    rowAway: { opacity: 0.55 },
+    rowAwayText: { ...typography.subtitle, fontSize: 12 },
   }));
 
   const list = useMemo<Conversation[]>(() => {
@@ -90,21 +96,26 @@ export function PassengersScreen({ navigation }: Props) {
         };
       });
 
-    // Live conversations first, newest on top; people you have never written
-    // to fall below them, ordered by how recently the radio heard from them.
+    // People here now before people away; within each, live conversations
+    // first, newest on top, then the rest by how recently the radio heard
+    // from them.
     return conversations.sort((a, b) => {
+      const awayA = isAway(a.peer, now);
+      const awayB = isAway(b.peer, now);
+      if (awayA !== awayB) return awayA ? 1 : -1;
       if (a.lastMessage && b.lastMessage) return b.lastMessage.sentAt - a.lastMessage.sentAt;
       if (a.lastMessage) return -1;
       if (b.lastMessage) return 1;
       return b.peer.lastSeenAt - a.peer.lastSeenAt;
     });
-  }, [peers, messagesByPeer, unreadByPeer]);
+  }, [peers, messagesByPeer, unreadByPeer, now]);
 
   const renderItem = ({ item }: { item: Conversation }) => {
     const { peer, lastMessage, unread } = item;
     const nickname = peer.profile?.nickname ?? '?';
+    const away = isAway(peer, now);
     return (
-      <Pressable style={styles.row} onPress={() => navigation.navigate('Chat', { peerId: peer.peerId })}>
+      <Pressable style={[styles.row, away && styles.rowAway]} onPress={() => navigation.navigate('Chat', { peerId: peer.peerId })}>
         {/* The photo opens their profile; the rest of the row opens the chat. */}
         <Pressable onPress={() => navigation.navigate('Profile', { peerId: peer.peerId })}>
           <Avatar peerId={peer.peerId} nickname={nickname} size={48} />
@@ -126,6 +137,7 @@ export function PassengersScreen({ navigation }: Props) {
           ) : (
             <Text style={styles.rowPreviewEmpty}>{t.passengers.noMessagesYet}</Text>
           )}
+          {away && <Text style={styles.rowAwayText}>{t.passengers.away(minutesAway(peer, now))}</Text>}
         </View>
         {unread > 0 && (
           <View style={styles.unreadBadge}>

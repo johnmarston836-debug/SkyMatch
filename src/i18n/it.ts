@@ -50,6 +50,10 @@ export const it: Strings = {
     page2Body2:
       'In aereo la modalità aereo non è un problema: puoi lasciarla attiva e accendere il Bluetooth a parte. ' +
       'Non serve wifi, né dati, né campo da nessuna parte.',
+    page2TitleAndroid: 'Non chiudere l’app',
+    page2BodyAndroid:
+      'Su Android, SkyMatch resta connesso anche se esci dall’app: lo vedrai in una notifica. Se la chiudi del tutto dalle app recenti, o tocchi «Disconnetti», smetti di ricevere messaggi e di fare da ponte per gli altri.',
+    calloutTitleAndroid: 'Se chiudi l’app, ti perdi la conversazione',
     page3Label: 'COME FUNZIONA · 3 DI 3',
     page3Title: 'Le vostre chat private le leggete solo voi due',
     page3Body:
@@ -101,11 +105,17 @@ export const it: Strings = {
     replyingTo: (nickname: string) => `Rispondi a ${nickname}`,
     encrypted: 'Crittografia end-to-end: solo voi due potete leggere questa chat',
     notEncrypted: 'Non crittografata: questa persona usa una versione vecchia di SkyMatch',
+    away: (minutes: number) =>
+      minutes < 1
+        ? 'Ha appena lasciato l’app: per ora i tuoi messaggi non arrivano'
+        : `Fuori dall’app da ${minutes} min: per ora i tuoi messaggi non arrivano`,
   },
 
   passengers: {
     ownPreview: (body: string) => `Tu: ${body}`,
     noMessagesYet: 'Ancora nessun messaggio',
+    away: (minutes: number) =>
+      minutes < 1 ? 'Fuori dall’app · proprio ora' : `Fuori dall’app · ${minutes} min fa`,
   },
 
   profile: {
@@ -167,6 +177,14 @@ export const it: Strings = {
     poweredOffAction: 'Accendilo per vedere chi hai vicino',
     unsupportedTitle: 'Questo telefono non può usare il Bluetooth a basso consumo',
     invisibleTitle: 'Tu vedi gli altri, ma loro non vedono te',
+  },
+
+  background: {
+    title: 'SkyMatch resta connesso',
+    body:
+      'Continui a ricevere messaggi e a fare da ponte per gli altri anche fuori dall’app.',
+    stop: 'Disconnetti',
+    channelName: 'Connessione in background',
   },
 
   notifications: {

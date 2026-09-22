@@ -53,6 +53,10 @@ export const pt: Strings = {
     page2Body2:
       'Num avião, o modo avião não é problema: podes deixá-lo ligado e ligar o Bluetooth à parte. ' +
       'Não é preciso wifi, nem dados, nem rede em lado nenhum.',
+    page2TitleAndroid: 'Não feches a app',
+    page2BodyAndroid:
+      'No Android, o SkyMatch continua ligado mesmo que saias da app: vais vê-lo numa notificação. Se a fechares de vez nas apps recentes, ou tocares em «Desligar», deixas de receber mensagens e de servir de ponte para os outros.',
+    calloutTitleAndroid: 'Se fechares a app, perdes a conversa',
     page3Label: 'COMO FUNCIONA · 3 DE 3',
     page3Title: 'As tuas conversas privadas só vocês os dois as podem ler',
     page3Body:
@@ -104,11 +108,17 @@ export const pt: Strings = {
     replyingTo: (nickname: string) => `A responder a ${nickname}`,
     encrypted: 'Encriptação ponta a ponta: só vocês os dois podem ler esta conversa',
     notEncrypted: 'Sem encriptação: esta pessoa usa uma versão antiga do SkyMatch',
+    away: (minutes: number) =>
+      minutes < 1
+        ? 'Acabou de sair da app: por agora as tuas mensagens não lhe chegam'
+        : `Fora da app há ${minutes} min: por agora as tuas mensagens não lhe chegam`,
   },
 
   passengers: {
     ownPreview: (body: string) => `Tu: ${body}`,
     noMessagesYet: 'Ainda sem mensagens',
+    away: (minutes: number) =>
+      minutes < 1 ? 'Fora da app · agora mesmo' : `Fora da app · há ${minutes} min`,
   },
 
   profile: {
@@ -170,6 +180,14 @@ export const pt: Strings = {
     poweredOffAction: 'Liga-o para veres quem tens perto',
     unsupportedTitle: 'Este telemóvel não consegue usar Bluetooth de baixo consumo',
     invisibleTitle: 'Consegues ver os outros, mas eles não te veem',
+  },
+
+  background: {
+    title: 'O SkyMatch continua ligado',
+    body:
+      'Continuas a receber mensagens e a servir de ponte para os outros mesmo fora da app.',
+    stop: 'Desligar',
+    channelName: 'Ligação em segundo plano',
   },
 
   notifications: {

@@ -50,6 +50,10 @@ export const de: Strings = {
     page2Body2:
       'Im Flugzeug ist der Flugmodus kein Problem: du kannst ihn anlassen und Bluetooth einzeln einschalten. ' +
       'Kein WLAN, keine mobilen Daten, nirgends Empfang nötig.',
+    page2TitleAndroid: 'Schließ die App nicht',
+    page2BodyAndroid:
+      'Auf Android bleibt SkyMatch verbunden, auch wenn du die App verlässt – du siehst es an einer Benachrichtigung. Schließt du sie ganz über die letzten Apps oder tippst auf „Trennen“, bekommst du keine Nachrichten mehr und leitest keine mehr für andere weiter.',
+    calloutTitleAndroid: 'Wenn du die App schließt, verpasst du das Gespräch',
     page3Label: 'SO FUNKTIONIERT’S · 3 VON 3',
     page3Title: 'Eure privaten Chats könnt nur ihr beide lesen',
     page3Body:
@@ -101,11 +105,17 @@ export const de: Strings = {
     replyingTo: (nickname: string) => `Antwort an ${nickname}`,
     encrypted: 'Ende-zu-Ende-verschlüsselt: Nur ihr beide könnt diesen Chat lesen',
     notEncrypted: 'Nicht verschlüsselt: Diese Person nutzt eine ältere Version von SkyMatch',
+    away: (minutes: number) =>
+      minutes < 1
+        ? 'Hat die App gerade verlassen: Deine Nachrichten kommen im Moment nicht an'
+        : `Seit ${minutes} Min. nicht in der App: Deine Nachrichten kommen im Moment nicht an`,
   },
 
   passengers: {
     ownPreview: (body: string) => `Du: ${body}`,
     noMessagesYet: 'Noch keine Nachrichten',
+    away: (minutes: number) =>
+      minutes < 1 ? 'Nicht in der App · gerade eben' : `Nicht in der App · vor ${minutes} Min.`,
   },
 
   profile: {
@@ -167,6 +177,14 @@ export const de: Strings = {
     poweredOffAction: 'Schalte es ein, um zu sehen, wer in der Nähe ist',
     unsupportedTitle: 'Dieses Handy kann kein Bluetooth Low Energy',
     invisibleTitle: 'Du siehst die anderen, aber sie sehen dich nicht',
+  },
+
+  background: {
+    title: 'SkyMatch bleibt verbunden',
+    body:
+      'Du bekommst weiter Nachrichten und leitest sie für andere weiter, auch außerhalb der App.',
+    stop: 'Trennen',
+    channelName: 'Verbindung im Hintergrund',
   },
 
   notifications: {

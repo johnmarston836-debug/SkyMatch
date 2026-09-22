@@ -58,6 +58,11 @@ export const es = {
     page2Body2:
       'En un avión, el modo avión no es problema: puedes dejarlo activado y encender el Bluetooth por separado. ' +
       'No hace falta wifi, ni datos, ni cobertura en ningún sitio.',
+    /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
+    page2TitleAndroid: 'No cierres la app',
+    page2BodyAndroid:
+      'En Android, SkyMatch sigue conectado aunque salgas de la app: lo verás en una notificación. Si la cierras del todo desde la multitarea, o tocas «Desconectar», dejas de recibir mensajes y de servir de puente para los demás.',
+    calloutTitleAndroid: 'Si cierras la app, te pierdes la conversación',
     page3Label: 'CÓMO FUNCIONA · 3 DE 3',
     page3Title: 'Tus chats privados solo los leéis vosotros dos',
     page3Body:
@@ -111,12 +116,19 @@ export const es = {
     /** Under the header of a private chat, depending on whether the other phone announced keys. */
     encrypted: 'Cifrado de extremo a extremo: solo vosotros dos podéis leer este chat',
     notEncrypted: 'Sin cifrar: esta persona usa una versión antigua de SkyMatch',
+    away: (minutes: number) =>
+      minutes < 1
+        ? 'Acaba de salir de la app: ahora no le llegan tus mensajes'
+        : `Fuera de la app desde hace ${minutes} min: ahora no le llegan tus mensajes`,
   },
 
   passengers: {
     /** How your own last message is previewed in the conversation list. */
     ownPreview: (body: string) => `Tú: ${body}`,
     noMessagesYet: 'Sin mensajes todavía',
+    /** Under someone the radio has stopped hearing (see AWAY_AFTER_MS). */
+    away: (minutes: number) =>
+      minutes < 1 ? 'Fuera de la app · ahora mismo' : `Fuera de la app · hace ${minutes} min`,
   },
 
   profile: {
@@ -178,6 +190,15 @@ export const es = {
     poweredOffAction: 'Enciéndelo para ver a quien tienes cerca',
     unsupportedTitle: 'Este móvil no puede usar Bluetooth de bajo consumo',
     invisibleTitle: 'Puedes ver a los demás, pero ellos no te ven',
+  },
+
+  /** The notification that keeps Android on the mesh with the app in the background. */
+  background: {
+    title: 'SkyMatch sigue conectado',
+    body:
+      'Recibes mensajes y sigues haciendo de puente para los demás aunque salgas de la app.',
+    stop: 'Desconectar',
+    channelName: 'Conexión en segundo plano',
   },
 
   notifications: {

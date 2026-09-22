@@ -15,7 +15,9 @@
     "react-native.config.js",
     "skymatch-peripheral.podspec",
     "image.js",
-    "image.d.ts"
+    "image.d.ts",
+    "background.js",
+    "background.d.ts"
   ],
   "peerDependencies": {
     "react-native": "*"

@@ -17,7 +17,8 @@ import { SwipeToReply } from '../../components/SwipeToReply';
 import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useAvatarStore } from '../../state/avatarStore';
-import { useDiscoveryStore } from '../../state/discoveryStore';
+import { isAway, minutesAway, useDiscoveryStore } from '../../state/discoveryStore';
+import { useNow } from '../../hooks/useNow';
 import { useProfileStore } from '../../state/profileStore';
 import { requestFullAvatar, sendPrivateChatMessage, sendReadReceipt } from '../../mesh/meshController';
 import { colorForPeer } from '../../theme';
@@ -48,6 +49,7 @@ export function ChatScreen({ route, navigation }: Props) {
   const theme = useAppTheme();
   const { peerId } = route.params;
   const peer = useDiscoveryStore((state) => state.peers[peerId]);
+  const now = useNow(15_000);
   const peerNickname = peer?.profile?.nickname;
   const messages = useChatStore((state) => state.privateMessagesByPeer[peerId] ?? EMPTY_MESSAGES);
   const myProfile = useProfileStore((state) => state.profile);
@@ -240,6 +242,7 @@ export function ChatScreen({ route, navigation }: Props) {
           ) : (
             <Text style={styles.peerContactEmpty}>{t.chat.noContact}</Text>
           )}
+          {isAway(peer, now) && <Text style={styles.securityOff}>{t.chat.away(minutesAway(peer, now))}</Text>}
           {peer.secure ? (
             <Text style={styles.security}>{t.chat.encrypted}</Text>
           ) : (

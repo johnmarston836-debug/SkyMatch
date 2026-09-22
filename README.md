@@ -25,6 +25,13 @@ src/mesh/
   meshController.ts    wires MeshService into the zustand stores
 ```
 
+### Leaving the app
+
+Two things happen when someone leaves SkyMatch, and the app treats them differently by platform:
+
+- **Android stays on the mesh.** Leaving the app would otherwise stop it within a minute: React Native pauses JavaScript timers in the background (the profile beat among them) and the system freezes the process. `SkyMatchBackgroundService` is a foreground service - with the notification Android requires, "SkyMatch is still connected" - that keeps the process alive and runs a headless JS task that never finishes, which is what React Native checks before pausing timers. It starts with the mesh, while the app is in front (Android refuses to start one from the background), and stops on "Disconnect" in the notification or when the app is swiped away from the recent apps; coming back to the app starts it again.
+- **Everyone else sees you as away, not gone.** Three missed beats (35s) and a passenger is shown dimmed as "Out of the app · 3 min ago", below the people who are here; after ten minutes they are forgotten, and they come back the moment their next beat arrives. Their private chat says messages won't reach them for now. This is what iOS phones look like when their owner leaves the app, and an Android phone that was disconnected or closed.
+
 ### Identity, signatures and sealed private messages
 
 Every install makes two key pairs on first launch (`src/crypto/identity.ts`, kept by `src/state/identityStore.ts`): Ed25519 to sign, X25519 to receive sealed messages. The crypto is `tweetnacl` - pure JavaScript, audited, no native code.
