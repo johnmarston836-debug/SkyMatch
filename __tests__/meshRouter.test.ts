@@ -118,3 +118,42 @@ describe('decoding what comes off the radio', () => {
     expect(decoded?.need).toEqual([1, 4]);
   });
 });
+
+describe('profile beats', () => {
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  const beat = (id: string, ttl = DEFAULT_TTL): MeshEnvelope => ({ ...envelope(id, 'peer-x', ttl), kind: 'profile' });
+
+  it('are relayed after a short wait when nobody else has', () => {
+    const transport = new RecordingTransport();
+    const router = new MeshRouter(transport, 'me');
+    const delivered: string[] = [];
+    router.onDeliver((e) => delivered.push(e.id));
+
+    transport.receive(beat('b1'), 'n1');
+    // Delivered straight away; only the relay waits.
+    expect(delivered).toEqual(['b1']);
+    expect(transport.sent).toHaveLength(0);
+    jest.advanceTimersByTime(200);
+    expect(transport.sent).toHaveLength(1);
+  });
+
+  it('are not relayed by a phone whose neighbours have already repeated them', () => {
+    const transport = new RecordingTransport();
+    new MeshRouter(transport, 'me');
+
+    transport.receive(beat('b1'), 'n1');
+    transport.receive(beat('b1', DEFAULT_TTL - 1), 'n2');
+    transport.receive(beat('b1', DEFAULT_TTL - 1), 'n3');
+    jest.advanceTimersByTime(200);
+    expect(transport.sent).toHaveLength(0);
+  });
+
+  it('never hold back a chat message', () => {
+    const transport = new RecordingTransport();
+    new MeshRouter(transport, 'me');
+    transport.receive(envelope('m1'), 'n1');
+    expect(transport.sent).toHaveLength(1);
+  });
+});

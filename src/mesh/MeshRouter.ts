@@ -7,6 +7,8 @@ import {
   FLOOD_LIMIT,
   FLOOD_WINDOW_MS,
   SEEN_CACHE_SIZE,
+  BEAT_RELAY_SUPPRESS_AFTER,
+  BEAT_RELAY_JITTER_MS,
   type MeshEnvelope,
 } from './protocol';
 
@@ -23,6 +25,8 @@ export class MeshRouter {
   /** When each sender's current allowance started, and how much of it is spent. */
   private rates = new Map<string, { since: number; count: number }>();
   private deliverListeners = new Set<(envelope: MeshEnvelope) => void>();
+  /** Beats waiting to be relayed, and how many times each has been heard meanwhile. */
+  private pendingBeats = new Map<string, number>();
 
   constructor(
     private transport: BleTransport,
@@ -72,15 +76,30 @@ export class MeshRouter {
     // and counting each copy against its author used to silence ordinary
     // people: ten neighbours, one profile beat and two messages were enough
     // to drop everything else they said for the rest of the window.
-    if (this.seenSet.has(envelope.id)) return;
+    if (this.seenSet.has(envelope.id)) {
+      const heard = this.pendingBeats.get(envelope.id);
+      if (heard !== undefined) this.pendingBeats.set(envelope.id, heard + 1);
+      return;
+    }
     this.markSeen(envelope.id);
     if (this.floods(envelope.fromId)) return;
 
     if (envelope.toId === BROADCAST_ID) {
       this.deliverListeners.forEach((listener) => listener(envelope));
-      if (envelope.ttl > 1) {
-        void this.transport.broadcast(encodeEnvelope({ ...envelope, ttl: envelope.ttl - 1 }), fromPeerId);
+      if (envelope.ttl <= 1) return;
+      const relayed = encodeEnvelope({ ...envelope, ttl: envelope.ttl - 1 });
+      if (envelope.kind !== 'profile') {
+        void this.transport.broadcast(relayed, fromPeerId);
+        return;
       }
+      // See BEAT_RELAY_SUPPRESS_AFTER.
+      this.pendingBeats.set(envelope.id, 1);
+      const [min, max] = BEAT_RELAY_JITTER_MS;
+      setTimeout(() => {
+        const heard = this.pendingBeats.get(envelope.id) ?? 1;
+        this.pendingBeats.delete(envelope.id);
+        if (heard < BEAT_RELAY_SUPPRESS_AFTER) void this.transport.broadcast(relayed, fromPeerId);
+      }, min + Math.random() * (max - min));
       return;
     }
 

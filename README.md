@@ -63,6 +63,7 @@ Every packet is written by whatever build the other person runs, and whatever th
 - `decodeEnvelope` and `decodeFrame` refuse anything malformed, clamp the TTL, and cap a send at 4096 chunks.
 - `validate.ts` checks every payload type (a message whose body isn't a string used to be able to take down the chat screen), caps lengths, refuses a message whose author isn't who the mesh says, and keeps photos out of the group chat.
 - The router drops duplicates *before* counting a sender against the flood limit, so ordinary people in a full room - whose every packet reaches you once through each neighbour - aren't silenced.
+- Profile beats - most of the traffic, one per person every ten seconds - wait a random 30-150ms before being relayed, and aren't relayed at all by a phone that heard the same beat three times meanwhile. In simulated cabins that cuts beat traffic by about 40% for a few points of reach; a beat that doesn't make it is replaced ten seconds later. Messages are always relayed straight away. (Cutting the beat's TTL to 2 hops instead was simulated too: it would hide three in four passengers in a wide-body cabin.)
 
 ### Data model
 

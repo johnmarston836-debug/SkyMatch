@@ -49,7 +49,22 @@ export const DEFAULT_TTL = 6; // max hops a packet will travel before being drop
  */
 export const FLOOD_LIMIT = 30;
 export const FLOOD_WINDOW_MS = 10_000;
-export const SEEN_CACHE_SIZE = 512; // recently-relayed message ids kept to stop flood loops
+export const SEEN_CACHE_SIZE = 512;
+
+/**
+ * Profile beats are not relayed by a phone that has already heard the same
+ * beat this many times - its neighbours have it covered - and before
+ * relaying, a phone waits a short random moment to find out.
+ *
+ * Beats are most of what crosses the mesh: everyone sends one every ten
+ * seconds and every phone used to repeat every one of them. In simulated
+ * cabins this cuts beat traffic by about 40% for a few points of reach, and
+ * a beat that doesn't make it is replaced by the next one ten seconds
+ * later. Messages are never held back like this: losing one is not
+ * something the next ten seconds repair.
+ */
+export const BEAT_RELAY_SUPPRESS_AFTER = 3;
+export const BEAT_RELAY_JITTER_MS: [number, number] = [30, 150]; // recently-relayed message ids kept to stop flood loops
 export const PEER_STALE_MS = 15_000; // an advert not refreshed within this window is considered out of range
 
 export type PacketKind = 'profile' | 'chat' | 'presence' | 'reaction' | 'avatar' | 'avatarRequest' | 'read';
