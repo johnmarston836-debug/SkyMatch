@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import { FlatList, Image, Pressable, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, Image, Pressable, Text, TextInput, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { resize } from 'skymatch-peripheral/image';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { useChatAutoScroll } from '../../hooks/useChatAutoScroll';
@@ -23,6 +24,7 @@ import { colorForPeer } from '../../theme';
 import { formatLocation } from '../../utils/location';
 import { t } from '../../i18n';
 import { formatTime, quoteOf } from '../../utils/id';
+import { MAX_BODY_CHARS } from '../../mesh/validate';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import type { ChatMessage, ReplyQuote } from '../../types';
 
@@ -33,6 +35,13 @@ type Props = NativeStackScreenProps<MainStackParamList, 'Chat'>;
 // read (it never `Object.is`-equals the previous one), which spins into an
 // infinite render loop - exactly the failure mode this constant avoids.
 const EMPTY_MESSAGES: ChatMessage[] = [];
+
+/**
+ * The heaviest photo a private message will carry, in base64 characters:
+ * about 30KB, or some 500 Bluetooth frames. Anything more takes long enough
+ * to cross that the link is likely to drop half way.
+ */
+const MAX_CHAT_IMAGE_CHARS = 40_000;
 
 export function ChatScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets();
@@ -163,8 +172,21 @@ export function ChatScreen({ route, navigation }: Props) {
     });
     const asset = result.assets?.[0];
     if (!asset?.base64) return;
+
+    // A busy photo can come back several times heavier than a plain one of
+    // the same size, and every 80 characters of it is another Bluetooth
+    // frame. Squeeze it before giving up on it.
+    let image = asset.base64;
+    if (image.length > MAX_CHAT_IMAGE_CHARS) {
+      image = (await resize(image, 360, 0.4)) ?? image;
+    }
+    if (image.length > MAX_CHAT_IMAGE_CHARS) {
+      Alert.alert(t.myProfile.photoTooBigTitle, t.myProfile.photoTooBigBody);
+      return;
+    }
+
     autoScroll.stickToEnd();
-    void sendPrivateChatMessage(myProfile, peerId, draft.trim() || t.common.photo, asset.base64, replyTo ?? undefined);
+    void sendPrivateChatMessage(myProfile, peerId, draft.trim() || t.common.photo, image, replyTo ?? undefined);
     setDraft('');
     setReplyTo(null);
   };
@@ -242,6 +264,7 @@ export function ChatScreen({ route, navigation }: Props) {
           value={draft}
           onChangeText={setDraft}
           placeholder={t.chat.placeholder}
+          maxLength={MAX_BODY_CHARS}
           placeholderTextColor={theme.colors.textMuted}
           onSubmitEditing={handleSend}
         />

@@ -59,7 +59,6 @@ export class MeshRouter {
   private handleIncoming(raw: string, fromPeerId: string) {
     const envelope = decodeEnvelope(raw);
     if (!envelope) return;
-    if (this.floods(envelope.fromId)) return;
 
     // A packet still carrying its full TTL has not been relayed by anyone,
     // so its sender is the neighbour that just handed it to us: the one
@@ -68,8 +67,14 @@ export class MeshRouter {
     // neighbour, which is why the TTL check matters.)
     if (envelope.ttl === DEFAULT_TTL) this.transport.notePeerIdentity?.(fromPeerId, envelope.fromId);
 
+    // Duplicates go before the flood check, not after. In a full room the
+    // same packet reaches us once through every neighbour that relays it,
+    // and counting each copy against its author used to silence ordinary
+    // people: ten neighbours, one profile beat and two messages were enough
+    // to drop everything else they said for the rest of the window.
     if (this.seenSet.has(envelope.id)) return;
     this.markSeen(envelope.id);
+    if (this.floods(envelope.fromId)) return;
 
     if (envelope.toId === BROADCAST_ID) {
       this.deliverListeners.forEach((listener) => listener(envelope));

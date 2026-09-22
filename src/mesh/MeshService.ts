@@ -13,6 +13,7 @@ import type {
   UserLocation,
 } from '../types';
 import { newId } from '../utils/id';
+import { readAvatar, readChatMessage, readPresenceAlert, readReaction, readReceipt } from './validate';
 
 type Listeners = {
   peerSeen: (peerId: string, location: UserLocation | null) => void;
@@ -158,29 +159,51 @@ export class MeshService {
     this.listeners[event].forEach((listener) => (listener as (...a: Parameters<Listeners[K]>) => void)(...args));
   }
 
+  /**
+   * Turns a delivered envelope into an app event, once its payload has been
+   * checked (see validate.ts): what arrives here was written by another
+   * phone, and one this phone can't read is dropped rather than drawn.
+   */
   private handleEnvelope(envelope: MeshEnvelope) {
+    const { fromId, payload } = envelope;
     switch (envelope.kind) {
       case 'profile':
-        this.emit('profile', envelope.fromId, envelope.payload as Profile);
+        this.emit('profile', fromId, payload as ProfilePacket);
         break;
-      case 'chat':
-        this.emit('message', envelope.payload as ChatMessage);
+      case 'chat': {
+        const message = readChatMessage(payload, fromId);
+        if (!message) break;
+        // The scope has to agree with how it was addressed: a "private"
+        // message flooded to everyone, or a group one aimed at us alone, is
+        // not what it says it is.
+        const addressedToMe = envelope.toId === this.myPeerId && message.toId === this.myPeerId;
+        if (message.scope === 'group' ? envelope.toId !== BROADCAST_ID : !addressedToMe) break;
+        this.emit('message', message);
         break;
-      case 'presence':
-        this.emit('presence', envelope.payload as PresenceAlert);
+      }
+      case 'presence': {
+        const alert = readPresenceAlert(payload, fromId);
+        if (alert) this.emit('presence', alert);
         break;
-      case 'reaction':
-        this.emit('reaction', envelope.payload as PresenceReaction);
+      }
+      case 'reaction': {
+        const reaction = readReaction(payload, fromId);
+        if (reaction) this.emit('reaction', reaction);
         break;
-      case 'avatar':
-        this.emit('avatar', envelope.payload as AvatarPacket);
+      }
+      case 'avatar': {
+        const avatar = readAvatar(payload, fromId);
+        if (avatar) this.emit('avatar', avatar);
         break;
+      }
       case 'avatarRequest':
-        this.emit('avatarRequest', envelope.fromId, (envelope.payload as AvatarRequest)?.full === true);
+        this.emit('avatarRequest', fromId, (payload as AvatarRequest | null)?.full === true);
         break;
-      case 'read':
-        this.emit('read', envelope.payload as ReadReceipt);
+      case 'read': {
+        const receipt = readReceipt(payload, fromId, this.myPeerId);
+        if (receipt) this.emit('read', receipt);
         break;
+      }
       default:
         break;
     }

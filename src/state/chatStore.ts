@@ -5,6 +5,13 @@ import type { ChatMessage } from '../types';
 
 const STORAGE_KEY = '@skymatch/chats';
 
+/**
+ * How much of the group chat is kept on screen. A long flight in a full
+ * cabin is thousands of lines, every one of them re-sorted and re-rendered
+ * on each arrival; nobody scrolls back that far.
+ */
+const MAX_GROUP_MESSAGES = 500;
+
 /** Kept per conversation. Beyond this the oldest go; a phone is not an archive. */
 const MAX_STORED_PER_PEER = 150;
 
@@ -106,7 +113,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   addGroupMessage: (message) => {
     if (get().groupMessages.some((m) => m.id === message.id)) return; // mesh relay can deliver duplicates
-    set((state) => ({ groupMessages: [...state.groupMessages, message].sort((a, b) => a.sentAt - b.sentAt) }));
+    set((state) => ({
+      groupMessages: [...state.groupMessages, message]
+        .sort((a, b) => a.sentAt - b.sentAt)
+        .slice(-MAX_GROUP_MESSAGES),
+    }));
   },
 
   addPrivateMessage: (peerId, message, incoming = false) => {

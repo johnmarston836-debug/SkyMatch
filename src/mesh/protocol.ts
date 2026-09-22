@@ -67,12 +67,24 @@ export function encodeEnvelope(envelope: MeshEnvelope): string {
   return JSON.stringify(envelope);
 }
 
+/**
+ * Reads an envelope off the radio, or refuses it.
+ *
+ * Everything here arrives from a phone we know nothing about, and the
+ * router relays what it accepts to everyone else in the room, so a
+ * malformed packet is not one phone's problem. The TTL is clamped rather
+ * than trusted: a sender that stamps a huge one would have its packets
+ * cross every hop of every mesh they ever reach.
+ */
 export function decodeEnvelope(raw: string): MeshEnvelope | null {
   try {
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== 'object') return null;
-    if (typeof parsed.id !== 'string' || typeof parsed.fromId !== 'string') return null;
-    return parsed as MeshEnvelope;
+    if (typeof parsed.id !== 'string' || parsed.id.length === 0) return null;
+    if (typeof parsed.fromId !== 'string' || parsed.fromId.length === 0) return null;
+    if (typeof parsed.toId !== 'string' || typeof parsed.kind !== 'string') return null;
+    const ttl = typeof parsed.ttl === 'number' && Number.isFinite(parsed.ttl) ? Math.floor(parsed.ttl) : 0;
+    return { ...(parsed as MeshEnvelope), ttl: Math.min(ttl, DEFAULT_TTL) };
   } catch {
     return null;
   }
@@ -119,6 +131,16 @@ export interface Frame {
   need?: number[];
 }
 
+/**
+ * The most chunks one send may claim to have. Today's composer keeps a
+ * private photo to about 500 chunks, but the builds before it sent the
+ * picker's output as it came - a busy 480px photo can be several times
+ * that - and a relay running this build must not cut those short for
+ * everyone downstream. A frame claiming millions would otherwise have the
+ * receiver walk all of them every time it looks for gaps.
+ */
+export const MAX_FRAMES_PER_SEND = 4096;
+
 /** How many gaps one request names. A long list defeats the point of a small packet. */
 export const MAX_REPAIR_REQUEST = 24;
 
@@ -160,7 +182,16 @@ export function decodeFrame(raw: string): Frame | null {
     if (typeof parsed.id !== 'string' || typeof parsed.index !== 'number' || typeof parsed.total !== 'number') {
       return null;
     }
-    if (parsed.need !== undefined && !Array.isArray(parsed.need)) return null;
+    if (parsed.need !== undefined) {
+      if (!Array.isArray(parsed.need)) return null;
+      const need = (parsed.need as unknown[])
+        .filter((index): index is number => Number.isInteger(index) && (index as number) >= 0)
+        .slice(0, MAX_REPAIR_REQUEST);
+      return { id: parsed.id, index: -1, total: 0, part: '', need };
+    }
+    if (typeof parsed.part !== 'string') return null;
+    if (!Number.isInteger(parsed.total) || parsed.total < 1 || parsed.total > MAX_FRAMES_PER_SEND) return null;
+    if (!Number.isInteger(parsed.index) || parsed.index < 0 || parsed.index >= parsed.total) return null;
     return parsed as Frame;
   } catch {
     return null;

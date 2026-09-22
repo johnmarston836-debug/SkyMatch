@@ -26,6 +26,7 @@ import { formatTime, quoteOf } from '../../utils/id';
 import { venueOf } from '../../venues';
 import { t } from '../../i18n';
 import type { ChatMessage, ReplyQuote } from '../../types';
+import { MAX_BODY_CHARS } from '../../mesh/validate';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'CabinChat'>;
 
@@ -273,6 +274,7 @@ export function CabinChatScreen({ navigation }: Props) {
           value={draft}
           onChangeText={setDraft}
           placeholder={venue.composerPlaceholder}
+          maxLength={MAX_BODY_CHARS}
           placeholderTextColor={theme.colors.textMuted}
           onSubmitEditing={handleSend}
         />
