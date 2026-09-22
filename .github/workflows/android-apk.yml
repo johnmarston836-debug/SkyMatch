@@ -1,0 +1,48 @@
+# Builds an installable Android APK on every push to main, and on demand
+# from the Actions tab ("Run workflow"). The APK is signed with the
+# project's debug keystore (see android/app/build.gradle), which is enough to
+# install it on a phone for testing - not to publish it on Google Play.
+name: APK de Android
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: android-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Compilar la APK
+        working-directory: android
+        # Only the two ABIs real phones use: the emulator ones double the
+        # build time for nothing on a device.
+        run: ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a,armeabi-v7a --no-daemon
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skymatch-${{ github.sha }}
+          path: android/app/build/outputs/apk/release/app-release.apk
+          retention-days: 30
