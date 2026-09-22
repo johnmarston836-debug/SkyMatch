@@ -23,7 +23,14 @@ export const PROFILE_CHAR_UUID = '6b2f1a01-2c9e-4f7a-8e1d-9a2f4c6b8e10';
 export const RELAY_CHAR_UUID = '6b2f1a02-2c9e-4f7a-8e1d-9a2f4c6b8e10';
 
 export const PROTOCOL_VERSION = 1;
-export const MANUFACTURER_ID = 0xffff; // placeholder; replace with a registered company ID before shipping
+/**
+ * The company id Android's advert carries the location under (see
+ * locationFromAdvert). 0xFFFF is the Bluetooth SIG's id for testing and
+ * unregistered use, kept on purpose: registering one buys nothing here, and
+ * a stranger's data under the same id is ignored because ours always
+ * starts with "SM".
+ */
+export const MANUFACTURER_ID = 0xffff;
 
 /** Sentinel recipient id for the group chat and presence alerts: every node delivers locally AND keeps flooding it. */
 export const BROADCAST_ID = '*';
