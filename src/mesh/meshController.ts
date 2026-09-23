@@ -1,7 +1,8 @@
 import { MeshService } from './MeshService';
 import { MockBleTransport } from './MockBleTransport';
 import { RealBleTransport } from './RealBleTransport';
-import { useDiscoveryStore } from '../state/discoveryStore';
+import { isAway, useDiscoveryStore } from '../state/discoveryStore';
+import { isKeyedId } from '../crypto/identity';
 import { useChatStore } from '../state/chatStore';
 import { usePresenceStore } from '../state/presenceStore';
 import { useProfileStore } from '../state/profileStore';
@@ -209,7 +210,10 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   service.on('profile', (_peerId, packet) => {
     if (useBlockStore.getState().isMuted(packet.id)) return;
     // Back in range: whatever didn't reach them while they were away goes again.
-    if (typeof packet?.id === 'string') deliveries.peerBack(packet.id);
+    if (typeof packet?.id === 'string') {
+      deliveries.peerBack(packet.id);
+      retryUndeliveredTo(packet.id);
+    }
     // Everything past this line is untyped input from another phone, which
     // may be running an older build (a profile was a bare seat then) or a
     // newer one. A profile we can't read is dropped rather than stored:
@@ -456,7 +460,16 @@ export async function sendPrivateChatMessage(
       location: profile.location,
     });
   }
-  if (service.acksFrom(toId)) deliveries.expect(message.id, toId);
+  // Everyone on a build with keys answers with a receipt, so a keyed id is
+  // enough to expect one - even from someone not heard this session, whose
+  // announcement is the only other way to know.
+  if (service.acksFrom(toId) || isKeyedId(toId)) deliveries.expect(message.id, toId);
+  // Out of reach right now: it goes out anyway - a phone in between may
+  // still carry it - but the bubble says straight away that it hasn't got
+  // there, instead of looking sent for the minute and a half the retries
+  // take. A receipt clears it; their coming back tries again.
+  const peer = useDiscoveryStore.getState().peers[toId];
+  if (!peer || isAway(peer)) useChatStore.getState().setUndelivered(toId, message.id, true);
   try {
     await service.sendPrivateMessage(message);
   } finally {
@@ -464,10 +477,33 @@ export async function sendPrivateChatMessage(
   }
 }
 
+/**
+ * Messages marked as not delivered that are tried again, once each, when
+ * their person is heard from - including ones marked before the app was
+ * last closed, which the tracker has no memory of.
+ */
+const revivedUndelivered = new Set<string>();
+
+function retryUndeliveredTo(peerId: string) {
+  if (!service) return;
+  const thread = useChatStore.getState().privateMessagesByPeer[peerId];
+  if (!thread) return;
+  const myId = useProfileStore.getState().profile?.id;
+  for (const message of thread) {
+    if (!message.undelivered || message.fromId !== myId) continue;
+    if (revivedUndelivered.has(message.id) || deliveries.isPending(message.id)) continue;
+    revivedUndelivered.add(message.id);
+    deliveries.retry(message.id, peerId);
+  }
+}
+
 /** "Not delivered", tapped: clears the mark and starts a new round of attempts. */
 export function retryPrivateMessage(peerId: string, messageId: string) {
   if (!service || !ownPrivateMessage(peerId, messageId)) return;
-  useChatStore.getState().setUndelivered(peerId, messageId, false);
+  // Still out of reach: the mark stays until a receipt says otherwise,
+  // rather than vanishing for the minute and a half the retries take.
+  const peer = useDiscoveryStore.getState().peers[peerId];
+  if (peer && !isAway(peer)) useChatStore.getState().setUndelivered(peerId, messageId, false);
   deliveries.retry(messageId, peerId);
 }
 
