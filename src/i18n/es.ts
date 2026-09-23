@@ -43,15 +43,15 @@ export const es = {
       'SkyMatch no usa internet ni wifi. Tu dispositivo habla por Bluetooth con los que tiene cerca, y cada uno pasa los mensajes al siguiente.',
     page1Caption: 'El dispositivo de la derecha está demasiado lejos para oírte, pero el de en medio le pasa tu mensaje.',
     page1Body2:
-      'El Bluetooth llega a pocos metros, pero cada salto suma: un mensaje puede cruzar varios dispositivos hasta llegar a su destino. Cuanta más gente lleve SkyMatch, más lejos llega.',
+      'El Bluetooth llega a varios metros, y cada salto suma: un mensaje puede cruzar muchos dispositivos hasta llegar a su destino. Cuanta más gente lleve SkyMatch, más lejos llega.',
     page1CalloutTitle: 'Funciona en modo avión',
     page1CalloutBody:
       'No necesitas wifi, datos ni cobertura. En el avión puedes dejar el modo avión activado y encender solo el Bluetooth.',
     page2Label: 'CÓMO FUNCIONA · 2 DE 3',
     /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
-    page2Title: 'Ábrela al llegar y guarda el dispositivo',
+    page2Title: 'Abre la app para descubrir gente alrededor',
     page2Body:
-      'Abre SkyMatch al llegar y déjala unos segundos en pantalla: así tu iPhone se conecta con quien tiene cerca. Después puedes bloquearlo o usar otras apps, y seguirás recibiendo mensajes y haciendo de puente para los demás.',
+      'Abre SkyMatch unos segundos para que tu iPhone se conecte con quien tienes cerca. Después puedes bloquearlo o usar otras apps: si te escriben en un chat ya iniciado, seguirás recibiendo los mensajes con el iPhone bloqueado, y seguirás haciendo de puente para los demás.',
     page2Caption: 'El dispositivo de en medio está bloqueado, y aun así pasa tu mensaje.',
     page2Body2:
       'No hay servidor: los mensajes solo existen en los dispositivos de alrededor, así que lo que se diga mientras estés desconectado no se puede recuperar. Tus chats privados sí se guardan en tu dispositivo.',
@@ -59,9 +59,9 @@ export const es = {
     page2CalloutBody:
       'Con la pantalla bloqueada tarda más en encontrar a gente nueva, y dos iPhone bloqueados que no se han visto nunca no se encuentran. Si cierras SkyMatch del todo desde la multitarea, dejas de recibir mensajes y de hacer de puente.',
     /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
-    page2TitleAndroid: 'Sigue conectada aunque salgas',
+    page2TitleAndroid: 'Abre la app para descubrir gente alrededor',
     page2BodyAndroid:
-      'En Android, SkyMatch sigue conectada en segundo plano: lo verás en una notificación. Puedes bloquear el dispositivo o usar otras apps, y seguirás recibiendo mensajes y haciendo de puente para los demás.',
+      'SkyMatch sigue conectada en segundo plano: lo verás en una notificación. Si te escriben en un chat ya iniciado, seguirás recibiendo los mensajes con el dispositivo bloqueado, y seguirás haciendo de puente para los demás.',
     page2CalloutTitleAndroid: 'Cuándo deja de funcionar',
     page2CalloutBodyAndroid:
       'Si tocas «Desconectar» en la notificación o cierras SkyMatch desde la multitarea, dejas de recibir mensajes y de hacer de puente.',

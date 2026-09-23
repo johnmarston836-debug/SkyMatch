@@ -36,15 +36,15 @@ export const fr: Strings = {
     page1Caption:
       'L’appareil de droite est trop loin pour t’entendre, mais celui du milieu lui transmet ton message.',
     page1Body2:
-      'Le Bluetooth ne porte qu’à quelques mètres, mais chaque saut compte : un message peut traverser plusieurs appareils avant d’arriver. Plus il y a de monde avec SkyMatch, plus il va loin.',
+      'Le Bluetooth porte à plusieurs mètres, et chaque saut s’ajoute : un message peut traverser de nombreux appareils avant d’arriver. Plus il y a de monde avec SkyMatch, plus il va loin.',
     page1CalloutTitle: 'Ça marche en mode avion',
     page1CalloutBody:
       'Pas besoin de wifi, de données ni de réseau. En avion, tu peux laisser le mode avion activé et rallumer seulement le Bluetooth.',
     page2Label: 'COMMENT ÇA MARCHE · 2 SUR 3',
     /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
-    page2Title: 'Ouvre-la en arrivant, puis range ton appareil',
+    page2Title: 'Ouvre l’appli pour découvrir les gens autour de toi',
     page2Body:
-      'Ouvre SkyMatch en arrivant et garde-la quelques secondes à l’écran : c’est ainsi que ton iPhone se connecte aux personnes autour de toi. Ensuite, tu peux le verrouiller ou utiliser d’autres applis : tu continues à recevoir les messages et à les relayer pour les autres.',
+      'Ouvre SkyMatch quelques secondes pour que ton iPhone se connecte aux personnes proches. Ensuite, tu peux le verrouiller ou utiliser d’autres applis : si on t’écrit dans une discussion déjà commencée, tu continues à recevoir les messages iPhone verrouillé, et à les relayer pour les autres.',
     page2Caption: 'L’appareil du milieu est verrouillé, et il transmet quand même ton message.',
     page2Body2:
       'Il n’y a pas de serveur : les messages n’existent que sur les appareils autour de toi, donc ce qui se dit pendant que tu es déconnecté ne peut pas être récupéré. Tes discussions privées, elles, restent enregistrées sur ton appareil.',
@@ -52,9 +52,9 @@ export const fr: Strings = {
     page2CalloutBody:
       'Écran verrouillé, il met plus de temps à trouver de nouvelles personnes, et deux iPhone verrouillés qui ne se sont jamais vus ne se trouvent pas. Si tu fermes complètement SkyMatch depuis le sélecteur d’applis, tu ne reçois plus de messages et tu ne les relaies plus.',
     /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
-    page2TitleAndroid: 'Elle reste connectée quand tu sors',
+    page2TitleAndroid: 'Ouvre l’appli pour découvrir les gens autour de toi',
     page2BodyAndroid:
-      'Sur Android, SkyMatch reste connectée en arrière-plan : tu le verras dans une notification. Tu peux verrouiller ton appareil ou utiliser d’autres applis : tu continues à recevoir les messages et à les relayer pour les autres.',
+      'SkyMatch reste connectée en arrière-plan : tu le verras dans une notification. Si on t’écrit dans une discussion déjà commencée, tu continues à recevoir les messages appareil verrouillé, et à les relayer pour les autres.',
     page2CalloutTitleAndroid: 'Quand elle cesse de fonctionner',
     page2CalloutBodyAndroid:
       'Si tu touches « Déconnecter » dans la notification ou fermes SkyMatch depuis les applis récentes, tu ne reçois plus de messages et tu ne les relaies plus.',

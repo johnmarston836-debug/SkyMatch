@@ -36,15 +36,15 @@ export const de: Strings = {
     page1Caption:
       'Das rechte Gerät ist zu weit weg, um dich zu hören – aber das in der Mitte gibt deine Nachricht weiter.',
     page1Body2:
-      'Bluetooth reicht nur wenige Meter, aber jeder Sprung zählt: Eine Nachricht kann mehrere Geräte durchqueren, bis sie ankommt. Je mehr Leute SkyMatch dabeihaben, desto weiter reicht es.',
+      'Bluetooth reicht mehrere Meter, und jeder Sprung kommt dazu: Eine Nachricht kann viele Geräte durchqueren, bis sie ankommt. Je mehr Leute SkyMatch dabeihaben, desto weiter reicht es.',
     page1CalloutTitle: 'Funktioniert im Flugmodus',
     page1CalloutBody:
       'Kein WLAN, keine mobilen Daten, kein Netz nötig. Im Flugzeug kannst du den Flugmodus anlassen und nur Bluetooth wieder einschalten.',
     page2Label: 'SO FUNKTIONIERT’S · 2 VON 3',
     /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
-    page2Title: 'Beim Ankommen öffnen, dann Gerät einstecken',
+    page2Title: 'Öffne die App, um Leute in deiner Nähe zu entdecken',
     page2Body:
-      'Öffne SkyMatch, wenn du ankommst, und lass es ein paar Sekunden auf dem Bildschirm: So verbindet sich dein iPhone mit den Leuten in der Nähe. Danach kannst du es sperren oder andere Apps nutzen – du bekommst weiter Nachrichten und leitest sie für andere weiter.',
+      'Öffne SkyMatch ein paar Sekunden lang, damit sich dein iPhone mit den Leuten in der Nähe verbindet. Danach kannst du es sperren oder andere Apps nutzen: Schreibt dir jemand in einem schon begonnenen Chat, bekommst du die Nachrichten auch bei gesperrtem iPhone – und du leitest weiterhin Nachrichten für andere weiter.',
     page2Caption: 'Das Gerät in der Mitte ist gesperrt und gibt deine Nachricht trotzdem weiter.',
     page2Body2:
       'Es gibt keinen Server: Nachrichten existieren nur auf den Geräten um dich herum. Was gesagt wird, während du nicht verbunden bist, lässt sich nicht nachholen. Deine privaten Chats bleiben aber auf deinem Gerät gespeichert.',
@@ -52,9 +52,9 @@ export const de: Strings = {
     page2CalloutBody:
       'Bei gesperrtem Bildschirm findet es neue Leute langsamer, und zwei gesperrte iPhones, die sich noch nie gesehen haben, finden sich nicht. Wenn du SkyMatch im App-Umschalter ganz schließt, bekommst du keine Nachrichten mehr und leitest keine mehr weiter.',
     /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
-    page2TitleAndroid: 'Bleibt verbunden, auch wenn du rausgehst',
+    page2TitleAndroid: 'Öffne die App, um Leute in deiner Nähe zu entdecken',
     page2BodyAndroid:
-      'Unter Android bleibt SkyMatch im Hintergrund verbunden – du siehst es an einer Benachrichtigung. Du kannst dein Gerät sperren oder andere Apps nutzen und bekommst weiter Nachrichten und leitest sie für andere weiter.',
+      'SkyMatch bleibt im Hintergrund verbunden – du siehst es an einer Benachrichtigung. Schreibt dir jemand in einem schon begonnenen Chat, bekommst du die Nachrichten auch bei gesperrtem Gerät – und du leitest weiterhin Nachrichten für andere weiter.',
     page2CalloutTitleAndroid: 'Wann es aufhört',
     page2CalloutBodyAndroid:
       'Wenn du in der Benachrichtigung auf „Trennen“ tippst oder SkyMatch in den letzten Apps schließt, bekommst du keine Nachrichten mehr und leitest keine mehr weiter.',

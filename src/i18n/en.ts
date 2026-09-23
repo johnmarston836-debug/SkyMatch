@@ -36,15 +36,15 @@ export const en: Strings = {
     page1Caption:
       'The device on the right is too far away to hear you, but the one in the middle passes your message on.',
     page1Body2:
-      'Bluetooth only reaches a few metres, but every hop adds up: a message can cross several devices on its way. The more people carry SkyMatch, the further it goes.',
+      'Bluetooth reaches several metres, and every hop adds more: a message can cross many devices on its way. The more people carry SkyMatch, the further it goes.',
     page1CalloutTitle: 'It works in flight mode',
     page1CalloutBody:
       'No Wi-Fi, data or signal needed. On a plane you can leave flight mode on and switch just Bluetooth back on.',
     page2Label: 'HOW IT WORKS · 2 OF 3',
     /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
-    page2Title: 'Open it when you arrive, then put your device away',
+    page2Title: 'Open the app to discover people around you',
     page2Body:
-      'Open SkyMatch when you arrive and keep it on screen for a few seconds: that is how your iPhone connects with the people around you. After that you can lock it or use other apps, and you keep getting messages and relaying them for others.',
+      'Open SkyMatch for a few seconds so your iPhone connects with the people near you. After that you can lock it or use other apps: if someone writes to you in a chat you’ve already started, you’ll keep getting their messages with your iPhone locked, and you keep relaying for others.',
     page2Caption: 'The device in the middle is locked, and still passes your message on.',
     page2Body2:
       'There is no server: messages only exist on the devices around you, so whatever is said while you are disconnected cannot be recovered. Your private chats do stay saved on your device.',
@@ -52,9 +52,9 @@ export const en: Strings = {
     page2CalloutBody:
       'With the screen locked it takes longer to find new people, and two locked iPhones that have never met won’t find each other. If you close SkyMatch completely from the app switcher, you stop getting messages and stop relaying them.',
     /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
-    page2TitleAndroid: 'It stays connected when you leave',
+    page2TitleAndroid: 'Open the app to discover people around you',
     page2BodyAndroid:
-      'On Android, SkyMatch stays connected in the background - you’ll see it in a notification. You can lock your device or use other apps, and you keep getting messages and relaying them for others.',
+      'SkyMatch stays connected in the background - you’ll see it in a notification. If someone writes to you in a chat you’ve already started, you’ll keep getting their messages with your device locked, and you keep relaying for others.',
     page2CalloutTitleAndroid: 'When it stops working',
     page2CalloutBodyAndroid:
       'If you tap “Disconnect” in the notification or close SkyMatch from the recent apps, you stop getting messages and stop relaying them.',

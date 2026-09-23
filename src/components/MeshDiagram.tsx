@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Text, View, type EasingFunction } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Animated, AppState, Easing, Text, View, type EasingFunction } from 'react-native';
 import { Padlock } from './Padlock';
 import { t } from '../i18n';
 import { useAppTheme, useThemedStyles } from '../theme/ThemeContext';
@@ -19,31 +19,54 @@ const LAST_ARRIVAL = SECOND_HOP_AT + TRAVEL;
 const PACKET = 10;
 const LOCK = 14;
 
-/** Made once: a new easing on every render would restart every loop that depends on it. */
 const MOVE = Easing.inOut(Easing.quad);
 const FADE = Easing.out(Easing.quad);
 const STEADY = Easing.linear;
 
+type Progress = Animated.AnimatedInterpolation<number>;
+
 /**
- * A value that runs 0 -> 1 once per CYCLE, starting `at` ms into it and
- * taking `duration`. Every moving part of the diagram is one of these, so
- * the packet, the screen that lights up when it lands and the tick that
- * follows can never drift apart.
+ * The one clock the whole scene runs on: 0 -> 1 over each CYCLE, forever.
+ *
+ * Every part of the journey - the dot crossing, the screen lighting up, the
+ * tick - is a slice of it (see `segment`), not an animation of its own. Each
+ * used to be a separate loop of pauses and moves, and separate loops can
+ * stall or slide apart; one steady loop can't, so the dot always runs all
+ * the way to the tick and starts again. It is restarted when the app comes
+ * back to the foreground, where iOS may have paused it.
  */
-function useCycle(at: number, duration: number, easing: EasingFunction) {
-  const value = useRef(new Animated.Value(0)).current;
+function useClock() {
+  const clock = useRef(new Animated.Value(0)).current;
   useEffect(() => {
-    const animation = Animated.loop(
-      Animated.sequence([
-        Animated.delay(at),
-        Animated.timing(value, { toValue: 1, duration, easing, useNativeDriver: true }),
-        Animated.delay(Math.max(0, CYCLE - at - duration)),
-      ]),
-    );
-    animation.start();
-    return () => animation.stop();
-  }, [at, duration, easing, value]);
-  return value;
+    let animation: Animated.CompositeAnimation | null = null;
+    const run = () => {
+      animation?.stop();
+      clock.setValue(0);
+      animation = Animated.loop(
+        Animated.timing(clock, { toValue: 1, duration: CYCLE, easing: STEADY, useNativeDriver: true }),
+      );
+      animation.start();
+    };
+    run();
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') run();
+    });
+    return () => {
+      subscription.remove();
+      animation?.stop();
+    };
+  }, [clock]);
+  return clock;
+}
+
+/** The part of the clock from `at` ms to `at + duration` ms, as 0 -> 1: 0 before it, 1 after. */
+function segment(clock: Animated.Value, at: number, duration: number, easing: EasingFunction): Progress {
+  return clock.interpolate({
+    inputRange: [at / CYCLE, (at + duration) / CYCLE],
+    outputRange: [0, 1],
+    easing,
+    extrapolate: 'clamp',
+  });
 }
 
 /** One Bluetooth ring: grows out of the phone and fades, like a radio wave leaving it. */
@@ -94,15 +117,15 @@ type Screen =
 interface PhoneProps {
   screen: Screen;
   /** 0 -> 1 as the message lands here: the screen lights up for a moment. */
-  flash?: Animated.Value;
+  flash?: Progress;
   /** The tick on the last phone once the message is in. */
-  tick?: Animated.Value;
+  tick?: Progress;
   /**
    * For a sealed message, on the phone it is for: the padlock arrives,
    * opens, and gives way to the message itself - decrypted at the end, and
    * only there.
    */
-  unlock?: Animated.Value;
+  unlock?: Progress;
   ripplePhase: number;
 }
 
@@ -244,10 +267,9 @@ function Phone({ screen, flash, tick, unlock, ripplePhase }: PhoneProps) {
 }
 
 /** The gap between two phones, with the message crossing it: a dot, or a padlock when it is sealed. */
-function Hop({ at, sealed }: { at: number; sealed?: boolean }) {
+function Hop({ progress, sealed }: { progress: Progress; sealed?: boolean }) {
   const { colors } = useAppTheme();
   const [width, setWidth] = useState(0);
-  const progress = useCycle(at, TRAVEL, MOVE);
   const styles = useThemedStyles(({ colors: c, radii }) => ({
     hop: { flex: 1, height: 20, justifyContent: 'center' as const },
     line: { position: 'absolute' as const, left: 0, right: 0, height: 2, borderRadius: 1, backgroundColor: c.border },
@@ -289,10 +311,18 @@ interface Props {
 
 /** You, a phone in between and one out of your reach, with a message making its way across. */
 export function MeshDiagram({ variant }: Props) {
-  const middleFlash = useCycle(MIDDLE_ARRIVAL, 500, FADE);
-  const lastFlash = useCycle(LAST_ARRIVAL, 500, FADE);
-  const lastTick = useCycle(LAST_ARRIVAL + 100, CYCLE - LAST_ARRIVAL - 200, STEADY);
-  const lastUnlock = useCycle(LAST_ARRIVAL, CYCLE - LAST_ARRIVAL - 100, STEADY);
+  const clock = useClock();
+  const parts = useMemo(
+    () => ({
+      firstHop: segment(clock, FIRST_HOP_AT, TRAVEL, MOVE),
+      secondHop: segment(clock, SECOND_HOP_AT, TRAVEL, MOVE),
+      middleFlash: segment(clock, MIDDLE_ARRIVAL, 500, FADE),
+      lastFlash: segment(clock, LAST_ARRIVAL, 500, FADE),
+      lastTick: segment(clock, LAST_ARRIVAL + 100, CYCLE - LAST_ARRIVAL - 200, STEADY),
+      lastUnlock: segment(clock, LAST_ARRIVAL, CYCLE - LAST_ARRIVAL - 100, STEADY),
+    }),
+    [clock],
+  );
   const styles = useThemedStyles(({ spacing }) => ({
     row: { flexDirection: 'row' as const, alignItems: 'center' as const, marginVertical: spacing(1) },
   }));
@@ -302,13 +332,13 @@ export function MeshDiagram({ variant }: Props) {
   return (
     <View style={styles.row}>
       <Phone screen="you" ripplePhase={0} />
-      <Hop at={FIRST_HOP_AT} sealed={sealed} />
-      <Phone screen={middle} ripplePhase={400} flash={middleFlash} />
-      <Hop at={SECOND_HOP_AT} sealed={sealed} />
+      <Hop progress={parts.firstHop} sealed={sealed} />
+      <Phone screen={middle} ripplePhase={400} flash={parts.middleFlash} />
+      <Hop progress={parts.secondHop} sealed={sealed} />
       {sealed ? (
-        <Phone screen="plain" ripplePhase={800} unlock={lastUnlock} />
+        <Phone screen="plain" ripplePhase={800} unlock={parts.lastUnlock} />
       ) : (
-        <Phone screen="plain" ripplePhase={800} flash={lastFlash} tick={lastTick} />
+        <Phone screen="plain" ripplePhase={800} flash={parts.lastFlash} tick={parts.lastTick} />
       )}
     </View>
   );
