@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, AppState, Easing, Text, View, type EasingFunction } from 'react-native';
+import { Animated, AppState, Easing, StyleSheet, Text, View, type EasingFunction } from 'react-native';
 import { Padlock } from './Padlock';
 import { t } from '../i18n';
 import { useAppTheme, useThemedStyles } from '../theme/ThemeContext';
@@ -105,6 +105,27 @@ function Ripple({ delay, faint }: { delay: number; faint?: boolean }) {
   );
 }
 
+/** A key drawn from a ring and a toothed shaft, standing upright like one about to go into a lock. */
+function Key({ color }: { color: string }) {
+  return (
+    <View style={keyStyles.key}>
+      <View style={[keyStyles.bow, { borderColor: color }]} />
+      <View style={[keyStyles.shaft, { backgroundColor: color }]}>
+        <View style={[keyStyles.tooth, keyStyles.toothTop, { backgroundColor: color }]} />
+        <View style={[keyStyles.tooth, { backgroundColor: color }]} />
+      </View>
+    </View>
+  );
+}
+
+const keyStyles = StyleSheet.create({
+  key: { alignItems: 'center' },
+  bow: { width: 10, height: 10, borderRadius: 5, borderWidth: 2 },
+  shaft: { width: 2, height: 10, borderRadius: 1 },
+  tooth: { position: 'absolute', left: 2, bottom: 0, width: 3, height: 2, borderRadius: 1 },
+  toothTop: { bottom: 3 },
+});
+
 type Screen =
   /** You: filled in, so it reads at a glance. */
   | 'you'
@@ -121,9 +142,9 @@ interface PhoneProps {
   /** The tick on the last phone once the message is in. */
   tick?: Progress;
   /**
-   * For a sealed message, on the phone it is for: the padlock arrives,
-   * opens, and gives way to the message itself - decrypted at the end, and
-   * only there.
+   * For a sealed message, on the phone it is for: it holds the key, the
+   * padlock arrives, the key opens it and the message itself comes out -
+   * decrypted at the end, and only there.
    */
   unlock?: Progress;
   ripplePhase: number;
@@ -211,19 +232,37 @@ function Phone({ screen, flash, tick, unlock, ripplePhase }: PhoneProps) {
             </Animated.View>
           )}
           {unlock && (
+            // The phone it is for holds the key. The sealed message lands as
+            // a shut padlock, the key goes into it, it opens, and the message
+            // comes out; then the key is back, waiting for the next one.
             <>
               <Animated.View
                 style={[
                   styles.overlay,
-                  // Open at rest; shut while the sealed message comes in,
-                  // then opened, and away while the message shows.
-                  { opacity: unlock.interpolate({ inputRange: [0, 0.45, 0.55, 0.9, 1], outputRange: [1, 1, 0, 0, 1] }) },
+                  {
+                    opacity: unlock.interpolate({
+                      inputRange: [0, 0.02, 0.14, 0.2, 0.92, 1],
+                      outputRange: [1, 1, 1, 0, 0, 1],
+                    }),
+                    transform: [
+                      { translateY: unlock.interpolate({ inputRange: [0, 0.02, 0.14, 1], outputRange: [0, 0, 5, 5] }) },
+                      { scale: unlock.interpolate({ inputRange: [0, 0.02, 0.14, 0.92, 1], outputRange: [1, 1, 0.7, 0.7, 1] }) },
+                    ],
+                  },
+                ]}
+              >
+                <Key color={colors.accent} />
+              </Animated.View>
+              <Animated.View
+                style={[
+                  styles.overlay,
+                  { opacity: unlock.interpolate({ inputRange: [0, 0.02, 0.45, 0.55, 1], outputRange: [0, 1, 1, 0, 0] }) },
                 ]}
               >
                 <Padlock
                   color={colors.accent}
                   size={LOCK}
-                  open={unlock.interpolate({ inputRange: [0, 0.02, 0.15, 0.32, 1], outputRange: [1, 0, 0, 1, 1] })}
+                  open={unlock.interpolate({ inputRange: [0, 0.16, 0.32, 1], outputRange: [0, 0, 1, 1] })}
                 />
               </Animated.View>
               <Animated.View
