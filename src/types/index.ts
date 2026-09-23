@@ -84,6 +84,13 @@ export interface ChatMessage {
    * would.
    */
   fromLabel: string;
+  /**
+   * The sender's location as packLocation() writes it ("G00", "P1c"), so
+   * each phone can put it into words in its own language - "Pecho" on one,
+   * "Chest" on the next - rather than showing the sender's. A few
+   * characters; absent from older builds, which only send fromLabel.
+   */
+  fromLoc?: string;
   fromNickname: string;
   toId?: string; // only set for scope 'private'
   body: string;
@@ -109,6 +116,10 @@ export interface PresenceAlert {
   fromId: string;
   /** Rendered location, same reasoning as ChatMessage.fromLabel. */
   label: string;
+  /** Packed location, same reasoning as ChatMessage.fromLoc. */
+  loc?: string;
+  /** Who is up, or leaving the machine: the name says it better than a muscle group does. */
+  nickname?: string;
   status: PresenceStatus;
   /** false means "I'm back" - broadcast with the same id to clear the alert everywhere, not just locally. */
   active: boolean;
@@ -170,6 +181,8 @@ export interface PresenceReaction {
   alertId: string;
   fromId: string;
   fromLabel: string;
+  /** Packed location, same reasoning as ChatMessage.fromLoc. */
+  fromLoc?: string;
   kind: ReactionKind;
   sentAt: number;
 }

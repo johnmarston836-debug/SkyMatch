@@ -100,6 +100,7 @@ export interface SealedMessage {
   fromId: string;
   toId: string;
   fromLabel: string;
+  fromLoc?: string;
   fromNickname: string;
   sentAt: number;
   /** XSalsa20-Poly1305 box of packContent(), base64. */
@@ -217,6 +218,7 @@ export class SecureChannel {
       fromId: message.fromId,
       toId: message.toId,
       fromLabel: message.fromLabel,
+      ...(message.fromLoc ? { fromLoc: message.fromLoc } : {}),
       fromNickname: message.fromNickname,
       sentAt: message.sentAt,
       sealed: toBase64(sealed),
@@ -245,6 +247,7 @@ export class SecureChannel {
         fromId: sealed.fromId,
         toId: sealed.toId,
         fromLabel: sealed.fromLabel,
+        fromLoc: sealed.fromLoc,
         fromNickname: sealed.fromNickname,
         sentAt: sealed.sentAt,
       };

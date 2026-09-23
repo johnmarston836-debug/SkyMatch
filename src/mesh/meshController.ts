@@ -15,7 +15,7 @@ import { t } from '../i18n';
 import { requestBlePermissions } from '../utils/permissions';
 import { newId } from '../utils/id';
 import { shortHash } from '../utils/hash';
-import { formatLocation, normalizeLocation } from '../utils/location';
+import { formatLocation, normalizeLocation, packLocation, unpackLocation } from '../utils/location';
 import { venueOf } from '../venues';
 import type {
   ChatMessage,
@@ -25,6 +25,7 @@ import type {
   ProfilePacket,
   ReactionKind,
   ReplyQuote,
+  UserLocation,
 } from '../types';
 
 /**
@@ -93,11 +94,36 @@ function normalizeProfile(packet: ProfilePacket): Profile | null {
  * The label to show for something that came off the radio. Current peers
  * send it ready to draw; older ones send the seat it was made from.
  */
-function labelOf(packet: { fromLabel?: string; label?: string; fromSeat?: unknown; seat?: unknown }): string {
-  const sent = packet.fromLabel ?? packet.label;
-  if (typeof sent === 'string' && sent.length > 0) return sent;
-  const location = normalizeLocation(packet.fromSeat ?? packet.seat);
-  return location ? formatLocation(location) : '·';
+/**
+ * Where something that came off the radio was sent from, in *this* phone's
+ * words: "Chest" here even when the sender's phone said "Pecho".
+ *
+ * In order of how exact they are: the packed location the packet carries,
+ * the sender's current profile (which also puts older builds, which send
+ * only words, into our language), the words they sent, and the bare seat
+ * the first builds sent.
+ */
+function whereFrom(packet: {
+  fromId: string;
+  fromLoc?: string;
+  loc?: string;
+  fromLabel?: string;
+  label?: string;
+  fromSeat?: unknown;
+  seat?: unknown;
+}): { label: string; location: UserLocation | null } {
+  const packed = packet.fromLoc ?? packet.loc;
+  const sent = packed ? unpackLocation(packed) : null;
+  const location = sent ?? useDiscoveryStore.getState().peers[packet.fromId]?.profile?.location ?? null;
+  if (location) return { label: formatLocation(location), location };
+  const words = packet.fromLabel ?? packet.label;
+  if (typeof words === 'string' && words.length > 0) return { label: words, location: null };
+  const legacy = normalizeLocation(packet.fromSeat ?? packet.seat);
+  return legacy ? { label: formatLocation(legacy), location: legacy } : { label: '·', location: null };
+}
+
+function labelOf(packet: Parameters<typeof whereFrom>[0]): string {
+  return whereFrom(packet).label;
 }
 
 /** Bluetooth device ids already greeted, so the duplicate scan hits don't re-announce endlessly. */
@@ -266,7 +292,11 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
         peerId,
         profile
           ? { nickname: profile.nickname, label: formatLocation(profile.location), location: profile.location }
-          : { nickname: message.fromNickname, label: message.fromLabel },
+          : {
+              nickname: message.fromNickname,
+              label: message.fromLabel,
+              location: whereFrom(message).location ?? undefined,
+            },
       );
     }
     // Nothing on screen is going to show it if the phone is in a pocket.
@@ -275,7 +305,12 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
 
   service.on('presence', (alert) => {
     if (useBlockStore.getState().isMuted(alert.fromId)) return;
-    usePresenceStore.getState().applyAlert({ ...alert, label: labelOf(alert) });
+    usePresenceStore.getState().applyAlert({
+      ...alert,
+      label: labelOf(alert),
+      // Older builds don't send a name; their profile has one.
+      nickname: alert.nickname ?? useDiscoveryStore.getState().peers[alert.fromId]?.profile?.nickname,
+    });
   });
 
   service.on('read', (receipt) => {
@@ -346,6 +381,7 @@ export async function sendGroupChatMessage(myProfile: Profile, body: string, rep
     scope: 'group',
     fromId: myProfile.id,
     fromLabel: formatLocation(myProfile.location),
+    fromLoc: packLocation(myProfile.location),
     fromNickname: myProfile.nickname,
     body,
     replyTo,
@@ -368,6 +404,7 @@ export async function sendPrivateChatMessage(
     scope: 'private',
     fromId: myProfile.id,
     fromLabel: formatLocation(myProfile.location),
+    fromLoc: packLocation(myProfile.location),
     fromNickname: myProfile.nickname,
     toId,
     body,
@@ -408,6 +445,8 @@ export async function togglePresence(myProfile: Profile) {
       id: currentId,
       fromId: myProfile.id,
       label: formatLocation(myProfile.location),
+      loc: packLocation(myProfile.location),
+      nickname: myProfile.nickname,
       status,
       active: false,
       startedAt: Date.now(),
@@ -422,6 +461,8 @@ export async function togglePresence(myProfile: Profile) {
     id: newId(),
     fromId: myProfile.id,
     label: formatLocation(myProfile.location),
+    loc: packLocation(myProfile.location),
+    nickname: myProfile.nickname,
     status,
     active: true,
     startedAt: Date.now(),
@@ -515,6 +556,7 @@ export async function sendPresenceReaction(myProfile: Profile, alertId: string, 
     alertId,
     fromId: myProfile.id,
     fromLabel: formatLocation(myProfile.location),
+    fromLoc: packLocation(myProfile.location),
     kind,
     sentAt: Date.now(),
   };

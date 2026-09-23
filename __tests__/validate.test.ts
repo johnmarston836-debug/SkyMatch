@@ -152,3 +152,16 @@ describe('MeshService at the boundary', () => {
     expect(heard).toHaveLength(0);
   });
 });
+
+describe('the packed location a packet carries', () => {
+  it('is kept when it looks like one, and dropped when it does not', () => {
+    expect(readChatMessage({ ...message, fromLoc: 'G00' }, 'peer-a')?.fromLoc).toBe('G00');
+    expect(readChatMessage({ ...message, fromLoc: '<script>' }, 'peer-a')?.fromLoc).toBeUndefined();
+    const alert = readPresenceAlert(
+      { id: 'a', fromId: 'p', label: 'Pecho', loc: 'G00', nickname: 'Ana', status: 'leavingMachine', active: true, startedAt: 1, expiresAt: 2 },
+      'p',
+      1,
+    );
+    expect(alert).toMatchObject({ loc: 'G00', nickname: 'Ana' });
+  });
+});

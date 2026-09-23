@@ -15,6 +15,7 @@ import { QuotedMessage } from '../../components/QuotedMessage';
 import { ReplyComposerBar } from '../../components/ReplyComposerBar';
 import { SwipeToReply } from '../../components/SwipeToReply';
 import { LocationBadge } from '../../components/LocationBadge';
+import { unpackLocation } from '../../utils/location';
 import { useChatStore } from '../../state/chatStore';
 import { useProfileStore } from '../../state/profileStore';
 import { usePresenceStore } from '../../state/presenceStore';
@@ -186,7 +187,8 @@ export function CabinChatScreen({ navigation }: Props) {
         >
           <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>
             <View style={[styles.senderRow, mine && styles.senderRowMine]}>
-              <LocationBadge label={item.fromLabel} />
+              {/* The location too, when it came with the message: in a room of colours, the swatch is the badge. */}
+              <LocationBadge label={item.fromLabel} location={item.fromLoc ? unpackLocation(item.fromLoc) ?? undefined : undefined} />
               <Text style={mine ? styles.senderNameMine : [styles.senderName, { color: colorForPeer(item.fromId) }]}>
                 {item.fromNickname}
               </Text>

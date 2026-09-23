@@ -53,7 +53,8 @@ export function describeConversationPeer(
     return {
       peerId,
       nickname: saved.nickname,
-      label: saved.label,
+      // In this phone's words when we know the location itself.
+      label: saved.location ? formatLocation(saved.location) : saved.label,
       location: saved.location,
       secure: false,
       connection: 'gone',

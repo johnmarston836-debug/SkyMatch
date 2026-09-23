@@ -44,6 +44,11 @@ export const MAX_ALERT_LIFETIME_MS = 10 * 60_000;
 
 const REACTIONS: ReactionKind[] = ['ok', 'heart', 'laugh'];
 
+/** A packed location is a venue letter and two or four hex digits (see packLocation). */
+function readPackedLocation(value: unknown): string | undefined {
+  return typeof value === 'string' && /^[A-Z][0-9a-f]{2,4}$/i.test(value) ? value : undefined;
+}
+
 function isText(value: unknown): value is string {
   return typeof value === 'string';
 }
@@ -91,8 +96,10 @@ export function readChatMessage(value: unknown, envelopeFromId: string): ChatMes
     body: message.body.slice(0, MAX_BODY_CHARS),
     fromNickname: message.fromNickname.slice(0, 24),
     fromLabel: isText(message.fromLabel) ? message.fromLabel.slice(0, 32) : '',
+    fromLoc: readPackedLocation(message.fromLoc),
     replyTo: readQuote(message.replyTo),
   };
+  if (read.fromLoc === undefined) delete read.fromLoc;
   if (image === undefined) delete read.imageBase64;
   else read.imageBase64 = image;
   if (read.replyTo === undefined) delete read.replyTo;
@@ -114,6 +121,8 @@ export function readPresenceAlert(value: unknown, envelopeFromId: string, now = 
     status: alert.status === 'leavingMachine' ? 'leavingMachine' : 'standing',
     active: alert.active !== false,
     label: isText(alert.label) ? alert.label.slice(0, 32) : '',
+    loc: readPackedLocation(alert.loc),
+    nickname: isText(alert.nickname) && alert.nickname.length > 0 ? alert.nickname.slice(0, 24) : undefined,
     expiresAt: Math.min(alert.expiresAt, now + MAX_ALERT_LIFETIME_MS),
   };
 }
@@ -128,6 +137,7 @@ export function readReaction(value: unknown, envelopeFromId: string): PresenceRe
   return {
     ...(reaction as PresenceReaction),
     fromLabel: isText(reaction.fromLabel) ? reaction.fromLabel.slice(0, 32) : '',
+    fromLoc: readPackedLocation(reaction.fromLoc),
   };
 }
 

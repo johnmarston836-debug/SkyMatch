@@ -8,7 +8,8 @@ import { PRESENCE_COUNTDOWN } from '../venues';
 import { t } from '../i18n';
 import { sendPresenceReaction } from '../mesh/meshController';
 import { useThemedStyles } from '../theme/ThemeContext';
-import type { PresenceReaction, PresenceStatus, ReactionKind } from '../types';
+import { unpackLocation } from '../utils/location';
+import type { PresenceAlert, PresenceReaction, PresenceStatus, ReactionKind } from '../types';
 
 // Stable reference for alerts nobody has reacted to: a fresh [] here would
 // make zustand think the snapshot changed on every read and spin forever.
@@ -26,6 +27,20 @@ interface Props {
 }
 
 /** Stack of "seat X is standing up" banners above the group chat, self-clearing as alerts expire. */
+
+/**
+ * Who the banner is about. Their name, when the alert carries it: "Pecho
+ * deja la máquina" says which bench, not who is leaving it. Where a place
+ * has seats the seat stays next to the name, because on a plane or a train
+ * it is how you find them; builds that send no name keep showing the
+ * location alone.
+ */
+function whoIsUp(alert: PresenceAlert): string {
+  if (!alert.nickname) return alert.label;
+  const where = alert.loc ? unpackLocation(alert.loc) : null;
+  const hasSeat = where ? where.kind === 'plane' || where.kind === 'train' : alert.status === 'standing';
+  return hasSeat && alert.label ? `${alert.nickname} (${alert.label})` : alert.nickname;
+}
 export function PresenceBanner({ onOpenChat }: Props) {
   const alerts = usePresenceStore((state) => state.alerts);
   const reactionsByAlert = usePresenceStore((state) => state.reactionsByAlert);
@@ -143,7 +158,7 @@ export function PresenceBanner({ onOpenChat }: Props) {
                   </>
                 ) : (
                   <>
-                    <Text style={styles.seat}>{alert.label}</Text> {copy.other}
+                    <Text style={styles.seat}>{whoIsUp(alert)}</Text> {copy.other}
                     {countdown}
                   </>
                 )}
