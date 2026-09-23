@@ -377,6 +377,8 @@ export function ChatScreen({ route, navigation }: Props) {
           <Image source={require('../../assets/icons/camera.png')} style={styles.attachButtonIcon} resizeMode="contain" />
         </Pressable>
         <TextInput
+          selectionColor={theme.colors.accent}
+          cursorColor={theme.colors.accent}
           style={styles.input}
           value={draft}
           onChangeText={setDraft}

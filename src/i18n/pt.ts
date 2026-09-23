@@ -149,6 +149,25 @@ export const pt: Strings = {
     unmute: 'Deixar de silenciar',
   },
 
+  settings: {
+    title: 'Definições',
+    /** Accessibility label of the gear on your profile. */
+    open: 'Definições',
+    appearance: 'ASPETO',
+    appearanceSystem: 'Dispositivo',
+    appearanceLight: 'Claro',
+    appearanceDark: 'Escuro',
+    appearanceHint: '«Dispositivo» segue o modo claro ou escuro do teu telemóvel.',
+    accent: 'COR DE DESTAQUE',
+    accentHint: 'A cor dos botões enviar, passageiros e principais, e da linha ao escrever.',
+    /** Read out for each colour swatch. */
+    accentNames: { blue: 'Azul', violet: 'Violeta', pink: 'Rosa', red: 'Vermelho', orange: 'Laranja', green: 'Verde', teal: 'Turquesa', graphite: 'Grafite' },
+    contact: 'CONTACTO',
+    contactDeveloper: 'Escrever ao programador',
+    contactSoon: 'Disponível muito em breve',
+    contactHint: 'Conta-nos o que gostas, o que falha ou o que te falta.',
+  },
+
   myProfile: {
     title: 'O meu perfil',
     changePhoto: 'Mudar foto',

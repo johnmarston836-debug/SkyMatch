@@ -148,6 +148,25 @@ export const fr: Strings = {
     unmute: 'Ne plus masquer',
   },
 
+  settings: {
+    title: 'Réglages',
+    /** Accessibility label of the gear on your profile. */
+    open: 'Réglages',
+    appearance: 'APPARENCE',
+    appearanceSystem: 'Appareil',
+    appearanceLight: 'Clair',
+    appearanceDark: 'Sombre',
+    appearanceHint: '« Appareil » suit le mode clair ou sombre de ton téléphone.',
+    accent: 'COULEUR D’ACCENT',
+    accentHint: 'La couleur des boutons envoyer, passagers et principaux, et du trait quand tu écris.',
+    /** Read out for each colour swatch. */
+    accentNames: { blue: 'Bleu', violet: 'Violet', pink: 'Rose', red: 'Rouge', orange: 'Orange', green: 'Vert', teal: 'Turquoise', graphite: 'Graphite' },
+    contact: 'CONTACT',
+    contactDeveloper: 'Écrire au développeur',
+    contactSoon: 'Disponible très bientôt',
+    contactHint: 'Dis-nous ce que tu aimes, ce qui ne marche pas ou ce qui te manque.',
+  },
+
   myProfile: {
     title: 'Mon profil',
     changePhoto: 'Changer la photo',

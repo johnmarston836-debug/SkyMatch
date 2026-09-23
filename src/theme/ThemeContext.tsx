@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, StyleSheet, useColorScheme, View, type ImageStyle, type TextStyle, type ViewStyle } from 'react-native';
 import { darkColors, getTypography, lightColors, radii, spacing, type ThemeColors, type Typography } from './index';
+import { ACCENTS, useSettingsStore } from '../state/settingsStore';
 
 interface Theme {
   colors: ThemeColors;
@@ -13,8 +14,15 @@ interface Theme {
 const ThemeContext = createContext<Theme | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const scheme = useColorScheme() === 'light' ? 'light' : 'dark'; // no system setting (e.g. simulator quirk) defaults to dark
-  const colors = scheme === 'light' ? lightColors : darkColors;
+  const system = useColorScheme() === 'light' ? 'light' : 'dark'; // no system setting (e.g. simulator quirk) defaults to dark
+  // What the owner chose in Settings: follow the phone, or always light or dark.
+  const appearance = useSettingsStore((state) => state.appearance);
+  const accentName = useSettingsStore((state) => state.accent);
+  const scheme = appearance === 'system' ? system : appearance;
+  const colors = useMemo<ThemeColors>(
+    () => ({ ...(scheme === 'light' ? lightColors : darkColors), accent: ACCENTS[accentName] }),
+    [scheme, accentName],
+  );
 
   const theme = useMemo<Theme>(
     () => ({ colors, typography: getTypography(colors), spacing, radii, scheme }),

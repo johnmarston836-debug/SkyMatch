@@ -160,6 +160,25 @@ export const es = {
     unmute: 'Dejar de silenciar',
   },
 
+  settings: {
+    title: 'Ajustes',
+    /** Accessibility label of the gear on your profile. */
+    open: 'Ajustes',
+    appearance: 'APARIENCIA',
+    appearanceSystem: 'Dispositivo',
+    appearanceLight: 'Claro',
+    appearanceDark: 'Oscuro',
+    appearanceHint: '«Dispositivo» sigue el modo claro u oscuro que tengas en tu móvil.',
+    accent: 'COLOR DE RESALTE',
+    accentHint: 'El color de los botones de enviar, pasajeros y los principales, y de la raya al escribir.',
+    /** Read out for each colour swatch. */
+    accentNames: { blue: 'Azul', violet: 'Violeta', pink: 'Rosa', red: 'Rojo', orange: 'Naranja', green: 'Verde', teal: 'Turquesa', graphite: 'Grafito' },
+    contact: 'CONTACTO',
+    contactDeveloper: 'Escribir al desarrollador',
+    contactSoon: 'Disponible muy pronto',
+    contactHint: 'Cuéntanos qué te gusta, qué falla o qué echas de menos.',
+  },
+
   myProfile: {
     title: 'Mi perfil',
     changePhoto: 'Cambiar foto',

@@ -11,6 +11,7 @@ import { PassengersScreen } from '../screens/passengers/PassengersScreen';
 import { ProfileScreen } from '../screens/profile/ProfileScreen';
 import { MyProfileScreen } from '../screens/profile/MyProfileScreen';
 import { HowItWorksScreen, TutorialScreen } from '../screens/tutorial/TutorialScreen';
+import { SettingsScreen } from '../screens/settings/SettingsScreen';
 import { ChatScreen } from '../screens/chat/ChatScreen';
 import { t } from '../i18n';
 import { useAppTheme } from '../theme/ThemeContext';
@@ -29,6 +30,7 @@ export type MainStackParamList = {
   Passengers: undefined;
   MyProfile: undefined;
   HowItWorks: undefined;
+  Settings: undefined;
   Profile: { peerId: string };
   Chat: { peerId: string };
 };
@@ -63,6 +65,7 @@ function MainNavigator() {
       <MainStack.Screen name="Passengers" component={PassengersScreen} />
       <MainStack.Screen name="MyProfile" component={MyProfileScreen} />
       <MainStack.Screen name="HowItWorks" component={HowItWorksScreen} />
+      <MainStack.Screen name="Settings" component={SettingsScreen} />
       <MainStack.Screen name="Profile" component={ProfileScreen} />
       <MainStack.Screen
         name="Chat"
@@ -78,7 +81,7 @@ function MainNavigator() {
 export function RootNavigator({ hasProfile }: { hasProfile: boolean }) {
   const { colors, scheme } = useAppTheme();
   const base = scheme === 'light' ? DefaultTheme : DarkTheme;
-  const navTheme = { ...base, colors: { ...base.colors, background: colors.background, card: colors.background, text: colors.text } };
+  const navTheme = { ...base, colors: { ...base.colors, primary: colors.accent, background: colors.background, card: colors.background, text: colors.text } };
 
   return (
     <NavigationContainer theme={navTheme}>

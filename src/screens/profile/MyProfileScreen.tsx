@@ -58,7 +58,8 @@ export function MyProfileScreen({ navigation }: Props) {
     scroll: { paddingHorizontal: spacing(3) },
     header: { flexDirection: 'row' as const, alignItems: 'center' as const, justifyContent: 'space-between' as const },
     backLink: { color: colors.text, fontWeight: '600' as const },
-    headerSpacer: { width: 60 },
+    headerSpacer: { width: 60, alignItems: 'flex-end' as const },
+    gear: { color: colors.text, fontSize: 24, lineHeight: 28 },
     title: typography.title,
     photoBlock: {
       alignItems: 'center' as const,
@@ -202,7 +203,15 @@ export function MyProfileScreen({ navigation }: Props) {
             <Text style={styles.backLink}>← {t.common.back}</Text>
           </Pressable>
           <Text style={styles.title}>{t.myProfile.title}</Text>
-          <View style={styles.headerSpacer} />
+          <Pressable
+            style={styles.headerSpacer}
+            onPress={() => navigation.navigate('Settings')}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel={t.settings.open}
+          >
+            <Text style={styles.gear}>⚙︎</Text>
+          </Pressable>
         </View>
 
         <View style={styles.photoBlock}>
@@ -226,6 +235,8 @@ export function MyProfileScreen({ navigation }: Props) {
 
         <Text style={styles.fieldLabel}>{t.myProfile.nameLabel}</Text>
         <TextInput
+          selectionColor={theme.colors.accent}
+          cursorColor={theme.colors.accent}
           style={styles.input}
           value={nickname}
           onChangeText={setNickname}
@@ -236,6 +247,8 @@ export function MyProfileScreen({ navigation }: Props) {
 
         <Text style={styles.fieldLabel}>{t.myProfile.contactLabel}</Text>
         <TextInput
+          selectionColor={theme.colors.accent}
+          cursorColor={theme.colors.accent}
           style={styles.input}
           value={contact}
           onChangeText={setContact}

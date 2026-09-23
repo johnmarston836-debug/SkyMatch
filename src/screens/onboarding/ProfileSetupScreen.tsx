@@ -66,6 +66,8 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
       </Text>
 
       <TextInput
+        selectionColor={theme.colors.accent}
+        cursorColor={theme.colors.accent}
         style={styles.input}
         value={nickname}
         onChangeText={setNickname}
@@ -77,6 +79,8 @@ export function ProfileSetupScreen({ route, navigation }: Props) {
 
       <Text style={styles.fieldLabel}>{t.profileSetup.contactLabel}</Text>
       <TextInput
+        selectionColor={theme.colors.accent}
+        cursorColor={theme.colors.accent}
         style={styles.input}
         value={contact}
         onChangeText={setContact}

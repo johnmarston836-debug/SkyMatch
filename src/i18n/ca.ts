@@ -146,6 +146,25 @@ export const ca: Strings = {
     unmute: 'Deixar de silenciar',
   },
 
+  settings: {
+    title: 'Configuració',
+    /** Accessibility label of the gear on your profile. */
+    open: 'Configuració',
+    appearance: 'APARENÇA',
+    appearanceSystem: 'Dispositiu',
+    appearanceLight: 'Clar',
+    appearanceDark: 'Fosc',
+    appearanceHint: '«Dispositiu» segueix el mode clar o fosc que tinguis al mòbil.',
+    accent: 'COLOR DE RESSALT',
+    accentHint: 'El color dels botons d’enviar, passatgers i els principals, i de la ratlla en escriure.',
+    /** Read out for each colour swatch. */
+    accentNames: { blue: 'Blau', violet: 'Violeta', pink: 'Rosa', red: 'Vermell', orange: 'Taronja', green: 'Verd', teal: 'Turquesa', graphite: 'Grafit' },
+    contact: 'CONTACTE',
+    contactDeveloper: 'Escriure al desenvolupador',
+    contactSoon: 'Disponible molt aviat',
+    contactHint: 'Explica’ns què t’agrada, què falla o què trobes a faltar.',
+  },
+
   myProfile: {
     title: 'El meu perfil',
     changePhoto: 'Canviar foto',

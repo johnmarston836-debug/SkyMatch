@@ -148,6 +148,25 @@ export const de: Strings = {
     unmute: 'Stummschaltung aufheben',
   },
 
+  settings: {
+    title: 'Einstellungen',
+    /** Accessibility label of the gear on your profile. */
+    open: 'Einstellungen',
+    appearance: 'DARSTELLUNG',
+    appearanceSystem: 'Gerät',
+    appearanceLight: 'Hell',
+    appearanceDark: 'Dunkel',
+    appearanceHint: '„Gerät“ folgt dem hellen oder dunklen Modus deines Handys.',
+    accent: 'AKZENTFARBE',
+    accentHint: 'Die Farbe der Buttons Senden, Passagiere und der wichtigsten Buttons sowie des Strichs beim Tippen.',
+    /** Read out for each colour swatch. */
+    accentNames: { blue: 'Blau', violet: 'Violett', pink: 'Pink', red: 'Rot', orange: 'Orange', green: 'Grün', teal: 'Türkis', graphite: 'Graphit' },
+    contact: 'KONTAKT',
+    contactDeveloper: 'Dem Entwickler schreiben',
+    contactSoon: 'Bald verfügbar',
+    contactHint: 'Sag uns, was dir gefällt, was nicht funktioniert oder was dir fehlt.',
+  },
+
   myProfile: {
     title: 'Mein Profil',
     changePhoto: 'Foto ändern',

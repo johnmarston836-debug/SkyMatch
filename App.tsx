@@ -8,6 +8,7 @@ import { useAvatarStore } from './src/state/avatarStore';
 import { useBlockStore } from './src/state/blockStore';
 import { useChatStore } from './src/state/chatStore';
 import { useIdentityStore } from './src/state/identityStore';
+import { useSettingsStore } from './src/state/settingsStore';
 import { ThemeProvider, useAppTheme } from './src/theme/ThemeContext';
 import { resize } from 'skymatch-peripheral/image';
 import { makeThumb } from './src/utils/avatarSizes';
@@ -33,12 +34,14 @@ function AppContent() {
   const hydrateMuted = useBlockStore((state) => state.hydrate);
   const hydrateChats = useChatStore((state) => state.hydrate);
   const avatarsHydrated = useAvatarStore((state) => state.hydrated);
+  const settingsHydrated = useSettingsStore((state) => state.hydrated);
 
   const [keysReady, setKeysReady] = useState(false);
 
   useEffect(() => {
     void hydrateAvatar((portrait) => makeThumb(portrait, resize));
     void hydrateMuted();
+    void useSettingsStore.getState().hydrate();
     // The keys, and the profile id made from them, before anything can
     // reach the mesh. A profile set up before keys existed has a random id;
     // it moves to its keyed one here, once, along with the messages we sent
@@ -54,7 +57,7 @@ function AppContent() {
   // All of it, not just the profile: the mesh starts as soon as this screen
   // goes away, and starting it before the photos are off disk means
   // announcing that we have none - or, before the keys, unsigned.
-  if (!hydrated || !avatarsHydrated || !keysReady) {
+  if (!hydrated || !avatarsHydrated || !keysReady || !settingsHydrated) {
     return (
       <View style={[styles.loading, { backgroundColor: colors.background }]}>
         <Image

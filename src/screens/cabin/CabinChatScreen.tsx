@@ -272,6 +272,8 @@ export function CabinChatScreen({ navigation }: Props) {
           />
         </Pressable>
         <TextInput
+          selectionColor={theme.colors.accent}
+          cursorColor={theme.colors.accent}
           style={styles.input}
           value={draft}
           onChangeText={setDraft}

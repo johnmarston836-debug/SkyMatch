@@ -205,6 +205,8 @@ export function LocationPicker({ location, onChange }: Props) {
 
       <Text style={styles.spotLabel}>{t.picker.spotLabel}</Text>
       <TextInput
+        selectionColor={theme.colors.accent}
+        cursorColor={theme.colors.accent}
         style={styles.input}
         value={location.spot ?? ''}
         onChangeText={spot =>

@@ -145,6 +145,25 @@ export const it: Strings = {
     unmute: 'Non silenziare più',
   },
 
+  settings: {
+    title: 'Impostazioni',
+    /** Accessibility label of the gear on your profile. */
+    open: 'Impostazioni',
+    appearance: 'ASPETTO',
+    appearanceSystem: 'Dispositivo',
+    appearanceLight: 'Chiaro',
+    appearanceDark: 'Scuro',
+    appearanceHint: '«Dispositivo» segue la modalità chiara o scura del tuo telefono.',
+    accent: 'COLORE DI RISALTO',
+    accentHint: 'Il colore dei pulsanti invia, passeggeri e principali, e della linea mentre scrivi.',
+    /** Read out for each colour swatch. */
+    accentNames: { blue: 'Blu', violet: 'Viola', pink: 'Rosa', red: 'Rosso', orange: 'Arancione', green: 'Verde', teal: 'Turchese', graphite: 'Grafite' },
+    contact: 'CONTATTO',
+    contactDeveloper: 'Scrivi allo sviluppatore',
+    contactSoon: 'Disponibile a breve',
+    contactHint: 'Raccontaci cosa ti piace, cosa non va o cosa ti manca.',
+  },
+
   myProfile: {
     title: 'Il mio profilo',
     changePhoto: 'Cambia foto',
