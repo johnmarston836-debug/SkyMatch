@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { resize } from 'skymatch-peripheral/image';
-import { makeThumb, PORTRAIT_QUALITY, PORTRAIT_SIDE } from '../../utils/avatarSizes';
+import { makeThumb, MAX_PORTRAIT_CHARS, PORTRAIT_QUALITY, PORTRAIT_SIDE } from '../../utils/avatarSizes';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -34,9 +34,6 @@ import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import { defaultLocation } from '../../utils/location';
 
 import type { UserLocation } from '../../types';
-
-/** ~14 KB of base64 is already ~175 Bluetooth frames; past that the cabin notices. */
-const MAX_AVATAR_CHARS = 14_000;
 
 type Props = NativeStackScreenProps<MainStackParamList, 'MyProfile'>;
 
@@ -148,8 +145,8 @@ export function MyProfileScreen({ navigation }: Props) {
     const result = await launchImageLibrary({
       mediaType: 'photo',
       includeBase64: true,
-      // Small on purpose: the photo crosses the cabin in ~80-byte Bluetooth
-      // frames, so every kilobyte is dozens of them.
+      // Only as big as a phone screen needs: the portrait crosses the radio
+      // to everyone who opens this card.
       maxWidth: PORTRAIT_SIDE,
       maxHeight: PORTRAIT_SIDE,
       quality: PORTRAIT_QUALITY,
@@ -161,10 +158,10 @@ export function MyProfileScreen({ navigation }: Props) {
     // so squeeze before refusing: telling someone their face is too big is
     // a worse answer than a slightly softer picture.
     let portrait = asset.base64;
-    if (portrait.length > MAX_AVATAR_CHARS) {
+    if (portrait.length > MAX_PORTRAIT_CHARS) {
       portrait = (await resize(portrait, PORTRAIT_SIDE, 0.4)) ?? portrait;
     }
-    if (portrait.length > MAX_AVATAR_CHARS) {
+    if (portrait.length > MAX_PORTRAIT_CHARS) {
       Alert.alert(t.myProfile.photoTooBigTitle, t.myProfile.photoTooBigBody);
       return;
     }

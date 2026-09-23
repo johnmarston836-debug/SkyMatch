@@ -116,6 +116,11 @@ export const es = {
     noContact: 'No ha compartido contacto',
     placeholder: 'Escribe un mensaje…',
     seen: 'Visto',
+    /** The ··· button in the chat's top bar, and what it offers. */
+    options: 'Opciones',
+    viewProfile: 'Ver perfil',
+    /** Under the chat header while this person is muted; tapping it undoes it. */
+    mutedNotice: (nickname: string) => `Has silenciado a ${nickname}: no ves sus mensajes nuevos.`,
     /** Under a private message of ours that never reached them; tapping it tries again. */
     undelivered: 'No entregado · Toca para reenviar',
     replyingTo: (nickname: string) => `Respondiendo a ${nickname}`,

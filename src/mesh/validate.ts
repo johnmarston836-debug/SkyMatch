@@ -34,8 +34,15 @@ export const MAX_BODY_CHARS = 500;
  * that made it across is never thrown away at the last step.
  */
 export const MAX_IMAGE_CHARS = 300_000;
-/** Longest profile photo accepted: the portrait is capped at 14K characters when it is picked. */
+/**
+ * Longest profile photo accepted, by size. The thumbnail goes to everyone
+ * and stays small (MAX_THUMB_CHARS when it is made); the portrait only goes
+ * to someone who opened the card, and is capped at MAX_PORTRAIT_CHARS when
+ * picked. Earlier builds accepted 20K for both, so they keep showing the
+ * thumbnail of a portrait they can't take.
+ */
 export const MAX_AVATAR_IMAGE_CHARS = 20_000;
+export const MAX_PORTRAIT_IMAGE_CHARS = 96_000;
 /**
  * The furthest in the future an alert may claim to expire. Senders set five
  * minutes; a phone that says a year would pin its banner on every screen in
@@ -166,7 +173,8 @@ export function readAvatar(value: unknown, envelopeFromId: string): AvatarPacket
   const avatar = value as Partial<AvatarPacket>;
   if (avatar.fromId !== envelopeFromId) return null;
   if (!isText(avatar.imageBase64) || avatar.imageBase64.length === 0) return null;
-  if (avatar.imageBase64.length > MAX_AVATAR_IMAGE_CHARS) return null;
+  const limit = avatar.full === true ? MAX_PORTRAIT_IMAGE_CHARS : MAX_AVATAR_IMAGE_CHARS;
+  if (avatar.imageBase64.length > limit) return null;
   // Absent stays absent: a photo from the build before thumbnails has no
   // fingerprint and no size, and the controller reads that as what it is.
   const read: AvatarPacket = {

@@ -104,6 +104,9 @@ describe('the other packets', () => {
   it('refuses a photo too big to be anyone’s profile picture', () => {
     expect(readAvatar({ fromId: 'p', imageBase64: 'x'.repeat(100_000), sentAt: 1 }, 'p')).toBeNull();
     expect(readAvatar({ fromId: 'p', imageBase64: 'AAAA', sentAt: 1 }, 'p')).toEqual({ fromId: 'p', imageBase64: 'AAAA', sentAt: 1 });
+    // A portrait may be bigger than a face; a face that big is refused.
+    expect(readAvatar({ fromId: 'p', imageBase64: 'x'.repeat(60_000), full: true, sentAt: 1 }, 'p')?.full).toBe(true);
+    expect(readAvatar({ fromId: 'p', imageBase64: 'x'.repeat(60_000), sentAt: 1 }, 'p')).toBeNull();
   });
 });
 

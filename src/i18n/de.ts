@@ -108,6 +108,11 @@ export const de: Strings = {
     noContact: 'Kein Kontakt geteilt',
     placeholder: 'Schreib eine Nachricht…',
     seen: 'Gelesen',
+    /** The ··· button in the chat's top bar, and what it offers. */
+    options: 'Optionen',
+    viewProfile: 'Profil ansehen',
+    /** Under the chat header while this person is muted; tapping it undoes it. */
+    mutedNotice: (nickname: string) => `Du hast ${nickname} stummgeschaltet: Du siehst keine neuen Nachrichten.`,
     /** Under a private message of ours that never reached them; tapping it tries again. */
     undelivered: 'Nicht zugestellt · Tippen zum erneuten Senden',
     replyingTo: (nickname: string) => `Antwort an ${nickname}`,

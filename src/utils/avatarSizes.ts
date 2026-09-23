@@ -1,8 +1,10 @@
 /**
  * The two sizes of the same profile photo, and why each number is what it is.
  *
- * The portrait is 256 because the profile card draws it at 88 points, which
- * on a current iPhone is 264 pixels: anything smaller is visibly stretched.
+ * The portrait is what opens full screen when someone taps a face, and what
+ * the profile card draws at 88 points. It was 256 - enough for the card,
+ * blurry full screen. 512 is sharp on the card and decent full screen, and
+ * it only ever crosses the radio to someone who opened that card.
  *
  * The thumbnail is what the lists, the chat header and the bubbles draw, at
  * 36 to 48 points - up to 144 pixels on a current iPhone. It used to be 64,
@@ -11,7 +13,9 @@
  * go out without waiting for each answer, so a face that is sharp at 48
  * points costs about what the blurry one did.
  */
-export const PORTRAIT_SIDE = 256;
+export const PORTRAIT_SIDE = 512;
+/** Most base64 characters a portrait may be once picked; a heavier one is squeezed, then refused. */
+export const MAX_PORTRAIT_CHARS = 72_000;
 export const PORTRAIT_QUALITY = 0.6;
 export const THUMB_SIDE = 144;
 export const THUMB_QUALITY = 0.6;

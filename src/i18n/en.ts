@@ -107,6 +107,11 @@ export const en: Strings = {
     noContact: 'No contact shared',
     placeholder: 'Write a message…',
     seen: 'Seen',
+    /** The ··· button in the chat's top bar, and what it offers. */
+    options: 'Options',
+    viewProfile: 'View profile',
+    /** Under the chat header while this person is muted; tapping it undoes it. */
+    mutedNotice: (nickname: string) => `You muted ${nickname}: you don’t see their new messages.`,
     /** Under a private message of ours that never reached them; tapping it tries again. */
     undelivered: 'Not delivered · Tap to resend',
     replyingTo: (nickname: string) => `Replying to ${nickname}`,

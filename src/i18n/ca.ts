@@ -106,6 +106,11 @@ export const ca: Strings = {
     noContact: 'No ha compartit contacte',
     placeholder: 'Escriu un missatge…',
     seen: 'Vist',
+    /** The ··· button in the chat's top bar, and what it offers. */
+    options: 'Opcions',
+    viewProfile: 'Veure el perfil',
+    /** Under the chat header while this person is muted; tapping it undoes it. */
+    mutedNotice: (nickname: string) => `Has silenciat ${nickname}: no veus els seus missatges nous.`,
     /** Under a private message of ours that never reached them; tapping it tries again. */
     undelivered: 'No entregat · Toca per tornar-lo a enviar',
     replyingTo: (nickname: string) => `Responent a ${nickname}`,

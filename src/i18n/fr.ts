@@ -108,6 +108,11 @@ export const fr: Strings = {
     noContact: 'Aucun contact partagé',
     placeholder: 'Écris un message…',
     seen: 'Vu',
+    /** The ··· button in the chat's top bar, and what it offers. */
+    options: 'Options',
+    viewProfile: 'Voir le profil',
+    /** Under the chat header while this person is muted; tapping it undoes it. */
+    mutedNotice: (nickname: string) => `Tu as masqué ${nickname} : tu ne vois plus ses nouveaux messages.`,
     /** Under a private message of ours that never reached them; tapping it tries again. */
     undelivered: 'Non distribué · Touchez pour renvoyer',
     replyingTo: (nickname: string) => `Réponse à ${nickname}`,

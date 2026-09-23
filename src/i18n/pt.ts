@@ -109,6 +109,11 @@ export const pt: Strings = {
     noContact: 'Não partilhou contacto',
     placeholder: 'Escreve uma mensagem…',
     seen: 'Visto',
+    /** The ··· button in the chat's top bar, and what it offers. */
+    options: 'Opções',
+    viewProfile: 'Ver perfil',
+    /** Under the chat header while this person is muted; tapping it undoes it. */
+    mutedNotice: (nickname: string) => `Silenciaste ${nickname}: não vês as mensagens novas.`,
     /** Under a private message of ours that never reached them; tapping it tries again. */
     undelivered: 'Não entregue · Toque para reenviar',
     replyingTo: (nickname: string) => `A responder a ${nickname}`,

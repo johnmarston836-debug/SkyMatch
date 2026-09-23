@@ -183,7 +183,7 @@ export interface AvatarPacket {
    * different answer from hashing the portrait it was made from.
    */
   hash?: string;
-  /** true for the 256px portrait, absent or false for the 64px thumbnail. */
+  /** true for the portrait (PORTRAIT_SIDE), absent or false for the thumbnail (THUMB_SIDE). */
   full?: boolean;
   sentAt: number;
 }

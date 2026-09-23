@@ -10,6 +10,7 @@ import { useKeyboardPadding } from '../../hooks/useKeyboardPadding';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Padlock } from '../../components/Padlock';
+import { useBlockStore } from '../../state/blockStore';
 import { Avatar } from '../../components/Avatar';
 import { PhotoViewer } from '../../components/PhotoViewer';
 import { QuotedMessage } from '../../components/QuotedMessage';
@@ -50,6 +51,18 @@ const EMPTY_MESSAGES: ChatMessage[] = [];
  */
 const MAX_CHAT_IMAGE_CHARS = 40_000;
 
+/** The ··· in the top bar that opens what can be done about this person. */
+function OptionsButton({ onPress }: { onPress: () => void }) {
+  const styles = useThemedStyles(({ colors }) => ({
+    text: { color: colors.text, fontSize: 16, fontWeight: '800' as const, letterSpacing: 1, paddingHorizontal: 4 },
+  }));
+  return (
+    <Pressable onPress={onPress} hitSlop={10} accessibilityRole="button" accessibilityLabel={t.chat.options}>
+      <Text style={styles.text}>•••</Text>
+    </Pressable>
+  );
+}
+
 export function ChatScreen({ route, navigation }: Props) {
   const insets = useSafeAreaInsets();
   const theme = useAppTheme();
@@ -66,6 +79,8 @@ export function ChatScreen({ route, navigation }: Props) {
   const setActivePeer = useChatStore((state) => state.setActivePeer);
   const markRead = useChatStore((state) => state.markRead);
   const readUpTo = useChatStore((state) => state.readUpToByPeer[peerId] ?? 0);
+  const muted = useBlockStore((state) => state.muted[peerId] === true);
+  const toggleMuted = useBlockStore((state) => state.toggle);
   const [draft, setDraft] = useState('');
   const keyboardPadding = useKeyboardPadding(insets.bottom);
   const autoScroll = useChatAutoScroll<ChatMessage>();
@@ -98,6 +113,15 @@ export function ChatScreen({ route, navigation }: Props) {
     peerName: { fontSize: 15, fontWeight: '700' as const, flexShrink: 1 },
     peerContact: { ...typography.body, fontSize: 13, textAlign: 'center' as const },
     peerContactEmpty: { ...typography.subtitle, fontSize: 12, textAlign: 'center' as const },
+    mutedNotice: {
+      ...typography.subtitle,
+      fontSize: 12,
+      color: colors.danger,
+      textAlign: 'center' as const,
+      paddingHorizontal: spacing(2),
+      paddingVertical: spacing(1),
+    },
+    mutedUndo: { fontWeight: '700' as const, textDecorationLine: 'underline' as const },
     statusRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 5 },
     security: { ...typography.subtitle, fontSize: 12 },
     securityOff: { ...typography.subtitle, fontSize: 12, color: colors.danger, textAlign: 'center' as const },
@@ -155,9 +179,30 @@ export function ChatScreen({ route, navigation }: Props) {
     sendButtonText: { color: '#FFFFFF', fontWeight: '700' as const },
   }));
 
+  /**
+   * What you can do about this person without leaving the chat. Silencing
+   * used to live only on their profile card, which a chat never led to -
+   * so once you had written to someone there was no way to silence them.
+   * Three buttons at most: Android's alert shows no more.
+   */
+  const openOptions = useCallback(() => {
+    const nickname = peerNickname ?? t.chat.title;
+    Alert.alert(nickname, undefined, [
+      { text: t.chat.viewProfile, onPress: () => navigation.navigate('Profile', { peerId }) },
+      {
+        text: muted ? t.profile.unmute : t.profile.mute,
+        style: muted ? 'default' : 'destructive',
+        onPress: () => void toggleMuted(peerId),
+      },
+      { text: t.common.cancel, style: 'cancel' },
+    ]);
+  }, [muted, navigation, peerId, peerNickname, toggleMuted]);
+
+  const renderOptions = useCallback(() => <OptionsButton onPress={openOptions} />, [openOptions]);
+
   useLayoutEffect(() => {
-    navigation.setOptions({ title: peerNickname ?? t.chat.title });
-  }, [navigation, peerNickname]);
+    navigation.setOptions({ title: peerNickname ?? t.chat.title, headerRight: renderOptions });
+  }, [navigation, peerNickname, renderOptions]);
 
   // While this conversation is on screen its messages are read as they land,
   // so they neither raise the badge nor pop up a banner over the cabin chat.
@@ -277,7 +322,11 @@ export function ChatScreen({ route, navigation }: Props) {
               zoomable
               offline={person.connection !== 'connected'}
             />
-            <Text style={[styles.peerName, { color: colorForPeer(peerId) }]} numberOfLines={1}>
+            <Text
+              style={[styles.peerName, { color: colorForPeer(peerId) }]}
+              numberOfLines={1}
+              onPress={() => navigation.navigate('Profile', { peerId })}
+            >
               {person.nickname}
             </Text>
             {person.label.length > 0 && <LocationBadge label={person.label} location={person.location} />}
@@ -302,6 +351,11 @@ export function ChatScreen({ route, navigation }: Props) {
               <Text style={styles.securityOff}>{t.chat.notEncrypted}</Text>
             ))}
         </View>
+      )}
+      {muted && person && (
+        <Text style={styles.mutedNotice} onPress={() => void toggleMuted(peerId)}>
+          {t.chat.mutedNotice(person.nickname)} <Text style={styles.mutedUndo}>{t.profile.unmute}</Text>
+        </Text>
       )}
       <FlatList
         ref={autoScroll.listRef}
