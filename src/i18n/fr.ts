@@ -30,42 +30,42 @@ export const fr: Strings = {
   tutorial: {
     diagramYou: 'TOI',
     page1Label: 'COMMENT ÇA MARCHE · 1 SUR 3',
-    page1Title: 'Les messages sautent de téléphone en téléphone',
+    page1Title: 'Les messages sautent d’appareil en appareil',
     page1Body:
-      'SkyMatch n’utilise ni internet ni le wifi. Ton téléphone parle en Bluetooth avec ceux qui l’entourent, et chacun transmet les messages au suivant.',
+      'SkyMatch n’utilise ni internet ni le wifi. Ton appareil parle en Bluetooth avec ceux qui l’entourent, et chacun transmet les messages au suivant.',
     page1Caption:
-      'Le téléphone de droite est trop loin pour t’entendre, mais celui du milieu lui transmet ton message.',
+      'L’appareil de droite est trop loin pour t’entendre, mais celui du milieu lui transmet ton message.',
     page1Body2:
-      'Le Bluetooth ne porte qu’à quelques mètres, mais chaque saut compte : un message peut traverser plusieurs téléphones avant d’arriver. Plus il y a de monde avec SkyMatch, plus il va loin.',
+      'Le Bluetooth ne porte qu’à quelques mètres, mais chaque saut compte : un message peut traverser plusieurs appareils avant d’arriver. Plus il y a de monde avec SkyMatch, plus il va loin.',
     page1CalloutTitle: 'Ça marche en mode avion',
     page1CalloutBody:
       'Pas besoin de wifi, de données ni de réseau. En avion, tu peux laisser le mode avion activé et rallumer seulement le Bluetooth.',
     page2Label: 'COMMENT ÇA MARCHE · 2 SUR 3',
     /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
-    page2Title: 'Ouvre-la en arrivant, puis range ton téléphone',
+    page2Title: 'Ouvre-la en arrivant, puis range ton appareil',
     page2Body:
       'Ouvre SkyMatch en arrivant et garde-la quelques secondes à l’écran : c’est ainsi que ton iPhone se connecte aux personnes autour de toi. Ensuite, tu peux le verrouiller ou utiliser d’autres applis : tu continues à recevoir les messages et à les relayer pour les autres.',
-    page2Caption: 'Le téléphone du milieu est verrouillé, et il transmet quand même ton message.',
+    page2Caption: 'L’appareil du milieu est verrouillé, et il transmet quand même ton message.',
     page2Body2:
-      'Il n’y a pas de serveur : les messages n’existent que sur les téléphones autour de toi, donc ce qui se dit pendant que tu es déconnecté ne peut pas être récupéré. Tes discussions privées, elles, restent enregistrées sur ton téléphone.',
+      'Il n’y a pas de serveur : les messages n’existent que sur les appareils autour de toi, donc ce qui se dit pendant que tu es déconnecté ne peut pas être récupéré. Tes discussions privées, elles, restent enregistrées sur ton appareil.',
     page2CalloutTitle: 'Ce qu’un iPhone verrouillé ne peut pas faire',
     page2CalloutBody:
       'Écran verrouillé, il met plus de temps à trouver de nouvelles personnes, et deux iPhone verrouillés qui ne se sont jamais vus ne se trouvent pas. Si tu fermes complètement SkyMatch depuis le sélecteur d’applis, tu ne reçois plus de messages et tu ne les relaies plus.',
     /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
     page2TitleAndroid: 'Elle reste connectée quand tu sors',
     page2BodyAndroid:
-      'Sur Android, SkyMatch reste connectée en arrière-plan : tu le verras dans une notification. Tu peux verrouiller ton téléphone ou utiliser d’autres applis : tu continues à recevoir les messages et à les relayer pour les autres.',
+      'Sur Android, SkyMatch reste connectée en arrière-plan : tu le verras dans une notification. Tu peux verrouiller ton appareil ou utiliser d’autres applis : tu continues à recevoir les messages et à les relayer pour les autres.',
     page2CalloutTitleAndroid: 'Quand elle cesse de fonctionner',
     page2CalloutBodyAndroid:
       'Si tu touches « Déconnecter » dans la notification ou fermes SkyMatch depuis les applis récentes, tu ne reçois plus de messages et tu ne les relaies plus.',
     page3Label: 'COMMENT ÇA MARCHE · 3 SUR 3',
     page3Title: 'Vos discussions privées, vous seuls pouvez les lire',
     page3Body:
-      'Les messages privés sont chiffrés de bout en bout. Les téléphones qui les relaient les transmettent sans pouvoir les ouvrir : ni le texte ni les photos.',
+      'Les messages privés sont chiffrés de bout en bout. Les appareils qui les relaient les transmettent sans pouvoir les ouvrir : ni le texte ni les photos.',
     page3Caption:
-      'Le téléphone du milieu n’a que le message chiffré ; celui de droite, son destinataire, le déchiffre.',
+      'L’appareil du milieu n’a que le message chiffré ; celui de droite, son destinataire, le déchiffre.',
     page3Body2:
-      'De plus, tout ce que tu envoies est signé par ton téléphone : personne ne peut écrire en se faisant passer pour toi.',
+      'De plus, tout ce que tu envoies est signé par ton appareil : personne ne peut écrire en se faisant passer pour toi.',
     securityCalloutTitle: 'Regarde l’en-tête de la discussion',
     securityCalloutBody:
       'Si l’autre personne utilise une ancienne version de SkyMatch, votre discussion privée n’est pas chiffrée, et on te le signale en rouge. Ce que personne ne peut vérifier, c’est l’emplacement : chacun indique lui-même son siège, sa voiture ou sa machine.',

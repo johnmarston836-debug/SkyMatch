@@ -30,41 +30,41 @@ export const en: Strings = {
   tutorial: {
     diagramYou: 'YOU',
     page1Label: 'HOW IT WORKS · 1 OF 3',
-    page1Title: 'Messages hop from phone to phone',
+    page1Title: 'Messages hop from device to device',
     page1Body:
-      'SkyMatch uses no internet and no Wi-Fi. Your phone talks over Bluetooth to the phones around it, and each one hands messages on to the next.',
+      'SkyMatch uses no internet and no Wi-Fi. Your device talks over Bluetooth to the devices around it, and each one hands messages on to the next.',
     page1Caption:
-      'The phone on the right is too far away to hear you, but the one in the middle passes your message on.',
+      'The device on the right is too far away to hear you, but the one in the middle passes your message on.',
     page1Body2:
-      'Bluetooth only reaches a few metres, but every hop adds up: a message can cross several phones on its way. The more people carry SkyMatch, the further it goes.',
+      'Bluetooth only reaches a few metres, but every hop adds up: a message can cross several devices on its way. The more people carry SkyMatch, the further it goes.',
     page1CalloutTitle: 'It works in flight mode',
     page1CalloutBody:
       'No Wi-Fi, data or signal needed. On a plane you can leave flight mode on and switch just Bluetooth back on.',
     page2Label: 'HOW IT WORKS · 2 OF 3',
     /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
-    page2Title: 'Open it when you arrive, then pocket your phone',
+    page2Title: 'Open it when you arrive, then put your device away',
     page2Body:
       'Open SkyMatch when you arrive and keep it on screen for a few seconds: that is how your iPhone connects with the people around you. After that you can lock it or use other apps, and you keep getting messages and relaying them for others.',
-    page2Caption: 'The phone in the middle is locked, and still passes your message on.',
+    page2Caption: 'The device in the middle is locked, and still passes your message on.',
     page2Body2:
-      'There is no server: messages only exist on the phones around you, so whatever is said while you are disconnected cannot be recovered. Your private chats do stay saved on your phone.',
+      'There is no server: messages only exist on the devices around you, so whatever is said while you are disconnected cannot be recovered. Your private chats do stay saved on your device.',
     page2CalloutTitle: 'What a locked iPhone can’t do',
     page2CalloutBody:
       'With the screen locked it takes longer to find new people, and two locked iPhones that have never met won’t find each other. If you close SkyMatch completely from the app switcher, you stop getting messages and stop relaying them.',
     /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
     page2TitleAndroid: 'It stays connected when you leave',
     page2BodyAndroid:
-      'On Android, SkyMatch stays connected in the background - you’ll see it in a notification. You can lock your phone or use other apps, and you keep getting messages and relaying them for others.',
+      'On Android, SkyMatch stays connected in the background - you’ll see it in a notification. You can lock your device or use other apps, and you keep getting messages and relaying them for others.',
     page2CalloutTitleAndroid: 'When it stops working',
     page2CalloutBodyAndroid:
       'If you tap “Disconnect” in the notification or close SkyMatch from the recent apps, you stop getting messages and stop relaying them.',
     page3Label: 'HOW IT WORKS · 3 OF 3',
     page3Title: 'Only the two of you can read your private chats',
     page3Body:
-      'Private messages are end-to-end encrypted. The phones that relay them pass them on without being able to open them: neither the text nor the photos.',
+      'Private messages are end-to-end encrypted. The devices that relay them pass them on without being able to open them: neither the text nor the photos.',
     page3Caption:
-      'The phone in the middle only ever holds the message encrypted; the one on the right, who it is for, decrypts it.',
-    page3Body2: 'And everything you send is signed by your phone, so nobody can write pretending to be you.',
+      'The device in the middle only ever holds the message encrypted; the one on the right, who it is for, decrypts it.',
+    page3Body2: 'And everything you send is signed by your device, so nobody can write pretending to be you.',
     securityCalloutTitle: 'Check the top of the chat',
     securityCalloutBody:
       'If the other person is on an older version of SkyMatch, your private chat is not encrypted, and we warn you in red. What nobody can check is location: each person says their own seat, coach or machine.',

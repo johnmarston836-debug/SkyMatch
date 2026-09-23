@@ -42,15 +42,14 @@ const ANDROID = Platform.OS === 'android';
 const REVEAL_STAGGER = 90;
 
 /**
- * Fades and lifts its content into place each time its page comes on
- * screen, one piece after the other, so a page reads in the order it is
- * meant to.
+ * Fades and lifts the first page into place, one piece after the other, as
+ * the screen opens. Only that once: the other pages are already there when
+ * you swipe to them, so moving between pages never looks like a reload.
  */
-function Reveal({ active, order, children }: { active: boolean; order: number; children: React.ReactNode }) {
-  const progress = useRef(new Animated.Value(active ? 0 : 1)).current;
+function Reveal({ animate, order, children }: { animate: boolean; order: number; children: React.ReactNode }) {
+  const progress = useRef(new Animated.Value(animate ? 0 : 1)).current;
   useEffect(() => {
-    if (!active) return;
-    progress.setValue(0);
+    if (!animate) return;
     const animation = Animated.timing(progress, {
       toValue: 1,
       duration: 420,
@@ -58,9 +57,14 @@ function Reveal({ active, order, children }: { active: boolean; order: number; c
       easing: Easing.out(Easing.cubic),
       useNativeDriver: true,
     });
-    animation.start();
-    return () => animation.stop();
-  }, [active, order, progress]);
+    animation.start(() => progress.setValue(1));
+    return () => {
+      animation.stop();
+      progress.setValue(1);
+    };
+    // The first render decides; nothing later animates it again.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Animated.View
@@ -190,25 +194,25 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
         onMomentumScrollEnd={(event) => setPage(Math.round(event.nativeEvent.contentOffset.x / width))}
       >
         {pages().map((content, index) => {
-          const active = page === index;
+          const animate = index === 0;
           return (
             // Each page scrolls on its own, for small phones and large text.
             <ScrollView key={index} style={{ width }} contentContainerStyle={styles.page} showsVerticalScrollIndicator={false}>
-              <Reveal active={active} order={0}>
+              <Reveal animate={animate} order={0}>
                 <Text style={styles.label}>{content.label}</Text>
                 <Text style={styles.title}>{content.title}</Text>
               </Reveal>
-              <Reveal active={active} order={1}>
+              <Reveal animate={animate} order={1}>
                 <Text style={styles.body}>{content.body}</Text>
               </Reveal>
-              <Reveal active={active} order={2}>
+              <Reveal animate={animate} order={2}>
                 <MeshDiagram variant={content.diagram} />
                 <Text style={styles.diagramCaption}>{content.caption}</Text>
               </Reveal>
-              <Reveal active={active} order={3}>
+              <Reveal animate={animate} order={3}>
                 <Text style={styles.bodySpaced}>{content.body2}</Text>
               </Reveal>
-              <Reveal active={active} order={4}>
+              <Reveal animate={animate} order={4}>
                 <View style={styles.callout}>
                   <Text style={styles.calloutTitle}>{content.calloutTitle}</Text>
                   <Text style={styles.calloutText}>{content.calloutBody}</Text>

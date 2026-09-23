@@ -30,45 +30,45 @@ export const de: Strings = {
   tutorial: {
     diagramYou: 'DU',
     page1Label: 'SO FUNKTIONIERT’S · 1 VON 3',
-    page1Title: 'Nachrichten springen von Handy zu Handy',
+    page1Title: 'Nachrichten springen von Gerät zu Gerät',
     page1Body:
-      'SkyMatch braucht weder Internet noch WLAN. Dein Handy spricht per Bluetooth mit den Handys in deiner Nähe, und jedes gibt die Nachrichten an das nächste weiter.',
+      'SkyMatch braucht weder Internet noch WLAN. Dein Gerät spricht per Bluetooth mit den Geräten in deiner Nähe, und jedes gibt die Nachrichten an das nächste weiter.',
     page1Caption:
-      'Das rechte Handy ist zu weit weg, um dich zu hören – aber das in der Mitte gibt deine Nachricht weiter.',
+      'Das rechte Gerät ist zu weit weg, um dich zu hören – aber das in der Mitte gibt deine Nachricht weiter.',
     page1Body2:
-      'Bluetooth reicht nur wenige Meter, aber jeder Sprung zählt: Eine Nachricht kann mehrere Handys durchqueren, bis sie ankommt. Je mehr Leute SkyMatch dabeihaben, desto weiter reicht es.',
+      'Bluetooth reicht nur wenige Meter, aber jeder Sprung zählt: Eine Nachricht kann mehrere Geräte durchqueren, bis sie ankommt. Je mehr Leute SkyMatch dabeihaben, desto weiter reicht es.',
     page1CalloutTitle: 'Funktioniert im Flugmodus',
     page1CalloutBody:
       'Kein WLAN, keine mobilen Daten, kein Netz nötig. Im Flugzeug kannst du den Flugmodus anlassen und nur Bluetooth wieder einschalten.',
     page2Label: 'SO FUNKTIONIERT’S · 2 VON 3',
     /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
-    page2Title: 'Beim Ankommen öffnen, dann Handy einstecken',
+    page2Title: 'Beim Ankommen öffnen, dann Gerät einstecken',
     page2Body:
       'Öffne SkyMatch, wenn du ankommst, und lass es ein paar Sekunden auf dem Bildschirm: So verbindet sich dein iPhone mit den Leuten in der Nähe. Danach kannst du es sperren oder andere Apps nutzen – du bekommst weiter Nachrichten und leitest sie für andere weiter.',
-    page2Caption: 'Das Handy in der Mitte ist gesperrt und gibt deine Nachricht trotzdem weiter.',
+    page2Caption: 'Das Gerät in der Mitte ist gesperrt und gibt deine Nachricht trotzdem weiter.',
     page2Body2:
-      'Es gibt keinen Server: Nachrichten existieren nur auf den Handys um dich herum. Was gesagt wird, während du nicht verbunden bist, lässt sich nicht nachholen. Deine privaten Chats bleiben aber auf deinem Handy gespeichert.',
+      'Es gibt keinen Server: Nachrichten existieren nur auf den Geräten um dich herum. Was gesagt wird, während du nicht verbunden bist, lässt sich nicht nachholen. Deine privaten Chats bleiben aber auf deinem Gerät gespeichert.',
     page2CalloutTitle: 'Was ein gesperrtes iPhone nicht kann',
     page2CalloutBody:
       'Bei gesperrtem Bildschirm findet es neue Leute langsamer, und zwei gesperrte iPhones, die sich noch nie gesehen haben, finden sich nicht. Wenn du SkyMatch im App-Umschalter ganz schließt, bekommst du keine Nachrichten mehr und leitest keine mehr weiter.',
     /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
     page2TitleAndroid: 'Bleibt verbunden, auch wenn du rausgehst',
     page2BodyAndroid:
-      'Unter Android bleibt SkyMatch im Hintergrund verbunden – du siehst es an einer Benachrichtigung. Du kannst dein Handy sperren oder andere Apps nutzen und bekommst weiter Nachrichten und leitest sie für andere weiter.',
+      'Unter Android bleibt SkyMatch im Hintergrund verbunden – du siehst es an einer Benachrichtigung. Du kannst dein Gerät sperren oder andere Apps nutzen und bekommst weiter Nachrichten und leitest sie für andere weiter.',
     page2CalloutTitleAndroid: 'Wann es aufhört',
     page2CalloutBodyAndroid:
       'Wenn du in der Benachrichtigung auf „Trennen“ tippst oder SkyMatch in den letzten Apps schließt, bekommst du keine Nachrichten mehr und leitest keine mehr weiter.',
     page3Label: 'SO FUNKTIONIERT’S · 3 VON 3',
     page3Title: 'Eure privaten Chats könnt nur ihr zwei lesen',
     page3Body:
-      'Private Nachrichten sind Ende-zu-Ende-verschlüsselt. Die Handys, die sie weitergeben, können sie nicht öffnen: weder den Text noch die Fotos.',
+      'Private Nachrichten sind Ende-zu-Ende-verschlüsselt. Die Geräte, die sie weitergeben, können sie nicht öffnen: weder den Text noch die Fotos.',
     page3Caption:
-      'Das Handy in der Mitte hat die Nachricht nur verschlüsselt; das rechte, für das sie bestimmt ist, entschlüsselt sie.',
+      'Das Gerät in der Mitte hat die Nachricht nur verschlüsselt; das rechte, für das sie bestimmt ist, entschlüsselt sie.',
     page3Body2:
-      'Außerdem ist alles, was du sendest, von deinem Handy signiert – niemand kann in deinem Namen schreiben.',
+      'Außerdem ist alles, was du sendest, von deinem Gerät signiert – niemand kann in deinem Namen schreiben.',
     securityCalloutTitle: 'Achte auf den Kopf des Chats',
     securityCalloutBody:
-      'Nutzt die andere Person eine alte SkyMatch-Version, ist euer privater Chat nicht verschlüsselt, und wir warnen dich in Rot. Was niemand prüfen kann, ist der Ort: Sitz, Wagen oder Gerät gibt jede Person selbst an.',
+      'Nutzt die andere Person eine alte SkyMatch-Version, ist euer privater Chat nicht verschlüsselt, und wir warnen dich in Rot. Was niemand prüfen kann, ist der Ort: Sitz, Wagen oder Trainingsgerät gibt jede Person selbst an.',
     understood: 'Verstanden',
   },
 

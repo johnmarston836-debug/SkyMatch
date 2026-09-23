@@ -33,40 +33,40 @@ export const pt: Strings = {
   tutorial: {
     diagramYou: 'TU',
     page1Label: 'COMO FUNCIONA · 1 DE 3',
-    page1Title: 'As mensagens saltam de telemóvel em telemóvel',
+    page1Title: 'As mensagens saltam de dispositivo em dispositivo',
     page1Body:
-      'O SkyMatch não usa internet nem wi-fi. O teu telemóvel fala por Bluetooth com os que estão perto, e cada um passa as mensagens ao seguinte.',
-    page1Caption: 'O telemóvel da direita está longe demais para te ouvir, mas o do meio passa-lhe a tua mensagem.',
+      'O SkyMatch não usa internet nem wi-fi. O teu dispositivo fala por Bluetooth com os que estão perto, e cada um passa as mensagens ao seguinte.',
+    page1Caption: 'O dispositivo da direita está longe demais para te ouvir, mas o do meio passa-lhe a tua mensagem.',
     page1Body2:
-      'O Bluetooth só chega a poucos metros, mas cada salto soma: uma mensagem pode atravessar vários telemóveis até chegar ao destino. Quanto mais gente tiver o SkyMatch, mais longe chega.',
+      'O Bluetooth só chega a poucos metros, mas cada salto soma: uma mensagem pode atravessar vários dispositivos até chegar ao destino. Quanto mais gente tiver o SkyMatch, mais longe chega.',
     page1CalloutTitle: 'Funciona em modo de voo',
     page1CalloutBody:
       'Não precisas de wi-fi, dados nem rede. No avião podes deixar o modo de voo ligado e voltar a ligar só o Bluetooth.',
     page2Label: 'COMO FUNCIONA · 2 DE 3',
     /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
-    page2Title: 'Abre-a ao chegar e guarda o telemóvel',
+    page2Title: 'Abre-a ao chegar e guarda o dispositivo',
     page2Body:
       'Abre o SkyMatch ao chegar e deixa-o uns segundos no ecrã: é assim que o teu iPhone se liga a quem está por perto. Depois podes bloqueá-lo ou usar outras apps, e continuas a receber mensagens e a servir de ponte para os outros.',
-    page2Caption: 'O telemóvel do meio está bloqueado e, mesmo assim, passa a tua mensagem.',
+    page2Caption: 'O dispositivo do meio está bloqueado e, mesmo assim, passa a tua mensagem.',
     page2Body2:
-      'Não há servidor: as mensagens só existem nos telemóveis à tua volta, por isso o que se disser enquanto estiveres desligado não se pode recuperar. As tuas conversas privadas ficam guardadas no teu telemóvel.',
+      'Não há servidor: as mensagens só existem nos dispositivos à tua volta, por isso o que se disser enquanto estiveres desligado não se pode recuperar. As tuas conversas privadas ficam guardadas no teu dispositivo.',
     page2CalloutTitle: 'O que um iPhone bloqueado não consegue fazer',
     page2CalloutBody:
       'Com o ecrã bloqueado demora mais a encontrar gente nova, e dois iPhone bloqueados que nunca se viram não se encontram. Se fechares o SkyMatch por completo no seletor de apps, deixas de receber mensagens e de servir de ponte.',
     /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
     page2TitleAndroid: 'Continua ligada mesmo quando sais',
     page2BodyAndroid:
-      'No Android, o SkyMatch continua ligado em segundo plano: vais vê-lo numa notificação. Podes bloquear o telemóvel ou usar outras apps, e continuas a receber mensagens e a servir de ponte para os outros.',
+      'No Android, o SkyMatch continua ligado em segundo plano: vais vê-lo numa notificação. Podes bloquear o dispositivo ou usar outras apps, e continuas a receber mensagens e a servir de ponte para os outros.',
     page2CalloutTitleAndroid: 'Quando deixa de funcionar',
     page2CalloutBodyAndroid:
       'Se tocares em «Desligar» na notificação ou fechares o SkyMatch nas apps recentes, deixas de receber mensagens e de servir de ponte.',
     page3Label: 'COMO FUNCIONA · 3 DE 3',
     page3Title: 'As vossas conversas privadas só vocês os dois as leem',
     page3Body:
-      'As mensagens privadas são encriptadas ponto a ponto. Os telemóveis que servem de ponte passam-nas sem as conseguir abrir: nem o texto nem as fotos.',
-    page3Caption: 'O telemóvel do meio só tem a mensagem encriptada; o da direita, a quem se destina, desencripta-a.',
+      'As mensagens privadas são encriptadas ponto a ponto. Os dispositivos que servem de ponte passam-nas sem as conseguir abrir: nem o texto nem as fotos.',
+    page3Caption: 'O dispositivo do meio só tem a mensagem encriptada; o da direita, a quem se destina, desencripta-a.',
     page3Body2:
-      'Além disso, tudo o que envias vai assinado pelo teu telemóvel, por isso ninguém pode escrever a fazer-se passar por ti.',
+      'Além disso, tudo o que envias vai assinado pelo teu dispositivo, por isso ninguém pode escrever a fazer-se passar por ti.',
     securityCalloutTitle: 'Repara no topo da conversa',
     securityCalloutBody:
       'Se a outra pessoa usar uma versão antiga do SkyMatch, a vossa conversa privada não vai encriptada e avisamos-te a vermelho. O que ninguém pode confirmar é a localização: o lugar, a carruagem ou a máquina indica-os cada um.',

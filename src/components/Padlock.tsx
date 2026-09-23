@@ -19,7 +19,7 @@ export function Padlock({ color, size, open }: { color: string; size: number; op
             borderTopLeftRadius: size,
             borderTopRightRadius: size,
           },
-          open ? { transform: [{ translateY: Animated.multiply(open, -size * 0.3) }] } : null,
+          open ? { transform: [{ translateY: Animated.multiply(open, -size * 0.38) }] } : null,
         ]}
       />
       <View style={{ width: size, height: size * 0.66, borderRadius: size * 0.16, backgroundColor: color }} />

@@ -30,40 +30,40 @@ export const ca: Strings = {
   tutorial: {
     diagramYou: 'TU',
     page1Label: 'COM FUNCIONA · 1 DE 3',
-    page1Title: 'Els missatges salten de mòbil en mòbil',
+    page1Title: 'Els missatges salten de dispositiu en dispositiu',
     page1Body:
-      'SkyMatch no fa servir internet ni wifi. El teu mòbil parla per Bluetooth amb els que té a prop, i cadascun passa els missatges al següent.',
-    page1Caption: 'El mòbil de la dreta és massa lluny per sentir-te, però el del mig li passa el teu missatge.',
+      'SkyMatch no fa servir internet ni wifi. El teu dispositiu parla per Bluetooth amb els que té a prop, i cadascun passa els missatges al següent.',
+    page1Caption: 'El dispositiu de la dreta és massa lluny per sentir-te, però el del mig li passa el teu missatge.',
     page1Body2:
-      'El Bluetooth arriba a pocs metres, però cada salt suma: un missatge pot creuar diversos mòbils fins a arribar al seu destí. Com més gent porti SkyMatch, més lluny arriba.',
+      'El Bluetooth arriba a pocs metres, però cada salt suma: un missatge pot creuar diversos dispositius fins a arribar al seu destí. Com més gent porti SkyMatch, més lluny arriba.',
     page1CalloutTitle: 'Funciona en mode avió',
     page1CalloutBody:
       'No et cal wifi, dades ni cobertura. A l’avió pots deixar el mode avió activat i encendre només el Bluetooth.',
     page2Label: 'COM FUNCIONA · 2 DE 3',
     /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
-    page2Title: 'Obre-la en arribar i desa’t el mòbil',
+    page2Title: 'Obre-la en arribar i desa’t el dispositiu',
     page2Body:
       'Obre SkyMatch en arribar i deixa-la uns segons a la pantalla: així el teu iPhone es connecta amb qui té a prop. Després pots bloquejar-lo o fer servir altres apps, i continuaràs rebent missatges i fent de pont per als altres.',
-    page2Caption: 'El mòbil del mig està bloquejat, i tot i així passa el teu missatge.',
+    page2Caption: 'El dispositiu del mig està bloquejat, i tot i així passa el teu missatge.',
     page2Body2:
-      'No hi ha servidor: els missatges només existeixen als mòbils del voltant, així que el que es digui mentre estiguis desconnectat no es pot recuperar. Els teus xats privats sí que es desen al teu mòbil.',
+      'No hi ha servidor: els missatges només existeixen als dispositius del voltant, així que el que es digui mentre estiguis desconnectat no es pot recuperar. Els teus xats privats sí que es desen al teu dispositiu.',
     page2CalloutTitle: 'El que un iPhone bloquejat no pot fer',
     page2CalloutBody:
       'Amb la pantalla bloquejada triga més a trobar gent nova, i dos iPhone bloquejats que no s’han vist mai no es troben. Si tanques SkyMatch del tot des de la multitasca, deixes de rebre missatges i de fer de pont.',
     /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
     page2TitleAndroid: 'Continua connectada encara que en surtis',
     page2BodyAndroid:
-      'A Android, SkyMatch continua connectada en segon pla: ho veuràs en una notificació. Pots bloquejar el mòbil o fer servir altres apps, i continuaràs rebent missatges i fent de pont per als altres.',
+      'A Android, SkyMatch continua connectada en segon pla: ho veuràs en una notificació. Pots bloquejar el dispositiu o fer servir altres apps, i continuaràs rebent missatges i fent de pont per als altres.',
     page2CalloutTitleAndroid: 'Quan deixa de funcionar',
     page2CalloutBodyAndroid:
       'Si toques «Desconnectar» a la notificació o tanques SkyMatch des de la multitasca, deixes de rebre missatges i de fer de pont.',
     page3Label: 'COM FUNCIONA · 3 DE 3',
     page3Title: 'Els vostres xats privats només els llegiu vosaltres dos',
     page3Body:
-      'Els missatges privats van xifrats d’extrem a extrem. Els mòbils que fan de pont els passen sense poder obrir-los: ni el text ni les fotos.',
-    page3Caption: 'El mòbil del mig només té el missatge xifrat; el de la dreta, a qui va adreçat, el desxifra.',
+      'Els missatges privats van xifrats d’extrem a extrem. Els dispositius que fan de pont els passen sense poder obrir-los: ni el text ni les fotos.',
+    page3Caption: 'El dispositiu del mig només té el missatge xifrat; el de la dreta, a qui va adreçat, el desxifra.',
     page3Body2:
-      'A més, tot el que envies va signat pel teu mòbil, així que ningú no pot escriure fent-se passar per tu.',
+      'A més, tot el que envies va signat pel teu dispositiu, així que ningú no pot escriure fent-se passar per tu.',
     securityCalloutTitle: 'Fixa’t en la capçalera del xat',
     securityCalloutBody:
       'Si l’altra persona fa servir una versió antiga de SkyMatch, el vostre xat privat no va xifrat i t’ho avisem en vermell. El que ningú no pot comprovar és la ubicació: el seient, el vagó o la màquina els indica cadascú.',

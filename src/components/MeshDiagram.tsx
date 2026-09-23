@@ -135,7 +135,16 @@ function Phone({ screen, flash, tick, unlock, ripplePhase }: PhoneProps) {
     },
     glow: { position: 'absolute' as const, left: 0, right: 0, top: 0, bottom: 0, backgroundColor: c.accent },
     you: { color: '#FFFFFF', fontWeight: '800' as const, fontSize: 11 },
-    tick: { position: 'absolute' as const, color: c.accent, fontWeight: '800' as const, fontSize: 18 },
+    tick: {
+      position: 'absolute' as const,
+      width: 22,
+      height: 22,
+      borderRadius: radii.pill,
+      backgroundColor: c.accent,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    tickMark: { color: '#FFFFFF', fontWeight: '900' as const, fontSize: 13, lineHeight: 16 },
     overlay: { position: 'absolute' as const, alignItems: 'center' as const, justifyContent: 'center' as const },
     bubble: {
       width: 24,
@@ -183,20 +192,22 @@ function Phone({ screen, flash, tick, unlock, ripplePhase }: PhoneProps) {
               <Animated.View
                 style={[
                   styles.overlay,
-                  { opacity: unlock.interpolate({ inputRange: [0, 0.05, 0.4, 0.5], outputRange: [0, 1, 1, 0] }) },
+                  // Open at rest; shut while the sealed message comes in,
+                  // then opened, and away while the message shows.
+                  { opacity: unlock.interpolate({ inputRange: [0, 0.45, 0.55, 0.9, 1], outputRange: [1, 1, 0, 0, 1] }) },
                 ]}
               >
                 <Padlock
                   color={colors.accent}
                   size={LOCK}
-                  open={unlock.interpolate({ inputRange: [0.15, 0.32], outputRange: [0, 1], extrapolate: 'clamp' })}
+                  open={unlock.interpolate({ inputRange: [0, 0.02, 0.15, 0.32, 1], outputRange: [1, 0, 0, 1, 1] })}
                 />
               </Animated.View>
               <Animated.View
                 style={[
                   styles.overlay,
                   {
-                    opacity: unlock.interpolate({ inputRange: [0, 0.45, 0.55, 0.92, 1], outputRange: [0, 0, 1, 1, 0] }),
+                    opacity: unlock.interpolate({ inputRange: [0, 0.45, 0.55, 0.85, 0.92, 1], outputRange: [0, 0, 1, 1, 0, 0] }),
                     transform: [
                       { scale: unlock.interpolate({ inputRange: [0.45, 0.6], outputRange: [0.5, 1], extrapolate: 'clamp' }) },
                     ],
@@ -211,17 +222,20 @@ function Phone({ screen, flash, tick, unlock, ripplePhase }: PhoneProps) {
             </>
           )}
           {tick && (
-            <Animated.Text
+            // Pops in as the message lands, every time round the loop.
+            <Animated.View
               style={[
                 styles.tick,
                 {
-                  opacity: tick.interpolate({ inputRange: [0, 0.15, 0.85, 1], outputRange: [0, 1, 1, 0] }),
-                  transform: [{ scale: tick.interpolate({ inputRange: [0, 0.15, 1], outputRange: [0.4, 1, 1] }) }],
+                  opacity: tick.interpolate({ inputRange: [0, 0.1, 0.85, 1], outputRange: [0, 1, 1, 0] }),
+                  transform: [
+                    { scale: tick.interpolate({ inputRange: [0, 0.1, 0.18, 1], outputRange: [0.3, 1.25, 1, 1] }) },
+                  ],
                 },
               ]}
             >
-              ✓
-            </Animated.Text>
+              <Text style={styles.tickMark}>✓</Text>
+            </Animated.View>
           )}
         </View>
       </View>
