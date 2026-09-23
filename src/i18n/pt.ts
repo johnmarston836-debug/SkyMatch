@@ -112,7 +112,7 @@ export const pt: Strings = {
     /** Under a private message of ours that never reached them; tapping it tries again. */
     undelivered: 'Não entregue · Toque para reenviar',
     replyingTo: (nickname: string) => `A responder a ${nickname}`,
-    encrypted: 'Encriptação ponta a ponta: só vocês os dois podem ler esta conversa',
+    encrypted: 'Encriptação ponta a ponta',
     notEncrypted: 'Sem encriptação: esta pessoa usa uma versão antiga do SkyMatch',
     away: (minutes: number) =>
       minutes < 1

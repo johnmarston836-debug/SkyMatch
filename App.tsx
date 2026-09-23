@@ -9,6 +9,8 @@ import { useBlockStore } from './src/state/blockStore';
 import { useChatStore } from './src/state/chatStore';
 import { useIdentityStore } from './src/state/identityStore';
 import { ThemeProvider, useAppTheme } from './src/theme/ThemeContext';
+import { resize } from 'skymatch-peripheral/image';
+import { makeThumb } from './src/utils/avatarSizes';
 
 function App() {
   return (
@@ -35,7 +37,7 @@ function AppContent() {
   const [keysReady, setKeysReady] = useState(false);
 
   useEffect(() => {
-    void hydrateAvatar();
+    void hydrateAvatar((portrait) => makeThumb(portrait, resize));
     void hydrateMuted();
     // The keys, and the profile id made from them, before anything can
     // reach the mesh. A profile set up before keys existed has a random id;

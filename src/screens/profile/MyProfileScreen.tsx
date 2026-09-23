@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { resize } from 'skymatch-peripheral/image';
+import { makeThumb, PORTRAIT_QUALITY, PORTRAIT_SIDE } from '../../utils/avatarSizes';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -33,21 +34,6 @@ import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import { defaultLocation } from '../../utils/location';
 
 import type { UserLocation } from '../../types';
-
-/**
- * The two sizes of the same photo, and why each number is what it is.
- *
- * The portrait is 256 because the profile card draws it at 88 points, which
- * on a current iPhone is 264 pixels: anything smaller is visibly stretched,
- * which is exactly how the old 128 looked. The thumbnail is 64 because the
- * lists draw it at 40 to 48 points, where nobody can tell it from the
- * portrait - and it costs 22 Bluetooth frames instead of 119, which is what
- * makes it affordable to send a face to everyone in a full carriage.
- */
-const PORTRAIT_SIDE = 256;
-const PORTRAIT_QUALITY = 0.6;
-const THUMB_SIDE = 64;
-const THUMB_QUALITY = 0.5;
 
 /** ~14 KB of base64 is already ~175 Bluetooth frames; past that the cabin notices. */
 const MAX_AVATAR_CHARS = 14_000;
@@ -186,7 +172,7 @@ export function MyProfileScreen({ navigation }: Props) {
     // The face everyone nearby receives. Null when the rescaler isn't there
     // - the store then uses the portrait for both, which costs radio but
     // never leaves anyone looking at a blank circle.
-    const thumb = await resize(portrait, THUMB_SIDE, THUMB_QUALITY);
+    const thumb = await makeThumb(portrait, resize);
     await setMyAvatar(portrait, thumb);
     void announceAvatarChange();
   };

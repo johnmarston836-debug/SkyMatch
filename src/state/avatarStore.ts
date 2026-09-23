@@ -1,13 +1,16 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { shortHash } from '../utils/hash';
+import { THUMB_GENERATION } from '../utils/avatarSizes';
 
 const STORAGE_KEY = '@skymatch/avatar';
 const THUMB_KEY = '@skymatch/avatar-thumb';
 const PEERS_KEY = '@skymatch/peer-avatars';
+/** Which THUMB_GENERATION the stored thumbnail was made at. */
+const THUMB_GEN_KEY = '@skymatch/avatar-thumb-gen';
 
 /**
- * How many people's faces are kept on disk. A thumbnail is about a kilobyte
+ * How many people's faces are kept on disk. A thumbnail is a few kilobytes
  * and crossing one still costs twenty-odd Bluetooth frames, so keeping them
  * is worth far more than the space; the cap only stops a frequent traveller
  * accumulating hundreds of strangers.
@@ -32,7 +35,7 @@ const MAX_CACHED_PORTRAITS = 8;
  */
 export interface PeerAvatar {
   hash: string;
-  /** 64px, sent to everyone who asks; what the lists and bubbles show. */
+  /** The small size (THUMB_SIDE), sent to everyone who asks; what the lists and bubbles show. */
   thumb?: string;
   /** 256px, only ever sent to someone who opened this person's card. */
   full?: string;
@@ -48,13 +51,18 @@ export interface PeerAvatar {
 interface AvatarState {
   /** The 256px portrait: what you see of yourself, and what others ask for. */
   myAvatar: string | null;
-  /** The 64px thumbnail of the same photo - what everyone nearby receives. */
+  /** The thumbnail of the same photo (THUMB_SIDE) - what everyone nearby receives. */
   myThumb: string | null;
   peerAvatars: Record<string, PeerAvatar>;
   /** False until the photos are off disk; see `myAvatarHash`. */
   hydrated: boolean;
 
-  hydrate: () => Promise<void>;
+  /**
+   * `remakeThumb` rebuilds our own thumbnail from the portrait when it was
+   * made at an older size (see THUMB_GENERATION); without it the old one
+   * is kept.
+   */
+  hydrate: (remakeThumb?: (portrait: string) => Promise<string | null>) => Promise<void>;
   /** Stores both sizes of your own photo, or clears it when given null. */
   setMyAvatar: (full: string | null, thumb: string | null) => Promise<void>;
   /** Files an arrived photo under the hash its owner announced for it. */
@@ -134,12 +142,27 @@ export const useAvatarStore = create<AvatarState>((set, get) => ({
   peerAvatars: {},
   hydrated: false,
 
-  hydrate: async () => {
-    const [mine, myThumb, peers] = await Promise.all([
+  hydrate: async (remakeThumb) => {
+    const [mine, storedThumb, peers, generation] = await Promise.all([
       AsyncStorage.getItem(STORAGE_KEY),
       AsyncStorage.getItem(THUMB_KEY),
       AsyncStorage.getItem(PEERS_KEY),
+      AsyncStorage.getItem(THUMB_GEN_KEY),
     ]);
+
+    // Remade before anything is announced: the new fingerprint must never
+    // go out with the old, smaller face behind it.
+    let myThumb = storedThumb;
+    if (mine && remakeThumb && generation !== String(THUMB_GENERATION)) {
+      const remade = await remakeThumb(mine).catch(() => null);
+      if (remade) {
+        myThumb = remade;
+        await Promise.all([
+          AsyncStorage.setItem(THUMB_KEY, remade),
+          AsyncStorage.setItem(THUMB_GEN_KEY, String(THUMB_GENERATION)),
+        ]).catch(() => {});
+      }
+    }
 
     // Faces from the last time the app was open. Without this every photo
     // has to cross the radio again on every launch, which is why they
@@ -165,7 +188,11 @@ export const useAvatarStore = create<AvatarState>((set, get) => ({
     // or a build without the native module). The portrait then does both
     // jobs: bigger on the radio than it should be, but never a blank face.
     const face = thumb ?? full;
-    await Promise.all([AsyncStorage.setItem(STORAGE_KEY, full), AsyncStorage.setItem(THUMB_KEY, face)]);
+    await Promise.all([
+      AsyncStorage.setItem(STORAGE_KEY, full),
+      AsyncStorage.setItem(THUMB_KEY, face),
+      AsyncStorage.setItem(THUMB_GEN_KEY, String(THUMB_GENERATION)),
+    ]);
     set({ myAvatar: full, myThumb: face });
   },
 
@@ -198,6 +225,7 @@ export const useAvatarStore = create<AvatarState>((set, get) => ({
   myAvatarHash: () => {
     const { myAvatar, hydrated } = get();
     if (!hydrated) return undefined;
-    return myAvatar === null ? '' : shortHash(myAvatar);
+    // The generation is part of it: see THUMB_GENERATION.
+    return myAvatar === null ? '' : shortHash(`${THUMB_GENERATION}:${myAvatar}`);
   },
 }));

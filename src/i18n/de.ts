@@ -111,7 +111,7 @@ export const de: Strings = {
     /** Under a private message of ours that never reached them; tapping it tries again. */
     undelivered: 'Nicht zugestellt · Tippen zum erneuten Senden',
     replyingTo: (nickname: string) => `Antwort an ${nickname}`,
-    encrypted: 'Ende-zu-Ende-verschlüsselt: Nur ihr beide könnt diesen Chat lesen',
+    encrypted: 'Ende-zu-Ende-verschlüsselt',
     notEncrypted: 'Nicht verschlüsselt: Diese Person nutzt eine ältere Version von SkyMatch',
     away: (minutes: number) =>
       minutes < 1

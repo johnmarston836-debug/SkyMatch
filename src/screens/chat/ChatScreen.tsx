@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react';
-import { Alert, FlatList, Image, Pressable, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { resize } from 'skymatch-peripheral/image';
@@ -9,6 +9,7 @@ import { useChatAutoScroll } from '../../hooks/useChatAutoScroll';
 import { useKeyboardPadding } from '../../hooks/useKeyboardPadding';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
+import { Padlock } from '../../components/Padlock';
 import { Avatar } from '../../components/Avatar';
 import { PhotoViewer } from '../../components/PhotoViewer';
 import { QuotedMessage } from '../../components/QuotedMessage';
@@ -74,22 +75,32 @@ export function ChatScreen({ route, navigation }: Props) {
   const [replyTo, setReplyTo] = useState<ReplyQuote | null>(null);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
+    // Who you are talking to, in as little room as it takes: one centred
+    // line for the face, the name and where they are, one for what they
+    // shared, one for the state of the chat. The conversation below is
+    // what the screen is for.
     peerHeader: {
-      marginHorizontal: spacing(2),
-      marginTop: spacing(1),
-      padding: spacing(1.5),
-      gap: spacing(0.5),
-      backgroundColor: colors.surface,
-      borderRadius: radii.md,
-      borderWidth: 1,
-      borderColor: colors.border,
+      alignItems: 'center' as const,
+      gap: 2,
+      paddingHorizontal: spacing(2),
+      paddingTop: spacing(1),
+      paddingBottom: spacing(1.25),
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: colors.border,
     },
-    peerHeaderRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: spacing(1) },
-    peerName: { fontSize: 15, fontWeight: '700' as const },
-    peerContact: { ...typography.body, fontSize: 14 },
-    peerContactEmpty: { ...typography.subtitle, fontSize: 13 },
+    peerHeaderRow: {
+      flexDirection: 'row' as const,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      gap: spacing(1),
+      maxWidth: '100%' as const,
+    },
+    peerName: { fontSize: 15, fontWeight: '700' as const, flexShrink: 1 },
+    peerContact: { ...typography.body, fontSize: 13, textAlign: 'center' as const },
+    peerContactEmpty: { ...typography.subtitle, fontSize: 12, textAlign: 'center' as const },
+    statusRow: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: 5 },
     security: { ...typography.subtitle, fontSize: 12 },
-    securityOff: { ...typography.subtitle, fontSize: 12, color: colors.danger },
+    securityOff: { ...typography.subtitle, fontSize: 12, color: colors.danger, textAlign: 'center' as const },
     list: { padding: spacing(2), gap: spacing(1) },
     bubbleRow: { flexDirection: 'row' as const, marginBottom: spacing(1) },
     bubbleRowMine: { justifyContent: 'flex-end' as const },
@@ -262,15 +273,19 @@ export function ChatScreen({ route, navigation }: Props) {
             <Avatar
               peerId={peerId}
               nickname={person.nickname}
-              size={40}
+              size={36}
               zoomable
               offline={person.connection !== 'connected'}
             />
+            <Text style={[styles.peerName, { color: colorForPeer(peerId) }]} numberOfLines={1}>
+              {person.nickname}
+            </Text>
             {person.label.length > 0 && <LocationBadge label={person.label} location={person.location} />}
-            <Text style={[styles.peerName, { color: colorForPeer(peerId) }]}>{person.nickname}</Text>
           </View>
           {person.contact ? (
-            <Text style={styles.peerContact}>{person.contact}</Text>
+            <Text style={styles.peerContact} selectable>
+              {person.contact}
+            </Text>
           ) : (
             person.connection !== 'gone' && <Text style={styles.peerContactEmpty}>{t.chat.noContact}</Text>
           )}
@@ -279,7 +294,10 @@ export function ChatScreen({ route, navigation }: Props) {
           {/* Whether they announced keys is only known while the radio hears them. */}
           {person.connection !== 'gone' &&
             (person.secure ? (
-              <Text style={styles.security}>{t.chat.encrypted}</Text>
+              <View style={styles.statusRow}>
+                <Padlock color={theme.colors.textMuted} size={10} />
+                <Text style={styles.security}>{t.chat.encrypted}</Text>
+              </View>
             ) : (
               <Text style={styles.securityOff}>{t.chat.notEncrypted}</Text>
             ))}

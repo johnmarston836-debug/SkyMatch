@@ -109,7 +109,7 @@ export const ca: Strings = {
     /** Under a private message of ours that never reached them; tapping it tries again. */
     undelivered: 'No entregat · Toca per tornar-lo a enviar',
     replyingTo: (nickname: string) => `Responent a ${nickname}`,
-    encrypted: 'Xifrat d’extrem a extrem: només vosaltres dos podeu llegir aquest xat',
+    encrypted: 'Xifrat d’extrem a extrem',
     notEncrypted: 'Sense xifrar: aquesta persona fa servir una versió antiga de SkyMatch',
     away: (minutes: number) =>
       minutes < 1

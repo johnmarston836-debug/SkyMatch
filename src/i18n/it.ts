@@ -108,7 +108,7 @@ export const it: Strings = {
     /** Under a private message of ours that never reached them; tapping it tries again. */
     undelivered: 'Non consegnato · Tocca per inviare di nuovo',
     replyingTo: (nickname: string) => `Rispondi a ${nickname}`,
-    encrypted: 'Crittografia end-to-end: solo voi due potete leggere questa chat',
+    encrypted: 'Crittografia end-to-end',
     notEncrypted: 'Non crittografata: questa persona usa una versione vecchia di SkyMatch',
     away: (minutes: number) =>
       minutes < 1

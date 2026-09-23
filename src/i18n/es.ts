@@ -120,7 +120,7 @@ export const es = {
     undelivered: 'No entregado · Toca para reenviar',
     replyingTo: (nickname: string) => `Respondiendo a ${nickname}`,
     /** Under the header of a private chat, depending on whether the other phone announced keys. */
-    encrypted: 'Cifrado de extremo a extremo: solo vosotros dos podéis leer este chat',
+    encrypted: 'Cifrado de extremo a extremo',
     notEncrypted: 'Sin cifrar: esta persona usa una versión antigua de SkyMatch',
     away: (minutes: number) =>
       minutes < 1

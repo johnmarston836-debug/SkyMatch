@@ -111,7 +111,7 @@ export const fr: Strings = {
     /** Under a private message of ours that never reached them; tapping it tries again. */
     undelivered: 'Non distribué · Touchez pour renvoyer',
     replyingTo: (nickname: string) => `Réponse à ${nickname}`,
-    encrypted: 'Chiffré de bout en bout : vous seuls pouvez lire cette discussion',
+    encrypted: 'Chiffré de bout en bout',
     notEncrypted: 'Non chiffré : cette personne utilise une ancienne version de SkyMatch',
     away: (minutes: number) =>
       minutes < 1

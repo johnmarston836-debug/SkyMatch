@@ -1,10 +1,11 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { bestImage, useAvatarStore } from '../src/state/avatarStore';
+import { THUMB_GENERATION } from '../src/utils/avatarSizes';
 import { shortHash } from '../src/utils/hash';
 
 const PORTRAIT = 'the-256px-portrait-in-base64';
 const THUMB = 'the-64px-face';
-const HASH = shortHash(PORTRAIT);
+const HASH = shortHash(`${THUMB_GENERATION}:${PORTRAIT}`);
 
 function reset() {
   useAvatarStore.setState({ myAvatar: null, myThumb: null, peerAvatars: {}, hydrated: false });
@@ -146,5 +147,20 @@ describe('other people’s photos', () => {
     const entry = useAvatarStore.getState().peerAvatars['peer-a'];
     expect(entry.hash).toBe(HASH);
     expect(bestImage(entry)).toBe(PORTRAIT);
+  });
+
+  it('remakes a thumbnail made at an older size, once, before announcing anything', async () => {
+    await AsyncStorage.setItem('@skymatch/avatar', PORTRAIT);
+    await AsyncStorage.setItem('@skymatch/avatar-thumb', THUMB);
+    await AsyncStorage.removeItem('@skymatch/avatar-thumb-gen');
+    reset();
+    const remake = jest.fn(async () => 'bigger-thumb');
+    await useAvatarStore.getState().hydrate(remake);
+    expect(useAvatarStore.getState().myThumb).toBe('bigger-thumb');
+
+    reset();
+    await useAvatarStore.getState().hydrate(remake);
+    expect(remake).toHaveBeenCalledTimes(1);
+    expect(useAvatarStore.getState().myThumb).toBe('bigger-thumb');
   });
 });
