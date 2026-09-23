@@ -11,10 +11,58 @@ interface Props {
   size: number;
   /** Tapping the photo opens it full screen, where it can be pinched to zoom. */
   zoomable?: boolean;
+  /** Marks the photo with the red "no connection" sign (see ConversationPeer). */
+  offline?: boolean;
+}
+
+/**
+ * The red "no connection" sign: a no-entry disc over the corner of the
+ * photo, drawn rather than an emoji or icon font so it looks the same on
+ * every phone - and red because it is the one thing on the row that says
+ * "what you write here won't arrive".
+ */
+function OfflineMark({ size }: { size: number }) {
+  const mark = Math.max(12, Math.round(size * 0.32));
+  const styles = useThemedStyles(({ colors }) => ({
+    disc: {
+      position: 'absolute' as const,
+      right: -1,
+      bottom: -1,
+      width: mark,
+      height: mark,
+      borderRadius: mark / 2,
+      backgroundColor: colors.danger,
+      borderWidth: 2,
+      borderColor: colors.background,
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+    },
+    bar: { width: mark * 0.5, height: Math.max(2, mark * 0.14), borderRadius: 1, backgroundColor: '#FFFFFF' },
+  }));
+  return (
+    <View style={styles.disc} accessibilityLabel="offline">
+      <View style={styles.bar} />
+    </View>
+  );
 }
 
 /** Someone's photo if it has made it across the mesh, their initial if it hasn't. */
-export function Avatar({ peerId, nickname, size, zoomable = false }: Props) {
+export function Avatar({ offline = false, ...props }: Props) {
+  if (!offline) return <AvatarImage {...props} />;
+  // The photo fades, the mark doesn't: it is what the reader should see.
+  return (
+    <View>
+      <View style={offlinePhoto}>
+        <AvatarImage {...props} />
+      </View>
+      <OfflineMark size={props.size} />
+    </View>
+  );
+}
+
+const offlinePhoto = { opacity: 0.55 };
+
+function AvatarImage({ peerId, nickname, size, zoomable = false }: Omit<Props, 'offline'>) {
   const myAvatar = useAvatarStore((state) => state.myAvatar);
   // The one person's entry, not the whole record: a selector that returned
   // the record would re-render every avatar on screen each time any face

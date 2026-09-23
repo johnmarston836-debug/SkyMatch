@@ -111,15 +111,18 @@ export const pt: Strings = {
     notEncrypted: 'Sem encriptação: esta pessoa usa uma versão antiga do SkyMatch',
     away: (minutes: number) =>
       minutes < 1
-        ? 'Acabou de sair da app: por agora as tuas mensagens não lhe chegam'
-        : `Fora da app há ${minutes} min: por agora as tuas mensagens não lhe chegam`,
+        ? 'Sem ligação: por agora as tuas mensagens não lhe chegam'
+        : `Sem ligação há ${minutes} min: por agora as tuas mensagens não lhe chegam`,
+    offline:
+      'Sem ligação: já não está por perto e as tuas mensagens não lhe vão chegar',
   },
 
   passengers: {
     ownPreview: (body: string) => `Tu: ${body}`,
     noMessagesYet: 'Ainda sem mensagens',
     away: (minutes: number) =>
-      minutes < 1 ? 'Fora da app · agora mesmo' : `Fora da app · há ${minutes} min`,
+      minutes < 1 ? 'Sem ligação · agora mesmo' : `Sem ligação · há ${minutes} min`,
+    offline: 'Sem ligação',
     delete: 'Apagar',
     deleteTitle: (nickname: string) => `Apagar a conversa com ${nickname}?`,
     deleteBody: (nickname: string) =>

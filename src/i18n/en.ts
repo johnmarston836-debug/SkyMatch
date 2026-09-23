@@ -108,15 +108,18 @@ export const en: Strings = {
     notEncrypted: 'Not encrypted: this person is on an older version of SkyMatch',
     away: (minutes: number) =>
       minutes < 1
-        ? 'Just left the app: your messages won’t reach them for now'
-        : `Out of the app for ${minutes} min: your messages won’t reach them for now`,
+        ? 'No connection: your messages won’t reach them for now'
+        : `No connection for ${minutes} min: your messages won’t reach them for now`,
+    offline:
+      'No connection: they are no longer nearby, and your messages won’t reach them',
   },
 
   passengers: {
     ownPreview: (body: string) => `You: ${body}`,
     noMessagesYet: 'No messages yet',
     away: (minutes: number) =>
-      minutes < 1 ? 'Out of the app · just now' : `Out of the app · ${minutes} min ago`,
+      minutes < 1 ? 'No connection · just now' : `No connection · ${minutes} min ago`,
+    offline: 'No connection',
     delete: 'Delete',
     deleteTitle: (nickname: string) => `Delete your chat with ${nickname}?`,
     deleteBody: (nickname: string) =>

@@ -119,8 +119,10 @@ export const es = {
     notEncrypted: 'Sin cifrar: esta persona usa una versión antigua de SkyMatch',
     away: (minutes: number) =>
       minutes < 1
-        ? 'Acaba de salir de la app: ahora no le llegan tus mensajes'
-        : `Fuera de la app desde hace ${minutes} min: ahora no le llegan tus mensajes`,
+        ? 'Sin conexión: ahora no le llegan tus mensajes'
+        : `Sin conexión desde hace ${minutes} min: ahora no le llegan tus mensajes`,
+    offline:
+      'Sin conexión: ya no está cerca y no le llegarán tus mensajes',
   },
 
   passengers: {
@@ -129,7 +131,8 @@ export const es = {
     noMessagesYet: 'Sin mensajes todavía',
     /** Under someone the radio has stopped hearing (see AWAY_AFTER_MS). */
     away: (minutes: number) =>
-      minutes < 1 ? 'Fuera de la app · ahora mismo' : `Fuera de la app · hace ${minutes} min`,
+      minutes < 1 ? 'Sin conexión · ahora mismo' : `Sin conexión · hace ${minutes} min`,
+    offline: 'Sin conexión',
     /** The button a leftward swipe reveals behind a conversation, and the confirmation it asks for. */
     delete: 'Borrar',
     deleteTitle: (nickname: string) => `¿Borrar el chat con ${nickname}?`,

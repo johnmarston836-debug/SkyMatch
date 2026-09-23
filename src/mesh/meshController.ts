@@ -175,6 +175,15 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
     // like.
     const { avatarHash } = packet;
     useDiscoveryStore.getState().setProfile(profile, service?.isSecureWith(profile.id) ?? false);
+    // Someone we have a conversation with keeps their current name and seat
+    // on it, for when they are no longer around to announce them.
+    if (useChatStore.getState().privateMessagesByPeer[profile.id]) {
+      useChatStore.getState().rememberContact(profile.id, {
+        nickname: profile.nickname,
+        label: formatLocation(profile.location),
+        location: profile.location,
+      });
+    }
     // Their announcement carries the fingerprint of the photo they are
     // showing. If it isn't the one we hold, ask for it - now, and again on
     // every beat until it arrives. Photos used to be pushed once, the first
@@ -251,6 +260,15 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
     const incoming = message.fromId !== myProfile.id;
     const peerId = incoming ? message.fromId : message.toId!;
     useChatStore.getState().addPrivateMessage(peerId, message, incoming);
+    if (incoming) {
+      const profile = useDiscoveryStore.getState().peers[peerId]?.profile;
+      useChatStore.getState().rememberContact(
+        peerId,
+        profile
+          ? { nickname: profile.nickname, label: formatLocation(profile.location), location: profile.location }
+          : { nickname: message.fromNickname, label: message.fromLabel },
+      );
+    }
     // Nothing on screen is going to show it if the phone is in a pocket.
     if (incoming) void notifyPrivateMessage(message);
   });
@@ -358,6 +376,14 @@ export async function sendPrivateChatMessage(
     sentAt: Date.now(),
   };
   useChatStore.getState().addPrivateMessage(toId, message);
+  const profile = useDiscoveryStore.getState().peers[toId]?.profile;
+  if (profile) {
+    useChatStore.getState().rememberContact(toId, {
+      nickname: profile.nickname,
+      label: formatLocation(profile.location),
+      location: profile.location,
+    });
+  }
   await service.sendPrivateMessage(message);
 }
 

@@ -1,9 +1,26 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { t } from '../i18n';
-import type { ChatMessage } from '../types';
+import type { ChatMessage, UserLocation } from '../types';
 
 const STORAGE_KEY = '@skymatch/chats';
+const CONTACTS_KEY = '@skymatch/chat-contacts';
+
+/**
+ * Who a saved conversation is with, as they last presented themselves.
+ *
+ * The passenger list only knows the people it can hear right now; a chat
+ * with someone who has gone - off the plane, out of range - is still on the
+ * phone, and without this it had no name to show and simply vanished from
+ * the list.
+ */
+export interface ChatContact {
+  nickname: string;
+  /** Their location already rendered, as a message carries it. */
+  label: string;
+  /** The full location, when it came from their profile rather than a message. */
+  location?: UserLocation;
+}
 
 /**
  * How much of the group chat is kept on screen. A long flight in a full
@@ -52,6 +69,8 @@ interface ChatState {
   readUpToByPeer: Record<string, number>;
   /** False until the saved conversations are off disk. */
   hydrated: boolean;
+  /** Keyed like privateMessagesByPeer; kept only for people there is a conversation with. */
+  contacts: Record<string, ChatContact>;
 
   addGroupMessage: (message: ChatMessage) => void;
   addPrivateMessage: (peerId: string, message: ChatMessage, incoming?: boolean) => void;
@@ -76,6 +95,8 @@ interface ChatState {
    * their copy, and nothing is sent.
    */
   deleteConversation: (peerId: string) => void;
+  /** Records who a conversation is with, so it keeps a name once they are gone. */
+  rememberContact: (peerId: string, contact: ChatContact) => void;
 }
 
 /** Trims a conversation to what is worth keeping on disk. */
@@ -101,6 +122,29 @@ function forStorage(messages: ChatMessage[]): ChatMessage[] {
     .reverse();
 }
 
+async function persistContacts(contacts: Record<string, ChatContact>) {
+  try {
+    await AsyncStorage.setItem(CONTACTS_KEY, JSON.stringify(contacts));
+  } catch {
+    // Same as the messages: a full disk loses nothing on screen.
+  }
+}
+
+function readContacts(raw: string | null): Record<string, ChatContact> {
+  if (!raw) return {};
+  try {
+    const stored = JSON.parse(raw) as Record<string, Partial<ChatContact>>;
+    const contacts: Record<string, ChatContact> = {};
+    for (const [peerId, contact] of Object.entries(stored)) {
+      if (typeof contact?.nickname !== 'string' || typeof contact.label !== 'string') continue;
+      contacts[peerId] = { nickname: contact.nickname, label: contact.label, location: contact.location };
+    }
+    return contacts;
+  } catch {
+    return {};
+  }
+}
+
 async function persist(privateMessagesByPeer: Record<string, ChatMessage[]>) {
   const trimmed: Record<string, ChatMessage[]> = {};
   for (const [peerId, messages] of Object.entries(privateMessagesByPeer)) {
@@ -122,6 +166,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   appActive: true,
   readUpToByPeer: {},
   hydrated: false,
+  contacts: {},
 
   addGroupMessage: (message) => {
     if (get().groupMessages.some((m) => m.id === message.id)) return; // mesh relay can deliver duplicates
@@ -187,7 +232,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
   dismissNotice: () => set({ notice: null }),
 
   hydrate: async () => {
-    const raw = await AsyncStorage.getItem(STORAGE_KEY);
+    const [raw, rawContacts] = await Promise.all([
+      AsyncStorage.getItem(STORAGE_KEY),
+      AsyncStorage.getItem(CONTACTS_KEY),
+    ]);
+    // Live ones win: they are newer than anything on disk.
+    set((state) => ({ contacts: { ...readContacts(rawContacts), ...state.contacts } }));
     if (!raw) {
       set({ hydrated: true });
       return;
@@ -205,11 +255,20 @@ export const useChatStore = create<ChatState>((set, get) => ({
             (a, b) => a.sentAt - b.sentAt,
           );
         }
-        return { privateMessagesByPeer, hydrated: true };
+        // Chats saved before contacts were kept have no name on file; the
+        // newest message that person sent carries one.
+        const contacts = { ...state.contacts };
+        for (const [peerId, messages] of Object.entries(privateMessagesByPeer)) {
+          if (contacts[peerId]) continue;
+          const theirs = [...messages].reverse().find((message) => message.fromId === peerId);
+          if (theirs) contacts[peerId] = { nickname: theirs.fromNickname, label: theirs.fromLabel };
+        }
+        return { privateMessagesByPeer, contacts, hydrated: true };
       });
       // Anything that landed while the disk was being read is only in
       // memory until now.
       void persist(get().privateMessagesByPeer);
+      void persistContacts(get().contacts);
     } catch {
       set({ hydrated: true });
     }
@@ -238,17 +297,40 @@ export const useChatStore = create<ChatState>((set, get) => ({
       const privateMessagesByPeer = { ...state.privateMessagesByPeer };
       const unreadByPeer = { ...state.unreadByPeer };
       const readUpToByPeer = { ...state.readUpToByPeer };
+      const contacts = { ...state.contacts };
       delete privateMessagesByPeer[peerId];
       delete unreadByPeer[peerId];
       delete readUpToByPeer[peerId];
+      delete contacts[peerId];
       return {
         privateMessagesByPeer,
         unreadByPeer,
         readUpToByPeer,
+        contacts,
         notice: state.notice?.peerId === peerId ? null : state.notice,
       };
     });
-    if (get().hydrated) void persist(get().privateMessagesByPeer);
+    if (get().hydrated) {
+      void persist(get().privateMessagesByPeer);
+      void persistContacts(get().contacts);
+    }
+  },
+
+  rememberContact: (peerId, contact) => {
+    const known = get().contacts[peerId];
+    if (
+      known &&
+      known.nickname === contact.nickname &&
+      known.label === contact.label &&
+      (contact.location === undefined || JSON.stringify(known.location) === JSON.stringify(contact.location))
+    ) {
+      return;
+    }
+    // A message carries only the label; don't let it wipe a location a
+    // profile gave us.
+    const next: ChatContact = { ...contact, location: contact.location ?? known?.location };
+    set((state) => ({ contacts: { ...state.contacts, [peerId]: next } }));
+    if (get().hydrated) void persistContacts(get().contacts);
   },
 
   newestIncoming: (peerId, myId) => {

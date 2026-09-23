@@ -108,15 +108,18 @@ export const ca: Strings = {
     notEncrypted: 'Sense xifrar: aquesta persona fa servir una versió antiga de SkyMatch',
     away: (minutes: number) =>
       minutes < 1
-        ? 'Acaba de sortir de l’app: ara no li arriben els teus missatges'
-        : `Fora de l’app des de fa ${minutes} min: ara no li arriben els teus missatges`,
+        ? 'Sense connexió: ara no li arriben els teus missatges'
+        : `Sense connexió des de fa ${minutes} min: ara no li arriben els teus missatges`,
+    offline:
+      'Sense connexió: ja no és a prop i no li arribaran els teus missatges',
   },
 
   passengers: {
     ownPreview: (body: string) => `Tu: ${body}`,
     noMessagesYet: 'Encara no hi ha missatges',
     away: (minutes: number) =>
-      minutes < 1 ? 'Fora de l’app · ara mateix' : `Fora de l’app · fa ${minutes} min`,
+      minutes < 1 ? 'Sense connexió · ara mateix' : `Sense connexió · fa ${minutes} min`,
+    offline: 'Sense connexió',
     delete: 'Esborrar',
     deleteTitle: (nickname: string) => `Vols esborrar el xat amb ${nickname}?`,
     deleteBody: (nickname: string) =>

@@ -8,23 +8,28 @@ import { CabinSeats } from '../../components/CabinSeats';
 import { SwipeToDelete } from '../../components/SwipeToDelete';
 import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
-import { isAway, minutesAway, useDiscoveryStore } from '../../state/discoveryStore';
+import { useDiscoveryStore } from '../../state/discoveryStore';
+import { describeConversationPeer, type ConversationPeer } from '../../state/conversationPeer';
 import { useNow } from '../../hooks/useNow';
 import { useProfileStore } from '../../state/profileStore';
 import { formatTime } from '../../utils/id';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
-import { formatLocation } from '../../utils/location';
 import { venueOf } from '../../venues';
 import { t } from '../../i18n';
-import type { ChatMessage, DiscoveredPeer } from '../../types';
+import type { ChatMessage } from '../../types';
 
 type Props = NativeStackScreenProps<MainStackParamList, 'Passengers'>;
 
 interface Conversation {
-  peer: DiscoveredPeer;
+  person: ConversationPeer;
   lastMessage: ChatMessage | null;
   unread: number;
+  /** For ordering people you haven't written to: when the radio last heard them. */
+  lastSeenAt: number;
 }
+
+/** Here now first, then lost a moment ago, then long gone. */
+const CONNECTION_ORDER = { connected: 0, lost: 1, gone: 2 };
 
 function preview(message: ChatMessage, myId: string | undefined): string {
   const body = message.imageBase64 && !message.body ? t.common.photo : message.body;
@@ -42,6 +47,7 @@ export function PassengersScreen({ navigation }: Props) {
   const messagesByPeer = useChatStore((state) => state.privateMessagesByPeer);
   const unreadByPeer = useChatStore((state) => state.unreadByPeer);
   const deleteConversation = useChatStore((state) => state.deleteConversation);
+  const contacts = useChatStore((state) => state.contacts);
   const myId = useProfileStore((state) => state.profile?.id);
   const myVenue = useProfileStore((state) => state.profile?.location.kind) ?? 'plane';
   const venue = venueOf(myVenue);
@@ -85,36 +91,46 @@ export function PassengersScreen({ navigation }: Props) {
     },
     unreadBadgeText: { color: '#FFFFFF', fontSize: 12, fontWeight: '800' as const },
     // On what the row shows, not on the row: a see-through row would let the
-    // red delete button behind it show through.
+    // red delete button behind it show through - and not on the red "no
+    // connection" line either, which is the point of the row.
     rowAway: { opacity: 0.55 },
-    rowAwayText: { ...typography.subtitle, fontSize: 12 },
+    // Red, like the mark on the photo, and not dimmed with the rest of the row.
+    rowOffline: { color: colors.danger, fontSize: 12, fontWeight: '600' as const },
   }));
 
   const list = useMemo<Conversation[]>(() => {
-    const conversations = Object.values(peers)
-      .filter((peer) => peer.profile)
-      .map((peer) => {
-        const thread = messagesByPeer[peer.peerId] ?? [];
-        return {
-          peer,
-          lastMessage: thread.length > 0 ? thread[thread.length - 1] : null,
-          unread: unreadByPeer[peer.peerId] ?? 0,
-        };
+    // Everyone the radio can hear, plus everyone there is a saved chat with
+    // who it no longer can: a conversation must not vanish just because the
+    // other person got off the plane.
+    const peerIds = new Set([
+      ...Object.keys(peers),
+      ...Object.keys(messagesByPeer).filter((peerId) => (messagesByPeer[peerId]?.length ?? 0) > 0),
+    ]);
+    const conversations: Conversation[] = [];
+    for (const peerId of peerIds) {
+      const person = describeConversationPeer(peerId, peers[peerId], contacts[peerId], now);
+      if (!person) continue;
+      const thread = messagesByPeer[peerId] ?? [];
+      const lastMessage = thread.length > 0 ? thread[thread.length - 1] : null;
+      conversations.push({
+        person,
+        lastMessage,
+        unread: unreadByPeer[peerId] ?? 0,
+        lastSeenAt: peers[peerId]?.lastSeenAt ?? lastMessage?.sentAt ?? 0,
       });
+    }
 
-    // People here now before people away; within each, live conversations
-    // first, newest on top, then the rest by how recently the radio heard
-    // from them.
+    // Reachable people first; within each group, live conversations newest
+    // on top, then the rest by how recently the radio heard from them.
     return conversations.sort((a, b) => {
-      const awayA = isAway(a.peer, now);
-      const awayB = isAway(b.peer, now);
-      if (awayA !== awayB) return awayA ? 1 : -1;
+      const byConnection = CONNECTION_ORDER[a.person.connection] - CONNECTION_ORDER[b.person.connection];
+      if (byConnection !== 0) return byConnection;
       if (a.lastMessage && b.lastMessage) return b.lastMessage.sentAt - a.lastMessage.sentAt;
       if (a.lastMessage) return -1;
       if (b.lastMessage) return 1;
-      return b.peer.lastSeenAt - a.peer.lastSeenAt;
+      return b.lastSeenAt - a.lastSeenAt;
     });
-  }, [peers, messagesByPeer, unreadByPeer, now]);
+  }, [peers, messagesByPeer, unreadByPeer, contacts, now]);
 
   const confirmDelete = (peerId: string, nickname: string) => {
     Alert.alert(t.passengers.deleteTitle(nickname), t.passengers.deleteBody(nickname), [
@@ -124,40 +140,45 @@ export function PassengersScreen({ navigation }: Props) {
   };
 
   const renderItem = ({ item }: { item: Conversation }) => {
-    const { peer, lastMessage, unread } = item;
-    const nickname = peer.profile?.nickname ?? '?';
-    const away = isAway(peer, now);
+    const { person, lastMessage, unread } = item;
+    const { peerId, nickname } = person;
+    const away = person.connection !== 'connected';
     return (
       <View style={styles.rowWrap}>
         <SwipeToDelete
           label={t.passengers.delete}
-          onDelete={() => confirmDelete(peer.peerId, nickname)}
+          onDelete={() => confirmDelete(peerId, nickname)}
           // Nothing to delete with someone you have never written to.
           enabled={lastMessage !== null}
         >
-          <Pressable style={styles.row} onPress={() => navigation.navigate('Chat', { peerId: peer.peerId })}>
+          <Pressable style={styles.row} onPress={() => navigation.navigate('Chat', { peerId: peerId })}>
             {/* The photo opens their profile; the rest of the row opens the chat. */}
-            <Pressable style={away && styles.rowAway} onPress={() => navigation.navigate('Profile', { peerId: peer.peerId })}>
-              <Avatar peerId={peer.peerId} nickname={nickname} size={48} />
+            <Pressable onPress={() => navigation.navigate('Profile', { peerId: peerId })}>
+              <Avatar peerId={peerId} nickname={nickname} size={48} offline={away} />
             </Pressable>
-            <View style={[styles.rowBody, away && styles.rowAway]}>
-              <View style={styles.rowTop}>
+            <View style={styles.rowBody}>
+              <View style={[styles.rowTop, away && styles.rowAway]}>
                 <Text style={styles.rowName} numberOfLines={1}>
                   {nickname}
                 </Text>
-                {peer.profile && (
-                  <LocationBadge label={formatLocation(peer.profile.location)} location={peer.profile.location} />
-                )}
+                {person.label.length > 0 && <LocationBadge label={person.label} location={person.location} />}
                 {lastMessage && <Text style={styles.rowTime}>{formatTime(lastMessage.sentAt)}</Text>}
               </View>
               {lastMessage ? (
-                <Text style={[styles.rowPreview, unread > 0 && styles.rowPreviewUnread]} numberOfLines={1}>
+                <Text
+                  style={[styles.rowPreview, unread > 0 && styles.rowPreviewUnread, away && styles.rowAway]}
+                  numberOfLines={1}
+                >
                   {preview(lastMessage, myId)}
                 </Text>
               ) : (
-                <Text style={styles.rowPreviewEmpty}>{t.passengers.noMessagesYet}</Text>
+                <Text style={[styles.rowPreviewEmpty, away && styles.rowAway]}>{t.passengers.noMessagesYet}</Text>
               )}
-              {away && <Text style={styles.rowAwayText}>{t.passengers.away(minutesAway(peer, now))}</Text>}
+              {away && (
+                <Text style={styles.rowOffline}>
+                  {person.connection === 'lost' ? t.passengers.away(person.minutesAway) : t.passengers.offline}
+                </Text>
+              )}
             </View>
             {unread > 0 && (
               <View style={styles.unreadBadge}>
@@ -186,7 +207,7 @@ export function PassengersScreen({ navigation }: Props) {
           <Text style={styles.emptySubtitle}>{venue.peopleSearching}</Text>
         </View>
       ) : (
-        <FlatList data={list} keyExtractor={(item) => item.peer.peerId} renderItem={renderItem} contentContainerStyle={styles.list} />
+        <FlatList data={list} keyExtractor={(item) => item.person.peerId} renderItem={renderItem} contentContainerStyle={styles.list} />
       )}
     </View>
   );

@@ -108,15 +108,18 @@ export const fr: Strings = {
     notEncrypted: 'Non chiffré : cette personne utilise une ancienne version de SkyMatch',
     away: (minutes: number) =>
       minutes < 1
-        ? 'Vient de quitter l’app : vos messages ne lui parviennent pas pour l’instant'
-        : `Hors de l’app depuis ${minutes} min : vos messages ne lui parviennent pas pour l’instant`,
+        ? 'Pas de connexion : vos messages ne lui parviennent pas pour l’instant'
+        : `Pas de connexion depuis ${minutes} min : vos messages ne lui parviennent pas pour l’instant`,
+    offline:
+      'Pas de connexion : cette personne n’est plus à proximité et vos messages ne lui parviendront pas',
   },
 
   passengers: {
     ownPreview: (body: string) => `Toi : ${body}`,
     noMessagesYet: 'Pas encore de messages',
     away: (minutes: number) =>
-      minutes < 1 ? 'Hors de l’app · à l’instant' : `Hors de l’app · il y a ${minutes} min`,
+      minutes < 1 ? 'Pas de connexion · à l’instant' : `Pas de connexion · il y a ${minutes} min`,
+    offline: 'Pas de connexion',
     delete: 'Supprimer',
     deleteTitle: (nickname: string) => `Supprimer la discussion avec ${nickname} ?`,
     deleteBody: (nickname: string) =>

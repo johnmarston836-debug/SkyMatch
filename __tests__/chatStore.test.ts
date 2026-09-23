@@ -148,3 +148,19 @@ describe('deleting a conversation', () => {
     expect(state.unreadByPeer.leo).toBe(1);
   });
 });
+
+describe('saved contacts', () => {
+  it('keep a location a profile gave when a message only brings the label', () => {
+    const location = { kind: 'plane' as const, seat: { row: 3, letter: 'C' as const } };
+    useChatStore.setState({ contacts: {}, hydrated: true });
+    useChatStore.getState().rememberContact('ana', { nickname: 'Ana', label: '3C', location });
+    useChatStore.getState().rememberContact('ana', { nickname: 'Ana B.', label: '3C' });
+    expect(useChatStore.getState().contacts.ana).toEqual({ nickname: 'Ana B.', label: '3C', location });
+  });
+
+  it('go with the conversation when it is deleted', () => {
+    useChatStore.setState({ contacts: { ana: { nickname: 'Ana', label: '3C' } }, privateMessagesByPeer: {}, hydrated: true });
+    useChatStore.getState().deleteConversation('ana');
+    expect(useChatStore.getState().contacts.ana).toBeUndefined();
+  });
+});

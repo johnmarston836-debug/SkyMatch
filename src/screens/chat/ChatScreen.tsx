@@ -17,12 +17,12 @@ import { SwipeToReply } from '../../components/SwipeToReply';
 import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useAvatarStore } from '../../state/avatarStore';
-import { isAway, minutesAway, useDiscoveryStore } from '../../state/discoveryStore';
+import { useDiscoveryStore } from '../../state/discoveryStore';
+import { describeConversationPeer } from '../../state/conversationPeer';
 import { useNow } from '../../hooks/useNow';
 import { useProfileStore } from '../../state/profileStore';
 import { requestFullAvatar, sendPrivateChatMessage, sendReadReceipt } from '../../mesh/meshController';
 import { colorForPeer } from '../../theme';
-import { formatLocation } from '../../utils/location';
 import { t } from '../../i18n';
 import { formatTime, quoteOf } from '../../utils/id';
 import { MAX_BODY_CHARS } from '../../mesh/validate';
@@ -49,8 +49,12 @@ export function ChatScreen({ route, navigation }: Props) {
   const theme = useAppTheme();
   const { peerId } = route.params;
   const peer = useDiscoveryStore((state) => state.peers[peerId]);
+  const savedContact = useChatStore((state) => state.contacts[peerId]);
   const now = useNow(15_000);
-  const peerNickname = peer?.profile?.nickname;
+  // Who this is, whether the radio can still hear them or all that is left
+  // is the saved chat.
+  const person = describeConversationPeer(peerId, peer, savedContact, now);
+  const peerNickname = person?.nickname;
   const messages = useChatStore((state) => state.privateMessagesByPeer[peerId] ?? EMPTY_MESSAGES);
   const myProfile = useProfileStore((state) => state.profile);
   const setActivePeer = useChatStore((state) => state.setActivePeer);
@@ -232,24 +236,33 @@ export function ChatScreen({ route, navigation }: Props) {
 
   return (
     <Animated.View style={[styles.container, keyboardPadding]}>
-      {peer?.profile && (
+      {person && (
         <View style={styles.peerHeader}>
           <View style={styles.peerHeaderRow}>
-            <Avatar peerId={peerId} nickname={peer.profile.nickname} size={40} zoomable />
-            <LocationBadge label={formatLocation(peer.profile.location)} location={peer.profile.location} />
-            <Text style={[styles.peerName, { color: colorForPeer(peerId) }]}>{peer.profile.nickname}</Text>
+            <Avatar
+              peerId={peerId}
+              nickname={person.nickname}
+              size={40}
+              zoomable
+              offline={person.connection !== 'connected'}
+            />
+            {person.label.length > 0 && <LocationBadge label={person.label} location={person.location} />}
+            <Text style={[styles.peerName, { color: colorForPeer(peerId) }]}>{person.nickname}</Text>
           </View>
-          {peer.profile.contact ? (
-            <Text style={styles.peerContact}>{peer.profile.contact}</Text>
+          {person.contact ? (
+            <Text style={styles.peerContact}>{person.contact}</Text>
           ) : (
-            <Text style={styles.peerContactEmpty}>{t.chat.noContact}</Text>
+            person.connection !== 'gone' && <Text style={styles.peerContactEmpty}>{t.chat.noContact}</Text>
           )}
-          {isAway(peer, now) && <Text style={styles.securityOff}>{t.chat.away(minutesAway(peer, now))}</Text>}
-          {peer.secure ? (
-            <Text style={styles.security}>{t.chat.encrypted}</Text>
-          ) : (
-            <Text style={styles.securityOff}>{t.chat.notEncrypted}</Text>
-          )}
+          {person.connection === 'lost' && <Text style={styles.securityOff}>{t.chat.away(person.minutesAway)}</Text>}
+          {person.connection === 'gone' && <Text style={styles.securityOff}>{t.chat.offline}</Text>}
+          {/* Whether they announced keys is only known while the radio hears them. */}
+          {person.connection !== 'gone' &&
+            (person.secure ? (
+              <Text style={styles.security}>{t.chat.encrypted}</Text>
+            ) : (
+              <Text style={styles.securityOff}>{t.chat.notEncrypted}</Text>
+            ))}
         </View>
       )}
       <FlatList
