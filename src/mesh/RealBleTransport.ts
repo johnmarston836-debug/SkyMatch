@@ -7,6 +7,7 @@ import type { BleTransport } from './BleTransport';
 import { useMeshStatusStore } from '../state/meshStatusStore';
 import {
   frameChunks,
+  frameChunksForLink,
   encodeFrame,
   decodeFrame,
   isRepairFrame,
@@ -72,6 +73,9 @@ const MAX_REPAIR_ROUNDS = 6;
  * oldest is cancelled to make room.
  */
 const MAX_PENDING_RECONNECTS = 8;
+
+/** The ATT protocol's own ceiling on one value, whatever the MTU. */
+const MAX_ATT_VALUE = 512;
 
 /**
  * Prefix that marks one of our advertisements in an iOS local name, followed
@@ -172,6 +176,8 @@ export class RealBleTransport implements BleTransport {
   private identities = new Map<string, string>();
   /** Device id -> when we started waiting for a dropped link to come back, oldest first. */
   private reconnecting = new Map<string, number>();
+  /** Connections whose characteristic takes writes without a response; see writeFrames. */
+  private fastWriters = new Set<string>();
   private running = false;
 
   async start(myPeerId: string, location: UserLocation | null): Promise<void> {
@@ -206,6 +212,7 @@ export class RealBleTransport implements BleTransport {
     if (this.staleCheckTimer) clearInterval(this.staleCheckTimer);
     if (this.repairTimer) clearInterval(this.repairTimer);
     this.connectedDevices.clear();
+    this.fastWriters.clear();
     this.identities.clear();
     this.pendingFrames.clear();
     this.sentFrames.clear();
@@ -247,13 +254,11 @@ export class RealBleTransport implements BleTransport {
     const device = this.connectedDevices.get(deviceId);
     if (!device) return false;
 
-    const frames = frameChunks(raw, newFrameId());
+    const frames = this.framesFor(device, raw);
     this.rememberSent(frames);
 
     try {
-      for (const frame of frames) {
-        await this.writeFrame(device, frame);
-      }
+      await this.writeFrames(deviceId, device, frames);
       return true;
     } catch {
       // A link can die mid-write, and the failure used to escape as an
@@ -270,14 +275,57 @@ export class RealBleTransport implements BleTransport {
     this.identities.set(profileId, deviceId);
   }
 
-  /** UUIDs come back in whatever case the platform feels like, so compare them folded. */
-  private async hasOurCharacteristic(device: Device): Promise<boolean> {
+  /**
+   * Frames sized for this connection. The negotiated MTU, less the three
+   * bytes of ATT header, is what one packet carries; a link that never
+   * reported one gets the small fixed frames every path can take.
+   */
+  private framesFor(device: Device, raw: string): Frame[] {
+    const mtu = device.mtu ?? 0;
+    return frameChunksForLink(raw, newFrameId(), Math.min(mtu - 3, MAX_ATT_VALUE));
+  }
+
+  /**
+   * Writes a whole send, back to back.
+   *
+   * Every frame used to wait for the other phone's "got it" before the next
+   * one went, and that round trip, not the radio, was what made a photo
+   * take half a minute. Now all but the last go without a response - both
+   * Bluetooth stacks still hold each one until there is room for it, and
+   * the link layer delivers them in order - and the last is written with
+   * one. Its answer can only come once everything before it has been taken,
+   * so the send still fails loudly on a link that died, and the router
+   * floods instead. A frame lost on the way anyway is what repair frames
+   * and delivery receipts are for.
+   */
+  private async writeFrames(deviceId: string, device: Device, frames: Frame[]) {
+    const fast = this.fastWriters.has(deviceId);
+    for (let i = 0; i < frames.length; i++) {
+      const value = Buffer.from(encodeFrame(frames[i]), 'utf8').toString('base64');
+      if (fast && i < frames.length - 1) {
+        await device.writeCharacteristicWithoutResponseForService(SERVICE_UUID, PROFILE_CHAR_UUID, value);
+      } else {
+        await device.writeCharacteristicWithResponseForService(SERVICE_UUID, PROFILE_CHAR_UUID, value);
+      }
+    }
+  }
+
+  /**
+   * Whether the connection has our characteristic, and notes whether it
+   * takes writes without a response. UUIDs come back in whatever case the
+   * platform feels like, so they are compared folded.
+   */
+  private async hasOurCharacteristic(device: Device, deviceId: string): Promise<boolean> {
     try {
       const services = await device.services();
       const service = services.find((candidate) => candidate.uuid.toLowerCase() === SERVICE_UUID.toLowerCase());
       if (!service) return false;
       const characteristics = await service.characteristics();
-      return characteristics.some((candidate) => candidate.uuid.toLowerCase() === PROFILE_CHAR_UUID.toLowerCase());
+      const ours = characteristics.find((candidate) => candidate.uuid.toLowerCase() === PROFILE_CHAR_UUID.toLowerCase());
+      if (!ours) return false;
+      if (ours.isWritableWithoutResponse) this.fastWriters.add(deviceId);
+      else this.fastWriters.delete(deviceId);
+      return true;
     } catch {
       return false;
     }
@@ -285,6 +333,7 @@ export class RealBleTransport implements BleTransport {
 
   private dropDevice(deviceId: string) {
     this.connectedDevices.delete(deviceId);
+    this.fastWriters.delete(deviceId);
     // Whoever we reached through this connection has to be looked up again,
     // or we would keep writing into a link that is gone.
     this.identities.forEach((mapped, profileId) => {
@@ -369,9 +418,12 @@ export class RealBleTransport implements BleTransport {
   }
 
   private async connectAndSubscribe(deviceId: string, connect: () => Promise<Device>) {
-    const connected = await connect();
+    const linked = await connect();
     this.reconnecting.delete(deviceId);
-    await connected.discoverAllServicesAndCharacteristics();
+    // The copy discovery hands back, not the one from connecting: iOS
+    // settles the MTU just after the link comes up, and only the later copy
+    // reports it - the earlier one would size every frame for 23 bytes.
+    const connected = await linked.discoverAllServicesAndCharacteristics();
 
     // Confirm the characteristic is really there before treating this as a
     // usable link. CoreBluetooth caches a peripheral's GATT database, so a
@@ -379,7 +431,7 @@ export class RealBleTransport implements BleTransport {
     // that stale, empty cache: it advertises, it connects, and every write
     // then fails with "characteristic not found". Holding on to such a
     // connection means retrying against it forever.
-    if (!(await this.hasOurCharacteristic(connected))) {
+    if (!(await this.hasOurCharacteristic(connected, deviceId))) {
       await connected.cancelConnection().catch(() => {});
       return;
     }

@@ -18,6 +18,8 @@
  *    broadcasts, the group chat, private messages and presence alerts.
  */
 
+import { Buffer } from 'buffer';
+
 export const SERVICE_UUID = '6b2f1a00-2c9e-4f7a-8e1d-9a2f4c6b8e10';
 export const PROFILE_CHAR_UUID = '6b2f1a01-2c9e-4f7a-8e1d-9a2f4c6b8e10';
 export const RELAY_CHAR_UUID = '6b2f1a02-2c9e-4f7a-8e1d-9a2f4c6b8e10';
@@ -196,6 +198,63 @@ export function frameChunks(raw: string, frameId: string): Frame[] {
     parts.push(raw.slice(i, i + CHUNK_SIZE));
   }
   if (parts.length === 0) parts.push('');
+  return parts.map((part, index) => ({ id: frameId, index, total: parts.length, part }));
+}
+
+/**
+ * What one character costs on the wire once its frame is JSON and UTF-8:
+ * quotes and backslashes are escaped, control characters more so, and
+ * anything past ASCII takes two to four bytes. `pair` is a surrogate pair,
+ * kept together so an emoji is never split between two frames.
+ */
+function wireBytes(code: number, pair: boolean): number {
+  if (pair) return 4;
+  if (code === 0x22 || code === 0x5c) return 2;
+  if (code < 0x20) return code === 0x08 || code === 0x09 || code === 0x0a || code === 0x0c || code === 0x0d ? 2 : 6;
+  if (code < 0x80) return 1;
+  if (code < 0x800) return 2;
+  if (code >= 0xd800 && code <= 0xdfff) return 6; // a lone surrogate, which JSON writes as \uXXXX
+  return 3;
+}
+
+/** The smallest link budget worth sizing frames for; below it, frameChunks' fixed size is as good. */
+const MIN_LINK_FRAME_BYTES = 120;
+
+/**
+ * Splits a send into frames as large as one link can carry in a single
+ * packet: every encoded frame is at most `maxFrameBytes` of UTF-8.
+ *
+ * frameChunks has to fit the tightest path there is - a notification, on a
+ * link whose MTU nobody knows - so it sends 80 characters a frame, a third
+ * of them spent on the frame's own wrapper. A write over a connection we
+ * opened knows its MTU: between two iPhones it is usually several times
+ * that, so a photo goes in several times fewer frames. Any build puts them
+ * back together - reassembly goes by index, whatever each one holds.
+ */
+export function frameChunksForLink(raw: string, frameId: string, maxFrameBytes: number): Frame[] {
+  // The wrapper at its largest: four-digit index and total (MAX_FRAMES_PER_SEND).
+  const overhead = Buffer.byteLength(encodeFrame({ id: frameId, index: 9999, total: 9999, part: '' }), 'utf8');
+  const budget = maxFrameBytes - overhead;
+  if (maxFrameBytes < MIN_LINK_FRAME_BYTES || budget < 16) return frameChunks(raw, frameId);
+
+  const parts: string[] = [];
+  let start = 0;
+  let used = 0;
+  for (let i = 0; i < raw.length; ) {
+    const code = raw.charCodeAt(i);
+    const next = raw.charCodeAt(i + 1);
+    const pair = code >= 0xd800 && code <= 0xdbff && next >= 0xdc00 && next <= 0xdfff;
+    const width = pair ? 2 : 1;
+    const bytes = wireBytes(code, pair);
+    if (used + bytes > budget) {
+      parts.push(raw.slice(start, i));
+      start = i;
+      used = 0;
+    }
+    used += bytes;
+    i += width;
+  }
+  if (start < raw.length || parts.length === 0) parts.push(raw.slice(start));
   return parts.map((part, index) => ({ id: frameId, index, total: parts.length, part }));
 }
 
