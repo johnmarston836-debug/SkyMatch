@@ -142,10 +142,12 @@ export function ChatScreen({ route, navigation }: Props) {
   );
 
   // Told to them while the conversation is actually on screen, and again
-  // whenever something new arrives into it.
+  // whenever something new arrives into it - or when the phone comes back
+  // to it, since what landed while it was locked has only now been seen.
+  const onScreen = useChatStore((state) => state.appActive && state.activePeerId === peerId);
   useEffect(() => {
-    if (myProfile) void sendReadReceipt(myProfile, peerId);
-  }, [myProfile, peerId, messages]);
+    if (myProfile && onScreen) void sendReadReceipt(myProfile, peerId);
+  }, [myProfile, peerId, messages, onScreen]);
 
   // Their photo here is small, but it can be opened full screen, and someone
   // deep in a conversation with one person is exactly who the portrait is

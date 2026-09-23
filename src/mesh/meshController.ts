@@ -468,6 +468,12 @@ export async function announceAvatarChange() {
  */
 export async function sendReadReceipt(myProfile: Profile, toId: string) {
   if (!service) return;
+  // Read means someone is looking: this app on screen, with this chat open.
+  // It used to be enough for the chat to be the last screen shown, and on
+  // Android - where the mesh keeps running with the phone locked - every
+  // message that arrived in a pocket came back to its sender as seen.
+  const { appActive, activePeerId } = useChatStore.getState();
+  if (!appActive || activePeerId !== toId) return;
   const upTo = useChatStore.getState().newestIncoming(toId, myProfile.id);
   if (upTo === 0) return;
   if (lastReceiptSent.get(toId) === upTo) return;
