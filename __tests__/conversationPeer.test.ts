@@ -1,4 +1,4 @@
-import { describeConversationPeer } from '../src/state/conversationPeer';
+import { describeConversationPeer, withoutReplaced } from '../src/state/conversationPeer';
 import { AWAY_AFTER_MS } from '../src/state/discoveryStore';
 
 const location = { kind: 'plane' as const, seat: { row: 14, letter: 'A' as const } };
@@ -27,5 +27,26 @@ describe('describeConversationPeer', () => {
 
   it('is nobody without either', () => {
     expect(describeConversationPeer('ana', undefined, undefined)).toBeNull();
+  });
+});
+
+describe('withoutReplaced', () => {
+  const person = (peerId: string, connection: 'connected' | 'lost' | 'gone', nickname = 'Ana', label = '14A') => ({
+    peerId,
+    nickname,
+    label,
+    secure: true,
+    connection,
+    minutesAway: 0,
+  });
+
+  it('hides the old copy of someone who reinstalled, but never a conversation', () => {
+    const list = [
+      { person: person('new', 'connected'), lastMessage: null },
+      { person: person('old', 'lost', ' ana '), lastMessage: null },
+      { person: person('chat', 'gone'), lastMessage: { id: 'm' } },
+      { person: person('other', 'lost', 'Ana', '15B'), lastMessage: null },
+    ];
+    expect(withoutReplaced(list).map((entry) => entry.person.peerId)).toEqual(['new', 'chat', 'other']);
   });
 });

@@ -178,6 +178,8 @@ export class RealBleTransport implements BleTransport {
   private reconnecting = new Map<string, number>();
   /** Connections whose characteristic takes writes without a response; see writeFrames. */
   private fastWriters = new Set<string>();
+  /** Radio id (a scanned device, or a central that connected to us) -> the profile id behind it. */
+  private radioOwner = new Map<string, string>();
   private running = false;
 
   async start(myPeerId: string, location: UserLocation | null): Promise<void> {
@@ -214,6 +216,7 @@ export class RealBleTransport implements BleTransport {
     this.connectedDevices.clear();
     this.fastWriters.clear();
     this.identities.clear();
+    this.radioOwner.clear();
     this.pendingFrames.clear();
     this.sentFrames.clear();
   }
@@ -269,10 +272,40 @@ export class RealBleTransport implements BleTransport {
     }
   }
 
-  /** Only ever records a connection we opened ourselves, so the id is one `sendToPeer` can use. */
+  /**
+   * Who is behind a radio id, learned from a packet they sent us directly.
+   * Kept for every radio, for counting people rather than radios (see
+   * refreshCounts); only a connection we opened ourselves goes into
+   * `identities`, so that the ids `sendToPeer` gets are ones it can use.
+   */
   notePeerIdentity(deviceId: string, profileId: string) {
+    if (this.radioOwner.get(deviceId) !== profileId) {
+      this.radioOwner.set(deviceId, profileId);
+      this.refreshCounts();
+    }
     if (!this.connectedDevices.has(deviceId)) return;
     this.identities.set(profileId, deviceId);
+  }
+
+  /**
+   * The radio panel's numbers, in people.
+   *
+   * They used to count radio ids, and one phone has several: Android moves
+   * to a new Bluetooth address every so often and whenever it restarts its
+   * advert, the phone that connected to us has one id as a central and
+   * another as the peripheral we scanned, and iOS gives the same phone a
+   * new identifier when its app restarts. Each counted as one more phone,
+   * and the old one lingered until it went stale. Ids known to belong to
+   * the same person now count once; one not yet placed counts on its own
+   * until its first packet says whose it is, a beat at most.
+   */
+  private refreshCounts() {
+    const people = (ids: Iterable<string>) => new Set(Array.from(ids, (id) => this.radioOwner.get(id) ?? id)).size;
+    const status = useMeshStatusStore.getState();
+    const nearby = people(this.lastSeenAt.keys());
+    const connected = people(this.connectedDevices.keys());
+    if (status.nearby !== nearby) status.setNearby(nearby);
+    if (status.connected !== connected) status.setConnected(connected);
   }
 
   /**
@@ -339,7 +372,7 @@ export class RealBleTransport implements BleTransport {
     this.identities.forEach((mapped, profileId) => {
       if (mapped === deviceId) this.identities.delete(profileId);
     });
-    useMeshStatusStore.getState().setConnected(this.connectedDevices.size);
+    this.refreshCounts();
   }
 
   async broadcast(raw: string, excludePeerId?: string): Promise<void> {
@@ -370,6 +403,9 @@ export class RealBleTransport implements BleTransport {
       useMeshStatusStore.getState().setSubscribers(count);
     });
     this.removeWriteListener = Peripheral.addWriteListener(({ value, centralId }) => {
+      // Someone writing to us is as present as someone we can scan - and
+      // the only sign of an iPhone in a pocket, whose advert Android can't read.
+      this.lastSeenAt.set(centralId, Date.now());
       this.handleIncomingFrame(Buffer.from(value, 'base64').toString('utf8'), centralId);
     });
     await Peripheral.start(SERVICE_UUID, PROFILE_CHAR_UUID, encodeLocalName(location));
@@ -398,7 +434,7 @@ export class RealBleTransport implements BleTransport {
     const location = locationFromAdvert(device.localName, device.manufacturerData);
 
     this.lastSeenAt.set(device.id, Date.now());
-    useMeshStatusStore.getState().setNearby(this.lastSeenAt.size);
+    this.refreshCounts();
     this.peerSeenListeners.forEach((listener) => listener(device.id, device.rssi ?? -100, location));
 
     // Scanning with allowDuplicates fires many times a second, and a device
@@ -444,7 +480,7 @@ export class RealBleTransport implements BleTransport {
     if (Platform.OS === 'android') {
       this.manager.requestConnectionPriorityForDevice(deviceId, ConnectionPriority.High).catch(() => {});
     }
-    useMeshStatusStore.getState().setConnected(this.connectedDevices.size);
+    this.refreshCounts();
 
     connected.monitorCharacteristicForService(SERVICE_UUID, PROFILE_CHAR_UUID, (error, characteristic) => {
       if (error || !characteristic?.value) return;
@@ -655,9 +691,10 @@ export class RealBleTransport implements BleTransport {
     this.lastSeenAt.forEach((seenAt, peerId) => {
       if (now - seenAt > PEER_STALE_MS) {
         this.lastSeenAt.delete(peerId);
+        if (!this.connectedDevices.has(peerId)) this.radioOwner.delete(peerId);
         this.peerLostListeners.forEach((listener) => listener(peerId));
       }
     });
-    useMeshStatusStore.getState().setNearby(this.lastSeenAt.size);
+    this.refreshCounts();
   }
 }

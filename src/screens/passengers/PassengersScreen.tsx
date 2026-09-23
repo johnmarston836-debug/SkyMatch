@@ -9,7 +9,7 @@ import { SwipeToDelete } from '../../components/SwipeToDelete';
 import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
-import { describeConversationPeer, type ConversationPeer } from '../../state/conversationPeer';
+import { describeConversationPeer, withoutReplaced, type ConversationPeer } from '../../state/conversationPeer';
 import { useNow } from '../../hooks/useNow';
 import { useProfileStore } from '../../state/profileStore';
 import { formatTime } from '../../utils/id';
@@ -122,7 +122,7 @@ export function PassengersScreen({ navigation }: Props) {
 
     // Reachable people first; within each group, live conversations newest
     // on top, then the rest by how recently the radio heard from them.
-    return conversations.sort((a, b) => {
+    return withoutReplaced(conversations).sort((a, b) => {
       const byConnection = CONNECTION_ORDER[a.person.connection] - CONNECTION_ORDER[b.person.connection];
       if (byConnection !== 0) return byConnection;
       if (a.lastMessage && b.lastMessage) return b.lastMessage.sentAt - a.lastMessage.sentAt;

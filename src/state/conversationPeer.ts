@@ -64,3 +64,21 @@ export function describeConversationPeer(
   }
   return null;
 }
+
+/**
+ * Drops people who are only an older copy of someone connected right now.
+ *
+ * Reinstalling the app, or clearing its data, gives a phone a new identity -
+ * and so a new profile id - while everyone around still holds the old one,
+ * showing as "no connection" for the next ten minutes. The list then showed
+ * the same person twice. An entry that is not connected, has no
+ * conversation to keep, and matches someone connected by name and
+ * location is taken to be that: two different people can't share a seat.
+ */
+export function withoutReplaced<T extends { person: ConversationPeer; lastMessage: unknown }>(list: T[]): T[] {
+  const key = (person: ConversationPeer) => `${person.nickname.trim().toLowerCase()}\n${person.label}`;
+  const live = new Set(list.filter((entry) => entry.person.connection === 'connected').map((entry) => key(entry.person)));
+  return list.filter(
+    (entry) => entry.person.connection === 'connected' || entry.lastMessage || !live.has(key(entry.person)),
+  );
+}
