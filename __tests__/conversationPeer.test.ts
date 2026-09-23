@@ -20,6 +20,11 @@ describe('describeConversationPeer', () => {
     expect(person).toMatchObject({ nickname: 'Ana', label: '14A', connection: 'gone', secure: false });
   });
 
+  it('keeps the contact they shared once they are gone', () => {
+    const person = describeConversationPeer('ana', undefined, { nickname: 'Ana', label: '14A', contact: '@ana' });
+    expect(person).toMatchObject({ contact: '@ana', connection: 'gone' });
+  });
+
   it('is nobody without either', () => {
     expect(describeConversationPeer('ana', undefined, undefined)).toBeNull();
   });

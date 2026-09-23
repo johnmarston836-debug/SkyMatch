@@ -20,6 +20,8 @@ export interface ChatContact {
   label: string;
   /** The full location, when it came from their profile rather than a message. */
   location?: UserLocation;
+  /** What they chose to share on their profile card, kept for when they are gone. */
+  contact?: string;
 }
 
 /**
@@ -139,7 +141,12 @@ function readContacts(raw: string | null): Record<string, ChatContact> {
     const contacts: Record<string, ChatContact> = {};
     for (const [peerId, contact] of Object.entries(stored)) {
       if (typeof contact?.nickname !== 'string' || typeof contact.label !== 'string') continue;
-      contacts[peerId] = { nickname: contact.nickname, label: contact.label, location: contact.location };
+      contacts[peerId] = {
+        nickname: contact.nickname,
+        label: contact.label,
+        location: contact.location,
+        ...(typeof contact.contact === 'string' ? { contact: contact.contact } : {}),
+      };
     }
     return contacts;
   } catch {
@@ -324,13 +331,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
       known &&
       known.nickname === contact.nickname &&
       known.label === contact.label &&
-      (contact.location === undefined || JSON.stringify(known.location) === JSON.stringify(contact.location))
+      (contact.location === undefined || JSON.stringify(known.location) === JSON.stringify(contact.location)) &&
+      (contact.contact === undefined || known.contact === contact.contact)
     ) {
       return;
     }
     // A message carries only the label; don't let it wipe a location a
     // profile gave us.
-    const next: ChatContact = { ...contact, location: contact.location ?? known?.location };
+    const next: ChatContact = {
+      ...contact,
+      location: contact.location ?? known?.location,
+      contact: contact.contact ?? known?.contact,
+    };
+    if (next.contact === undefined) delete next.contact;
     set((state) => ({ contacts: { ...state.contacts, [peerId]: next } }));
     if (get().hydrated) void persistContacts(get().contacts);
   },

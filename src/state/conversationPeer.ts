@@ -56,6 +56,7 @@ export function describeConversationPeer(
       // In this phone's words when we know the location itself.
       label: saved.location ? formatLocation(saved.location) : saved.label,
       location: saved.location,
+      contact: saved.contact,
       secure: false,
       connection: 'gone',
       minutesAway: 0,

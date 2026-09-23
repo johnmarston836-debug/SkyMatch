@@ -230,6 +230,8 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
         nickname: profile.nickname,
         label: formatLocation(profile.location),
         location: profile.location,
+        // '' when they took it down, so the saved card forgets it too.
+        contact: profile.contact ?? '',
       });
     }
     // Their announcement carries the fingerprint of the photo they are

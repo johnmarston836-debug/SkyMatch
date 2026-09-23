@@ -34,4 +34,18 @@ describe('someone who leaves the app', () => {
     useDiscoveryStore.getState().setProfile(profile);
     expect(isAway(useDiscoveryStore.getState().peers.p1, start + 10 * 60_000 + 2)).toBe(false);
   });
+
+  it('keeps the card of someone forgotten, and lets go of it when they are back', () => {
+    const start = 1_000_000;
+    jest.spyOn(Date, 'now').mockReturnValue(start);
+    useDiscoveryStore.setState({ peers: {}, forgotten: {} });
+    useDiscoveryStore.getState().setProfile({ ...profile, contact: '@ana' });
+
+    jest.spyOn(Date, 'now').mockReturnValue(start + 10 * 60_000 + 1);
+    useDiscoveryStore.getState().pruneStale();
+    expect(useDiscoveryStore.getState().forgotten.p1?.contact).toBe('@ana');
+
+    useDiscoveryStore.getState().setProfile(profile);
+    expect(useDiscoveryStore.getState().forgotten.p1).toBeUndefined();
+  });
 });
