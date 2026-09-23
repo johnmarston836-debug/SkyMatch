@@ -32,38 +32,43 @@ export const de: Strings = {
     page1Label: 'SO FUNKTIONIERT’S · 1 VON 3',
     page1Title: 'Nachrichten springen von Handy zu Handy',
     page1Body:
-      'SkyMatch nutzt weder Internet noch WLAN. Dein Handy spricht per Bluetooth direkt mit den Handys in deiner Nähe.',
-    page1Caption: 'Das Handy rechts ist zu weit weg, um dich zu hören, aber das in der Mitte gibt deine Nachricht weiter.',
+      'SkyMatch braucht weder Internet noch WLAN. Dein Handy spricht per Bluetooth mit den Handys in deiner Nähe, und jedes gibt die Nachrichten an das nächste weiter.',
+    page1Caption:
+      'Das rechte Handy ist zu weit weg, um dich zu hören – aber das in der Mitte gibt deine Nachricht weiter.',
     page1Body2:
-      'Bluetooth reicht nur wenige Meter, also reichen die Handys dazwischen die Nachrichten weiter, bis sie ' +
-      'ankommen. Je mehr Leute die App offen haben, desto weiter kommt alles.',
+      'Bluetooth reicht nur wenige Meter, aber jeder Sprung zählt: Eine Nachricht kann mehrere Handys durchqueren, bis sie ankommt. Je mehr Leute SkyMatch dabeihaben, desto weiter reicht es.',
+    page1CalloutTitle: 'Funktioniert im Flugmodus',
+    page1CalloutBody:
+      'Kein WLAN, keine mobilen Daten, kein Netz nötig. Im Flugzeug kannst du den Flugmodus anlassen und nur Bluetooth wieder einschalten.',
     page2Label: 'SO FUNKTIONIERT’S · 2 VON 3',
-    page2Title: 'Lass die App offen',
+    /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
+    page2Title: 'Beim Ankommen öffnen, dann Handy einstecken',
     page2Body:
-      'Dein Handy sendet und empfängt nur, solange die App auf dem Bildschirm ist. Schließt du sie oder wechselst ' +
-      'zu einer anderen App, bekommst du nichts mehr — und bist auch keine Brücke mehr für die anderen.',
-    page2Caption: 'Das Handy in der Mitte hat die App geschlossen: es sendet nicht mehr, und die Nachricht kommt auf der anderen Seite nicht mehr an.',
-    calloutTitle: 'Verlässt du die App, verpasst du das Gespräch',
-    calloutBody:
-      'Es gibt keinen Server: Nachrichten existieren nur auf den Handys um dich herum, und was gesagt wird, ' +
-      'während du weg bist, lässt sich später nicht nachholen. Deine privaten Chats bleiben dagegen auf deinem ' +
-      'eigenen Handy gespeichert, damit du die Leute, die du kennengelernt hast, nicht mit der App verlierst.',
+      'Öffne SkyMatch, wenn du ankommst, und lass es ein paar Sekunden auf dem Bildschirm: So verbindet sich dein iPhone mit den Leuten in der Nähe. Danach kannst du es sperren oder andere Apps nutzen – du bekommst weiter Nachrichten und leitest sie für andere weiter.',
+    page2Caption: 'Das Handy in der Mitte ist gesperrt und gibt deine Nachricht trotzdem weiter.',
     page2Body2:
-      'Im Flugzeug ist der Flugmodus kein Problem: du kannst ihn anlassen und Bluetooth einzeln einschalten. ' +
-      'Kein WLAN, keine mobilen Daten, nirgends Empfang nötig.',
-    page2TitleAndroid: 'Schließ die App nicht',
+      'Es gibt keinen Server: Nachrichten existieren nur auf den Handys um dich herum. Was gesagt wird, während du nicht verbunden bist, lässt sich nicht nachholen. Deine privaten Chats bleiben aber auf deinem Handy gespeichert.',
+    page2CalloutTitle: 'Was ein gesperrtes iPhone nicht kann',
+    page2CalloutBody:
+      'Bei gesperrtem Bildschirm findet es neue Leute langsamer, und zwei gesperrte iPhones, die sich noch nie gesehen haben, finden sich nicht. Wenn du SkyMatch im App-Umschalter ganz schließt, bekommst du keine Nachrichten mehr und leitest keine mehr weiter.',
+    /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
+    page2TitleAndroid: 'Bleibt verbunden, auch wenn du rausgehst',
     page2BodyAndroid:
-      'Auf Android bleibt SkyMatch verbunden, auch wenn du die App verlässt – du siehst es an einer Benachrichtigung. Schließt du sie ganz über die letzten Apps oder tippst auf „Trennen“, bekommst du keine Nachrichten mehr und leitest keine mehr für andere weiter.',
-    calloutTitleAndroid: 'Wenn du die App schließt, verpasst du das Gespräch',
+      'Unter Android bleibt SkyMatch im Hintergrund verbunden – du siehst es an einer Benachrichtigung. Du kannst dein Handy sperren oder andere Apps nutzen und bekommst weiter Nachrichten und leitest sie für andere weiter.',
+    page2CalloutTitleAndroid: 'Wann es aufhört',
+    page2CalloutBodyAndroid:
+      'Wenn du in der Benachrichtigung auf „Trennen“ tippst oder SkyMatch in den letzten Apps schließt, bekommst du keine Nachrichten mehr und leitest keine mehr weiter.',
     page3Label: 'SO FUNKTIONIERT’S · 3 VON 3',
-    page3Title: 'Eure privaten Chats könnt nur ihr beide lesen',
+    page3Title: 'Eure privaten Chats könnt nur ihr zwei lesen',
     page3Body:
-      'Private Nachrichten sind Ende-zu-Ende-verschlüsselt. Die Handys, die sie weiterreichen, können sie nicht lesen: weder den Text noch die Fotos.',
+      'Private Nachrichten sind Ende-zu-Ende-verschlüsselt. Die Handys, die sie weitergeben, können sie nicht öffnen: weder den Text noch die Fotos.',
+    page3Caption:
+      'Das Handy in der Mitte gibt die Nachricht verschlossen weiter: Nur wer sie bekommt, kann sie öffnen.',
     page3Body2:
-      'Außerdem ist alles, was du sendest, von deinem Handy signiert. Niemand kann schreiben und sich dabei als dich ausgeben.',
+      'Außerdem ist alles, was du sendest, von deinem Handy signiert – niemand kann in deinem Namen schreiben.',
     securityCalloutTitle: 'Achte auf den Kopf des Chats',
     securityCalloutBody:
-      'Nutzt die andere Person eine ältere Version von SkyMatch, ist euer privater Chat nicht verschlüsselt, und wir weisen dich in Rot darauf hin. Den Sitzplatz gibt dagegen jeder selbst an: Das kann niemand überprüfen.',
+      'Nutzt die andere Person eine alte SkyMatch-Version, ist euer privater Chat nicht verschlüsselt, und wir warnen dich in Rot. Was niemand prüfen kann, ist der Ort: Sitz, Wagen oder Gerät gibt jede Person selbst an.',
     understood: 'Verstanden',
   },
 
@@ -262,7 +267,7 @@ export const de: Strings = {
       peopleSearching: 'Suche nach Passagieren in der Nähe…',
       composerPlaceholder: 'Schreib an die ganze Kabine…',
       emptyTitle: 'Noch hat niemand etwas gesagt',
-      emptySubtitle: 'Sobald Passagiere in der Nähe die App offen haben, tauchen sie hier auf.',
+      emptySubtitle: 'Sobald Passagiere in der Nähe SkyMatch haben, tauchen sie hier auf.',
       locationTitle: 'Auf welchem Sitz sitzt du?',
       locationSubtitle: 'Daran erkennt man dich im Kabinen-Chat.',
       locationHelp:
@@ -280,7 +285,7 @@ export const de: Strings = {
       peopleSearching: 'Suche nach Reisenden in der Nähe…',
       composerPlaceholder: 'Schreib an den ganzen Zug…',
       emptyTitle: 'Noch hat niemand etwas gesagt',
-      emptySubtitle: 'Sobald Reisende in der Nähe die App offen haben, tauchen sie hier auf.',
+      emptySubtitle: 'Sobald Reisende in der Nähe SkyMatch haben, tauchen sie hier auf.',
       locationTitle: 'Wo sitzt du?',
       locationSubtitle: 'Wagen und Platz: damit finden sie dich.',
       locationHelp:
@@ -298,7 +303,7 @@ export const de: Strings = {
       peopleSearching: 'Suche nach Trainierenden in der Nähe…',
       composerPlaceholder: 'Schreib an die ganze Fläche…',
       emptyTitle: 'Noch hat niemand etwas gesagt',
-      emptySubtitle: 'Sobald jemand in der Nähe die App offen hat, taucht er hier auf.',
+      emptySubtitle: 'Sobald jemand in der Nähe SkyMatch hat, taucht er hier auf.',
       locationTitle: 'Was trainierst du heute?',
       locationSubtitle: 'Das verortet dich auf der Fläche: wer dasselbe trainiert, findet dich.',
       locationHelp:
@@ -316,7 +321,7 @@ export const de: Strings = {
       peopleSearching: 'Suche nach Leuten in der Nähe…',
       composerPlaceholder: 'Schreib an die Leute hier…',
       emptyTitle: 'Noch hat niemand etwas gesagt',
-      emptySubtitle: 'Sobald jemand in der Nähe die App offen hat, taucht er hier auf.',
+      emptySubtitle: 'Sobald jemand in der Nähe SkyMatch hat, taucht er hier auf.',
       locationTitle: 'Welche Farbe hast du an?',
       locationSubtitle: 'Die Farbe der Kleidung, die du gerade trägst.',
       locationHelp:

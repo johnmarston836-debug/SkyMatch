@@ -32,38 +32,42 @@ export const fr: Strings = {
     page1Label: 'COMMENT ÇA MARCHE · 1 SUR 3',
     page1Title: 'Les messages sautent de téléphone en téléphone',
     page1Body:
-      'SkyMatch n’utilise ni internet ni wifi. Ton téléphone parle en Bluetooth directement aux téléphones qui sont près de toi.',
-    page1Caption: 'Le téléphone de droite est trop loin pour t’entendre, mais celui du milieu répète ton message.',
+      'SkyMatch n’utilise ni internet ni le wifi. Ton téléphone parle en Bluetooth avec ceux qui l’entourent, et chacun transmet les messages au suivant.',
+    page1Caption:
+      'Le téléphone de droite est trop loin pour t’entendre, mais celui du milieu lui transmet ton message.',
     page1Body2:
-      'Le Bluetooth ne porte qu’à quelques mètres, alors les téléphones au milieu se passent les messages ' +
-      'jusqu’à ce qu’ils arrivent à destination. Plus il y a de gens avec l’appli ouverte, plus tout va loin.',
+      'Le Bluetooth ne porte qu’à quelques mètres, mais chaque saut compte : un message peut traverser plusieurs téléphones avant d’arriver. Plus il y a de monde avec SkyMatch, plus il va loin.',
+    page1CalloutTitle: 'Ça marche en mode avion',
+    page1CalloutBody:
+      'Pas besoin de wifi, de données ni de réseau. En avion, tu peux laisser le mode avion activé et rallumer seulement le Bluetooth.',
     page2Label: 'COMMENT ÇA MARCHE · 2 SUR 3',
-    page2Title: 'Laisse l’appli ouverte',
+    /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
+    page2Title: 'Ouvre-la en arrivant, puis range ton téléphone',
     page2Body:
-      'Ton téléphone n’envoie et ne reçoit que pendant que l’appli est à l’écran. Si tu la fermes ou que tu passes ' +
-      'à une autre application, tu ne reçois plus rien et tu cesses aussi de servir de relais aux autres.',
-    page2Caption: 'Le téléphone du milieu a fermé l’appli : il n’émet plus et le message n’arrive plus de l’autre côté.',
-    calloutTitle: 'Si tu quittes l’appli, tu rates la conversation',
-    calloutBody:
-      'Il n’y a pas de serveur : les messages n’existent que sur les téléphones autour de toi, et ce qui se dit ' +
-      'pendant ton absence sera irrécupérable. Tes discussions privées, elles, restent enregistrées sur ton ' +
-      'propre téléphone, pour ne pas perdre les gens rencontrés en fermant l’appli.',
+      'Ouvre SkyMatch en arrivant et garde-la quelques secondes à l’écran : c’est ainsi que ton iPhone se connecte aux personnes autour de toi. Ensuite, tu peux le verrouiller ou utiliser d’autres applis : tu continues à recevoir les messages et à les relayer pour les autres.',
+    page2Caption: 'Le téléphone du milieu est verrouillé, et il transmet quand même ton message.',
     page2Body2:
-      'Dans un avion, le mode avion n’est pas un problème : tu peux le laisser activé et allumer le Bluetooth ' +
-      'séparément. Pas besoin de wifi, ni de données, ni de réseau où que ce soit.',
-    page2TitleAndroid: 'Ne fermez pas l’app',
+      'Il n’y a pas de serveur : les messages n’existent que sur les téléphones autour de toi, donc ce qui se dit pendant que tu es déconnecté ne peut pas être récupéré. Tes discussions privées, elles, restent enregistrées sur ton téléphone.',
+    page2CalloutTitle: 'Ce qu’un iPhone verrouillé ne peut pas faire',
+    page2CalloutBody:
+      'Écran verrouillé, il met plus de temps à trouver de nouvelles personnes, et deux iPhone verrouillés qui ne se sont jamais vus ne se trouvent pas. Si tu fermes complètement SkyMatch depuis le sélecteur d’applis, tu ne reçois plus de messages et tu ne les relaies plus.',
+    /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
+    page2TitleAndroid: 'Elle reste connectée quand tu sors',
     page2BodyAndroid:
-      'Sur Android, SkyMatch reste connecté quand vous quittez l’app : une notification l’indique. Si vous la fermez complètement depuis les apps récentes, ou touchez « Déconnecter », vous ne recevez plus de messages et ne relayez plus ceux des autres.',
-    calloutTitleAndroid: 'Si vous fermez l’app, vous manquez la conversation',
+      'Sur Android, SkyMatch reste connectée en arrière-plan : tu le verras dans une notification. Tu peux verrouiller ton téléphone ou utiliser d’autres applis : tu continues à recevoir les messages et à les relayer pour les autres.',
+    page2CalloutTitleAndroid: 'Quand elle cesse de fonctionner',
+    page2CalloutBodyAndroid:
+      'Si tu touches « Déconnecter » dans la notification ou fermes SkyMatch depuis les applis récentes, tu ne reçois plus de messages et tu ne les relaies plus.',
     page3Label: 'COMMENT ÇA MARCHE · 3 SUR 3',
-    page3Title: 'Vos discussions privées ne sont lisibles que par vous deux',
+    page3Title: 'Vos discussions privées, vous seuls pouvez les lire',
     page3Body:
-      'Les messages privés sont chiffrés de bout en bout. Les téléphones qui les relaient les transmettent sans pouvoir les lire : ni le texte, ni les photos.',
+      'Les messages privés sont chiffrés de bout en bout. Les téléphones qui les relaient les transmettent sans pouvoir les ouvrir : ni le texte ni les photos.',
+    page3Caption: 'Le téléphone du milieu transmet le message fermé : seul son destinataire peut l’ouvrir.',
     page3Body2:
-      'Et tout ce que vous envoyez est signé par votre téléphone : personne ne peut écrire en se faisant passer pour vous.',
-    securityCalloutTitle: 'Regardez le haut de la discussion',
+      'De plus, tout ce que tu envoies est signé par ton téléphone : personne ne peut écrire en se faisant passer pour toi.',
+    securityCalloutTitle: 'Regarde l’en-tête de la discussion',
     securityCalloutBody:
-      'Si l’autre personne utilise une ancienne version de SkyMatch, votre discussion privée n’est pas chiffrée, et nous vous le signalons en rouge. Le siège, en revanche, c’est chacun qui l’indique : personne ne peut le vérifier.',
+      'Si l’autre personne utilise une ancienne version de SkyMatch, votre discussion privée n’est pas chiffrée, et on te le signale en rouge. Ce que personne ne peut vérifier, c’est l’emplacement : chacun indique lui-même son siège, sa voiture ou sa machine.',
     understood: 'Compris',
   },
 
@@ -260,7 +264,7 @@ export const fr: Strings = {
       peopleSearching: 'Recherche de passagers à proximité…',
       composerPlaceholder: 'Écris à toute la cabine…',
       emptyTitle: 'Personne n’a encore parlé',
-      emptySubtitle: 'Dès qu’il y aura des passagers près de toi avec l’appli ouverte, ils apparaîtront ici.',
+      emptySubtitle: 'Dès qu’il y aura des passagers près de toi avec SkyMatch, ils apparaîtront ici.',
       locationTitle: 'Tu es à quelle place ?',
       locationSubtitle: 'C’est comme ça qu’on te reconnaîtra dans le chat de la cabine.',
       locationHelp:
@@ -278,7 +282,7 @@ export const fr: Strings = {
       peopleSearching: 'Recherche de voyageurs à proximité…',
       composerPlaceholder: 'Écris à tout le train…',
       emptyTitle: 'Personne n’a encore parlé',
-      emptySubtitle: 'Dès qu’il y aura des voyageurs près de toi avec l’appli ouverte, ils apparaîtront ici.',
+      emptySubtitle: 'Dès qu’il y aura des voyageurs près de toi avec SkyMatch, ils apparaîtront ici.',
       locationTitle: 'Tu es assis où ?',
       locationSubtitle: 'Voiture et place : ça suffit pour te trouver.',
       locationHelp:
@@ -296,7 +300,7 @@ export const fr: Strings = {
       peopleSearching: 'Recherche de gens qui s’entraînent à proximité…',
       composerPlaceholder: 'Écris à toute la salle…',
       emptyTitle: 'Personne n’a encore parlé',
-      emptySubtitle: 'Dès qu’il y aura quelqu’un près de toi avec l’appli ouverte, il apparaîtra ici.',
+      emptySubtitle: 'Dès qu’il y aura quelqu’un près de toi avec SkyMatch, il apparaîtra ici.',
       locationTitle: 'Tu travailles quoi aujourd’hui ?',
       locationSubtitle: 'C’est ce qui te situe dans la salle : ceux qui travaillent la même chose te trouvent.',
       locationHelp:
@@ -314,7 +318,7 @@ export const fr: Strings = {
       peopleSearching: 'Recherche de gens à proximité…',
       composerPlaceholder: 'Écris aux gens d’ici…',
       emptyTitle: 'Personne n’a encore parlé',
-      emptySubtitle: 'Dès qu’il y aura quelqu’un près de toi avec l’appli ouverte, il apparaîtra ici.',
+      emptySubtitle: 'Dès qu’il y aura quelqu’un près de toi avec SkyMatch, il apparaîtra ici.',
       locationTitle: 'Tu portes quelle couleur ?',
       locationSubtitle: 'La couleur des vêtements que tu portes en ce moment.',
       locationHelp:

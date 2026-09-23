@@ -30,40 +30,42 @@ export const it: Strings = {
   tutorial: {
     diagramYou: 'TU',
     page1Label: 'COME FUNZIONA · 1 DI 3',
-    page1Title: 'I messaggi saltano di telefono in telefono',
+    page1Title: 'I messaggi saltano da telefono a telefono',
     page1Body:
-      'SkyMatch non usa internet né wifi. Il tuo telefono parla via Bluetooth direttamente con i telefoni che hai vicino.',
-    page1Caption: 'Il telefono a destra è troppo lontano per sentirti, ma quello in mezzo ripete il tuo messaggio.',
+      'SkyMatch non usa internet né wifi. Il tuo telefono parla via Bluetooth con quelli che ha vicino, e ognuno passa i messaggi al successivo.',
+    page1Caption: 'Il telefono a destra è troppo lontano per sentirti, ma quello in mezzo gli passa il tuo messaggio.',
     page1Body2:
-      'Il Bluetooth arriva a pochi metri, quindi i telefoni che stanno in mezzo si passano i messaggi finché ' +
-      'non arrivano a destinazione. Più gente tiene l’app aperta, più lontano arriva tutto.',
+      'Il Bluetooth arriva a pochi metri, ma ogni salto si somma: un messaggio può attraversare diversi telefoni prima di arrivare. Più persone hanno SkyMatch, più lontano arriva.',
+    page1CalloutTitle: 'Funziona in modalità aereo',
+    page1CalloutBody:
+      'Non servono wifi, dati né campo. In aereo puoi lasciare attiva la modalità aereo e riaccendere solo il Bluetooth.',
     page2Label: 'COME FUNZIONA · 2 DI 3',
-    page2Title: 'Lascia l’app aperta',
+    /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
+    page2Title: 'Aprila quando arrivi, poi metti via il telefono',
     page2Body:
-      'Il tuo telefono invia e riceve solo mentre l’app è sullo schermo. Se la chiudi o passi a un’altra ' +
-      'applicazione, smetti di ricevere messaggi e smetti anche di fare da ponte per gli altri.',
-    page2Caption: 'Il telefono in mezzo ha chiuso l’app: smette di trasmettere e il messaggio non arriva più dall’altra parte.',
-    calloutTitle: 'Se esci dall’app, ti perdi la conversazione',
-    calloutBody:
-      'Non c’è nessun server: i messaggi esistono solo sui telefoni che hai intorno, e quello che si dice ' +
-      'mentre non ci sei non lo potrai recuperare dopo. Le tue chat private invece restano salvate sul tuo ' +
-      'telefono, così non perdi chi hai conosciuto quando chiudi l’app.',
+      'Apri SkyMatch quando arrivi e tienila qualche secondo sullo schermo: così il tuo iPhone si collega con chi hai vicino. Dopo puoi bloccarlo o usare altre app, e continuerai a ricevere messaggi e a fare da ponte per gli altri.',
+    page2Caption: 'Il telefono in mezzo è bloccato, eppure passa il tuo messaggio.',
     page2Body2:
-      'In aereo la modalità aereo non è un problema: puoi lasciarla attiva e accendere il Bluetooth a parte. ' +
-      'Non serve wifi, né dati, né campo da nessuna parte.',
-    page2TitleAndroid: 'Non chiudere l’app',
+      'Non c’è un server: i messaggi esistono solo sui telefoni intorno a te, quindi quello che si dice mentre sei disconnesso non si può recuperare. Le tue chat private invece restano salvate sul tuo telefono.',
+    page2CalloutTitle: 'Cosa non può fare un iPhone bloccato',
+    page2CalloutBody:
+      'Con lo schermo bloccato ci mette di più a trovare persone nuove, e due iPhone bloccati che non si sono mai visti non si trovano. Se chiudi del tutto SkyMatch dal multitasking, smetti di ricevere messaggi e di fare da ponte.',
+    /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
+    page2TitleAndroid: 'Resta connessa anche se esci',
     page2BodyAndroid:
-      'Su Android, SkyMatch resta connesso anche se esci dall’app: lo vedrai in una notifica. Se la chiudi del tutto dalle app recenti, o tocchi «Disconnetti», smetti di ricevere messaggi e di fare da ponte per gli altri.',
-    calloutTitleAndroid: 'Se chiudi l’app, ti perdi la conversazione',
+      'Su Android, SkyMatch resta connessa in background: lo vedrai in una notifica. Puoi bloccare il telefono o usare altre app, e continuerai a ricevere messaggi e a fare da ponte per gli altri.',
+    page2CalloutTitleAndroid: 'Quando smette di funzionare',
+    page2CalloutBodyAndroid:
+      'Se tocchi «Disconnetti» nella notifica o chiudi SkyMatch dalle app recenti, smetti di ricevere messaggi e di fare da ponte.',
     page3Label: 'COME FUNZIONA · 3 DI 3',
     page3Title: 'Le vostre chat private le leggete solo voi due',
     page3Body:
-      'I messaggi privati hanno la crittografia end-to-end. I telefoni che fanno da ponte li passano senza poterli leggere: né il testo né le foto.',
-    page3Body2:
-      'Inoltre, tutto ciò che invii è firmato dal tuo telefono, quindi nessuno può scrivere fingendo di essere te.',
+      'I messaggi privati sono crittografati end-to-end. I telefoni che fanno da ponte li passano senza poterli aprire: né il testo né le foto.',
+    page3Caption: 'Il telefono in mezzo passa il messaggio chiuso: solo chi lo riceve può aprirlo.',
+    page3Body2: 'Inoltre tutto ciò che invii è firmato dal tuo telefono, quindi nessuno può scrivere fingendosi te.',
     securityCalloutTitle: 'Guarda l’intestazione della chat',
     securityCalloutBody:
-      'Se l’altra persona usa una versione vecchia di SkyMatch, la vostra chat privata non è crittografata e te lo segnaliamo in rosso. Il posto, invece, lo indica ognuno: quello non può verificarlo nessuno.',
+      'Se l’altra persona usa una versione vecchia di SkyMatch, la vostra chat privata non è crittografata e te lo segnaliamo in rosso. Quello che nessuno può verificare è la posizione: posto, carrozza o macchina li indica ognuno da sé.',
     understood: 'Ho capito',
   },
 
@@ -260,7 +262,7 @@ export const it: Strings = {
       peopleSearching: 'Cerco passeggeri qui vicino…',
       composerPlaceholder: 'Scrivi a tutta la cabina…',
       emptyTitle: 'Non ha ancora parlato nessuno',
-      emptySubtitle: 'Appena ci saranno passeggeri vicini con l’app aperta, compariranno qui.',
+      emptySubtitle: 'Appena ci saranno passeggeri vicini con SkyMatch, compariranno qui.',
       locationTitle: 'A che posto sei?',
       locationSubtitle: 'È così che ti riconosceranno nella chat della cabina.',
       locationHelp:
@@ -278,7 +280,7 @@ export const it: Strings = {
       peopleSearching: 'Cerco viaggiatori qui vicino…',
       composerPlaceholder: 'Scrivi a tutto il treno…',
       emptyTitle: 'Non ha ancora parlato nessuno',
-      emptySubtitle: 'Appena ci saranno viaggiatori vicini con l’app aperta, compariranno qui.',
+      emptySubtitle: 'Appena ci saranno viaggiatori vicini con SkyMatch, compariranno qui.',
       locationTitle: 'Dove sei seduto?',
       locationSubtitle: 'Carrozza e posto: con quelli ti trovano.',
       locationHelp:
@@ -296,7 +298,7 @@ export const it: Strings = {
       peopleSearching: 'Cerco gente che si allena qui vicino…',
       composerPlaceholder: 'Scrivi a tutta la sala…',
       emptyTitle: 'Non ha ancora parlato nessuno',
-      emptySubtitle: 'Appena ci sarà qualcuno vicino con l’app aperta, comparirà qui.',
+      emptySubtitle: 'Appena ci sarà qualcuno vicino con SkyMatch, comparirà qui.',
       locationTitle: 'Cosa alleni oggi?',
       locationSubtitle: 'È quello che ti colloca in sala: chi allena la stessa cosa ti trova.',
       locationHelp:
@@ -314,7 +316,7 @@ export const it: Strings = {
       peopleSearching: 'Cerco gente qui vicino…',
       composerPlaceholder: 'Scrivi alla gente di qui…',
       emptyTitle: 'Non ha ancora parlato nessuno',
-      emptySubtitle: 'Appena ci sarà qualcuno vicino con l’app aperta, comparirà qui.',
+      emptySubtitle: 'Appena ci sarà qualcuno vicino con SkyMatch, comparirà qui.',
       locationTitle: 'Di che colore sei vestito?',
       locationSubtitle: 'Il colore dei vestiti che hai addosso adesso.',
       locationHelp:
