@@ -62,6 +62,14 @@ const SENT_FRAME_TTL_MS = 60_000;
 const MAX_REPAIR_ROUNDS = 6;
 
 /**
+ * Most links an iPhone keeps waiting to come back at once (see recoverLink).
+ * Android phones change their Bluetooth address every so often, so a phone
+ * that walked off can leave a wait behind that will never complete; the
+ * oldest is cancelled to make room.
+ */
+const MAX_PENDING_RECONNECTS = 8;
+
+/**
  * Prefix that marks one of our advertisements in an iOS local name, followed
  * by the packed location (see packLocation): a venue letter and one or two
  * bytes in hex, seven characters at most. An advertisement carrying a
@@ -149,8 +157,12 @@ export class RealBleTransport implements BleTransport {
   private sentFrames = new Map<string, { frames: Frame[]; sentAt: number }>();
   /** profile id -> the Bluetooth device id we reach that person through. */
   private identities = new Map<string, string>();
+  /** Device id -> when we started waiting for a dropped link to come back, oldest first. */
+  private reconnecting = new Map<string, number>();
+  private running = false;
 
   async start(myPeerId: string, location: UserLocation | null): Promise<void> {
+    this.running = true;
     await this.startAdvertising(location);
     this.startScanning();
     this.staleCheckTimer = setInterval(() => {
@@ -162,6 +174,11 @@ export class RealBleTransport implements BleTransport {
   }
 
   async stop(): Promise<void> {
+    this.running = false;
+    this.reconnecting.forEach((_since, deviceId) => {
+      this.manager.cancelDeviceConnection(deviceId).catch(() => {});
+    });
+    this.reconnecting.clear();
     this.scanSubscription?.remove();
     this.scanSubscription = null;
     this.manager.stopDeviceScan();
@@ -301,11 +318,15 @@ export class RealBleTransport implements BleTransport {
     this.scanSubscription = this.manager.onStateChange((state) => {
       useMeshStatusStore.getState().setCentralState(state);
       if (state !== 'PoweredOn') return;
-      this.manager.startDeviceScan([SERVICE_UUID], { allowDuplicates: true }, (error, device) => {
-        if (error || !device) return;
-        this.handleDeviceSeen(device);
-      });
+      this.scan();
     }, true);
+  }
+
+  private scan() {
+    this.manager.startDeviceScan([SERVICE_UUID], { allowDuplicates: true }, (error, device) => {
+      if (error || !device) return;
+      this.handleDeviceSeen(device);
+    });
   }
 
   private handleDeviceSeen(device: Device) {
@@ -325,7 +346,8 @@ export class RealBleTransport implements BleTransport {
     // ever completing.
     if (!this.connectedDevices.has(device.id) && !this.connecting.has(device.id)) {
       this.connecting.add(device.id);
-      this.connectAndSubscribe(device)
+      const options = Platform.OS === 'android' ? { requestMTU: ANDROID_MTU } : undefined;
+      this.connectAndSubscribe(device.id, () => device.connect(options))
         .catch(() => {
           // Both sides racing to connect is normal in a mesh; the loser just retries later.
         })
@@ -333,8 +355,9 @@ export class RealBleTransport implements BleTransport {
     }
   }
 
-  private async connectAndSubscribe(device: Device) {
-    const connected = await device.connect(Platform.OS === 'android' ? { requestMTU: ANDROID_MTU } : undefined);
+  private async connectAndSubscribe(deviceId: string, connect: () => Promise<Device>) {
+    const connected = await connect();
+    this.reconnecting.delete(deviceId);
     await connected.discoverAllServicesAndCharacteristics();
 
     // Confirm the characteristic is really there before treating this as a
@@ -348,15 +371,71 @@ export class RealBleTransport implements BleTransport {
       return;
     }
 
-    this.connectedDevices.set(device.id, connected);
+    this.connectedDevices.set(deviceId, connected);
     useMeshStatusStore.getState().setConnected(this.connectedDevices.size);
 
     connected.monitorCharacteristicForService(SERVICE_UUID, PROFILE_CHAR_UUID, (error, characteristic) => {
       if (error || !characteristic?.value) return;
-      this.handleIncomingFrame(Buffer.from(characteristic.value, 'base64').toString('utf8'), device.id);
+      // A live link is as good as an advert for knowing they are here - and
+      // with the screen locked, it is all an iPhone gets: CoreBluetooth
+      // reports each phone once per scan in the background, however often
+      // it advertises.
+      this.lastSeenAt.set(deviceId, Date.now());
+      this.handleIncomingFrame(Buffer.from(characteristic.value, 'base64').toString('utf8'), deviceId);
     });
 
-    connected.onDisconnected(() => this.dropDevice(device.id));
+    connected.onDisconnected(() => {
+      this.dropDevice(deviceId);
+      this.recoverLink(deviceId);
+    });
+  }
+
+  /**
+   * Gets a dropped link back on an iPhone, including one in a pocket.
+   *
+   * With the screen locked iOS keeps the app's Bluetooth running but changes
+   * how scanning behaves: `allowDuplicates` is ignored, so a phone already
+   * found is never reported again for as long as the scan runs. Reconnecting
+   * only when a scan reports someone meant a link that dropped while the
+   * screen was off stayed down until it was unlocked - and messages waited
+   * with it. The other side can't make up for it either: a locked iPhone
+   * advertises in a form Android doesn't recognise.
+   *
+   * Two things fix that, both allowed in the background. The disconnect is
+   * itself what wakes the app, so it:
+   * - asks CoreBluetooth to connect again to the same phone. That request
+   *   never times out: iOS completes it on its own the moment the phone is
+   *   back in range, screen on or off, with no scanning involved.
+   * - restarts the scan, which clears the "already reported" list, so a
+   *   phone that comes back under a new address is found too.
+   *
+   * Android needs neither: it scans and reconnects normally in the
+   * background, and restarting scans there gets them throttled.
+   */
+  private recoverLink(deviceId: string) {
+    if (Platform.OS !== 'ios' || !this.running) return;
+
+    this.manager.stopDeviceScan();
+    this.scan();
+
+    if (this.connecting.has(deviceId)) return;
+    if (this.reconnecting.size >= MAX_PENDING_RECONNECTS) {
+      const oldest = this.reconnecting.keys().next().value;
+      if (oldest !== undefined) {
+        this.reconnecting.delete(oldest);
+        this.manager.cancelDeviceConnection(oldest).catch(() => {});
+      }
+    }
+    this.reconnecting.set(deviceId, Date.now());
+    this.connecting.add(deviceId);
+    this.connectAndSubscribe(deviceId, () => this.manager.connectToDevice(deviceId))
+      .catch(() => {
+        // Cancelled to make room, or by stop(); a scan finds them again if they come back.
+      })
+      .finally(() => {
+        this.connecting.delete(deviceId);
+        this.reconnecting.delete(deviceId);
+      });
   }
 
   /** Buffers one frame and emits the envelope once every chunk of that send has arrived. */
