@@ -63,7 +63,7 @@ export const de: Strings = {
     page3Body:
       'Private Nachrichten sind Ende-zu-Ende-verschlüsselt. Die Handys, die sie weitergeben, können sie nicht öffnen: weder den Text noch die Fotos.',
     page3Caption:
-      'Das Handy in der Mitte gibt die Nachricht verschlossen weiter: Nur wer sie bekommt, kann sie öffnen.',
+      'Das Handy in der Mitte hat die Nachricht nur verschlüsselt; das rechte, für das sie bestimmt ist, entschlüsselt sie.',
     page3Body2:
       'Außerdem ist alles, was du sendest, von deinem Handy signiert – niemand kann in deinem Namen schreiben.',
     securityCalloutTitle: 'Achte auf den Kopf des Chats',

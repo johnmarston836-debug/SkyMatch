@@ -81,11 +81,14 @@ function Ripple({ delay, faint }: { delay: number; faint?: boolean }) {
   );
 }
 
-/** A padlock drawn in two pieces, so it takes the theme's colours like everything else. */
-function Padlock({ color, size }: { color: string; size: number }) {
+/**
+ * A padlock drawn in two pieces, so it takes the theme's colours like
+ * everything else. `open` (0 -> 1) lifts the shackle out of the body.
+ */
+function Padlock({ color, size, open }: { color: string; size: number; open?: Animated.AnimatedInterpolation<number> }) {
   return (
     <View style={padlock.lock}>
-      <View
+      <Animated.View
         style={[
           padlock.shackle,
           {
@@ -96,6 +99,7 @@ function Padlock({ color, size }: { color: string; size: number }) {
             borderTopLeftRadius: size,
             borderTopRightRadius: size,
           },
+          open ? { transform: [{ translateY: Animated.multiply(open, -size * 0.3) }] } : null,
         ]}
       />
       <View style={{ width: size, height: size * 0.66, borderRadius: size * 0.16, backgroundColor: color }} />
@@ -113,7 +117,7 @@ type Screen =
   | 'you'
   /** Screen off, in a pocket - and still passing messages on. */
   | 'locked'
-  /** Passes a sealed message on without being able to open it. */
+  /** Holds the message only as it travels - encrypted - and can't open it. */
   | 'blind'
   | 'plain';
 
@@ -123,10 +127,16 @@ interface PhoneProps {
   flash?: Animated.Value;
   /** The tick on the last phone once the message is in. */
   tick?: Animated.Value;
+  /**
+   * For a sealed message, on the phone it is for: the padlock arrives,
+   * opens, and gives way to the message itself - decrypted at the end, and
+   * only there.
+   */
+  unlock?: Animated.Value;
   ripplePhase: number;
 }
 
-function Phone({ screen, flash, tick, ripplePhase }: PhoneProps) {
+function Phone({ screen, flash, tick, unlock, ripplePhase }: PhoneProps) {
   const { colors } = useAppTheme();
   const styles = useThemedStyles(({ colors: c, radii }) => ({
     wrapper: { width: RING, height: RING * 1.3, alignItems: 'center' as const, justifyContent: 'center' as const },
@@ -155,8 +165,19 @@ function Phone({ screen, flash, tick, ripplePhase }: PhoneProps) {
     },
     glow: { position: 'absolute' as const, left: 0, right: 0, top: 0, bottom: 0, backgroundColor: c.accent },
     you: { color: '#FFFFFF', fontWeight: '800' as const, fontSize: 11 },
-    dots: { color: c.textMuted, fontWeight: '800' as const, fontSize: 12, letterSpacing: 1 },
     tick: { position: 'absolute' as const, color: c.accent, fontWeight: '800' as const, fontSize: 18 },
+    overlay: { position: 'absolute' as const, alignItems: 'center' as const, justifyContent: 'center' as const },
+    bubble: {
+      width: 24,
+      paddingVertical: 4,
+      paddingHorizontal: 4,
+      gap: 3,
+      borderRadius: 6,
+      borderBottomLeftRadius: 2,
+      backgroundColor: c.accent,
+    },
+    bubbleLine: { height: 2, borderRadius: 1, backgroundColor: 'rgba(255,255,255,0.9)' },
+    bubbleLineShort: { width: '60%' as const },
   }));
 
   return (
@@ -174,7 +195,51 @@ function Phone({ screen, flash, tick, ripplePhase }: PhoneProps) {
           )}
           {screen === 'you' && <Text style={styles.you}>{t.tutorial.diagramYou}</Text>}
           {screen === 'locked' && <Padlock color={colors.textMuted} size={12} />}
-          {screen === 'blind' && <Text style={styles.dots}>•••</Text>}
+          {screen === 'blind' && (
+            // All it ever holds is the padlock: it gives a small nudge as the
+            // message goes through, and stays shut.
+            <Animated.View
+              style={
+                flash
+                  ? { transform: [{ scale: flash.interpolate({ inputRange: [0, 0.3, 1], outputRange: [1, 1.2, 1] }) }] }
+                  : undefined
+              }
+            >
+              <Padlock color={colors.accent} size={LOCK} />
+            </Animated.View>
+          )}
+          {unlock && (
+            <>
+              <Animated.View
+                style={[
+                  styles.overlay,
+                  { opacity: unlock.interpolate({ inputRange: [0, 0.05, 0.4, 0.5], outputRange: [0, 1, 1, 0] }) },
+                ]}
+              >
+                <Padlock
+                  color={colors.accent}
+                  size={LOCK}
+                  open={unlock.interpolate({ inputRange: [0.15, 0.32], outputRange: [0, 1], extrapolate: 'clamp' })}
+                />
+              </Animated.View>
+              <Animated.View
+                style={[
+                  styles.overlay,
+                  {
+                    opacity: unlock.interpolate({ inputRange: [0, 0.45, 0.55, 0.92, 1], outputRange: [0, 0, 1, 1, 0] }),
+                    transform: [
+                      { scale: unlock.interpolate({ inputRange: [0.45, 0.6], outputRange: [0.5, 1], extrapolate: 'clamp' }) },
+                    ],
+                  },
+                ]}
+              >
+                <View style={styles.bubble}>
+                  <View style={styles.bubbleLine} />
+                  <View style={[styles.bubbleLine, styles.bubbleLineShort]} />
+                </View>
+              </Animated.View>
+            </>
+          )}
           {tick && (
             <Animated.Text
               style={[
@@ -232,7 +297,8 @@ interface Props {
   /**
    * `relay`: the message hops across a phone to one out of your reach.
    * `pocket`: the phone in the middle is locked, and still passes it on.
-   * `sealed`: it crosses the middle phone closed, and only opens at the end.
+   * `sealed`: end to end - the middle phone only ever holds it encrypted,
+   *   and the last one opens it.
    */
   variant: 'relay' | 'pocket' | 'sealed';
 }
@@ -242,6 +308,7 @@ export function MeshDiagram({ variant }: Props) {
   const middleFlash = useCycle(MIDDLE_ARRIVAL, 500, FADE);
   const lastFlash = useCycle(LAST_ARRIVAL, 500, FADE);
   const lastTick = useCycle(LAST_ARRIVAL + 100, CYCLE - LAST_ARRIVAL - 200, STEADY);
+  const lastUnlock = useCycle(LAST_ARRIVAL, CYCLE - LAST_ARRIVAL - 100, STEADY);
   const styles = useThemedStyles(({ spacing }) => ({
     row: { flexDirection: 'row' as const, alignItems: 'center' as const, marginVertical: spacing(1) },
   }));
@@ -252,10 +319,13 @@ export function MeshDiagram({ variant }: Props) {
     <View style={styles.row}>
       <Phone screen="you" ripplePhase={0} />
       <Hop at={FIRST_HOP_AT} sealed={sealed} />
-      {/* A phone that can't open the message has nothing to light up for. */}
-      <Phone screen={middle} ripplePhase={400} flash={sealed ? undefined : middleFlash} />
+      <Phone screen={middle} ripplePhase={400} flash={middleFlash} />
       <Hop at={SECOND_HOP_AT} sealed={sealed} />
-      <Phone screen="plain" ripplePhase={800} flash={lastFlash} tick={lastTick} />
+      {sealed ? (
+        <Phone screen="plain" ripplePhase={800} unlock={lastUnlock} />
+      ) : (
+        <Phone screen="plain" ripplePhase={800} flash={lastFlash} tick={lastTick} />
+      )}
     </View>
   );
 }

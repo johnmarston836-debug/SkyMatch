@@ -61,7 +61,7 @@ export const it: Strings = {
     page3Title: 'Le vostre chat private le leggete solo voi due',
     page3Body:
       'I messaggi privati sono crittografati end-to-end. I telefoni che fanno da ponte li passano senza poterli aprire: né il testo né le foto.',
-    page3Caption: 'Il telefono in mezzo passa il messaggio chiuso: solo chi lo riceve può aprirlo.',
+    page3Caption: 'Il telefono in mezzo ha solo il messaggio cifrato; quello a destra, a cui è destinato, lo decifra.',
     page3Body2: 'Inoltre tutto ciò che invii è firmato dal tuo telefono, quindi nessuno può scrivere fingendosi te.',
     securityCalloutTitle: 'Guarda l’intestazione della chat',
     securityCalloutBody:

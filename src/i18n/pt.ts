@@ -64,7 +64,7 @@ export const pt: Strings = {
     page3Title: 'As vossas conversas privadas só vocês os dois as leem',
     page3Body:
       'As mensagens privadas são encriptadas ponto a ponto. Os telemóveis que servem de ponte passam-nas sem as conseguir abrir: nem o texto nem as fotos.',
-    page3Caption: 'O telemóvel do meio passa a mensagem fechada: só quem a recebe a pode abrir.',
+    page3Caption: 'O telemóvel do meio só tem a mensagem encriptada; o da direita, a quem se destina, desencripta-a.',
     page3Body2:
       'Além disso, tudo o que envias vai assinado pelo teu telemóvel, por isso ninguém pode escrever a fazer-se passar por ti.',
     securityCalloutTitle: 'Repara no topo da conversa',

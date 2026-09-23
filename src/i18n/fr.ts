@@ -62,7 +62,8 @@ export const fr: Strings = {
     page3Title: 'Vos discussions privées, vous seuls pouvez les lire',
     page3Body:
       'Les messages privés sont chiffrés de bout en bout. Les téléphones qui les relaient les transmettent sans pouvoir les ouvrir : ni le texte ni les photos.',
-    page3Caption: 'Le téléphone du milieu transmet le message fermé : seul son destinataire peut l’ouvrir.',
+    page3Caption:
+      'Le téléphone du milieu n’a que le message chiffré ; celui de droite, son destinataire, le déchiffre.',
     page3Body2:
       'De plus, tout ce que tu envoies est signé par ton téléphone : personne ne peut écrire en se faisant passer pour toi.',
     securityCalloutTitle: 'Regarde l’en-tête de la discussion',

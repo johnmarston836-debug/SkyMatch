@@ -69,7 +69,8 @@ export const es = {
     page3Title: 'Tus chats privados solo los leéis vosotros dos',
     page3Body:
       'Los mensajes privados van cifrados de extremo a extremo. Los móviles que hacen de puente los pasan sin poder abrirlos: ni el texto ni las fotos.',
-    page3Caption: 'El móvil de en medio pasa el mensaje cerrado: solo quien lo recibe puede abrirlo.',
+    page3Caption:
+      'El móvil de en medio solo tiene el mensaje cifrado; el de la derecha, a quien va dirigido, lo descifra.',
     page3Body2:
       'Además, todo lo que envías va firmado por tu móvil, así que nadie puede escribir haciéndose pasar por ti.',
     securityCalloutTitle: 'Fíjate en la cabecera del chat',

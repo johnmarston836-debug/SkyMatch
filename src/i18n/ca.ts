@@ -61,7 +61,7 @@ export const ca: Strings = {
     page3Title: 'Els vostres xats privats només els llegiu vosaltres dos',
     page3Body:
       'Els missatges privats van xifrats d’extrem a extrem. Els mòbils que fan de pont els passen sense poder obrir-los: ni el text ni les fotos.',
-    page3Caption: 'El mòbil del mig passa el missatge tancat: només qui el rep el pot obrir.',
+    page3Caption: 'El mòbil del mig només té el missatge xifrat; el de la dreta, a qui va adreçat, el desxifra.',
     page3Body2:
       'A més, tot el que envies va signat pel teu mòbil, així que ningú no pot escriure fent-se passar per tu.',
     securityCalloutTitle: 'Fixa’t en la capçalera del xat',

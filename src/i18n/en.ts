@@ -62,7 +62,8 @@ export const en: Strings = {
     page3Title: 'Only the two of you can read your private chats',
     page3Body:
       'Private messages are end-to-end encrypted. The phones that relay them pass them on without being able to open them: neither the text nor the photos.',
-    page3Caption: 'The phone in the middle passes the message on sealed: only the person it is for can open it.',
+    page3Caption:
+      'The phone in the middle only ever holds the message encrypted; the one on the right, who it is for, decrypts it.',
     page3Body2: 'And everything you send is signed by your phone, so nobody can write pretending to be you.',
     securityCalloutTitle: 'Check the top of the chat',
     securityCalloutBody:
