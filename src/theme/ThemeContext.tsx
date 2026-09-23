@@ -49,16 +49,22 @@ const THEME_FADE_MS = 350;
  * instead of flashing in. It never takes a touch.
  */
 function ThemeFade({ background }: { background: string }) {
-  const previous = useRef(background);
+  const [shown, setShown] = useState(background);
   const [cover, setCover] = useState<string | null>(null);
   const opacity = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    if (previous.current === background) return;
-    const from = previous.current;
-    previous.current = background;
-    setCover(from);
+  // Noticed while rendering, not in an effect afterwards. An effect runs once
+  // the new colours are already on screen, so the old background came back
+  // for a frame before fading out - a flash from new to old to new. Caught
+  // here, the cover goes up in the very frame the colours change.
+  if (shown !== background) {
+    setShown(background);
+    setCover(shown);
     opacity.setValue(1);
+  }
+
+  useEffect(() => {
+    if (cover === null) return;
     const animation = Animated.timing(opacity, {
       toValue: 0,
       duration: THEME_FADE_MS,
@@ -69,7 +75,7 @@ function ThemeFade({ background }: { background: string }) {
       if (finished) setCover(null);
     });
     return () => animation.stop();
-  }, [background, opacity]);
+  }, [cover, opacity]);
 
   if (cover === null) return null;
   return <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, { backgroundColor: cover, opacity }]} />;
