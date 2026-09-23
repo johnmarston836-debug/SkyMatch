@@ -133,7 +133,6 @@ export function ChatScreen({ route, navigation }: Props) {
     bubbleTheirs: { backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border },
     bubbleTextMine: { ...typography.body, color: colors.background },
     bubbleTextTheirs: { ...typography.body },
-    seen: { fontSize: 11, color: colors.textMuted, alignSelf: 'flex-end' as const, marginTop: 2 },
     undelivered: {
       fontSize: 11,
       fontWeight: '600' as const,
@@ -296,9 +295,13 @@ export function ChatScreen({ route, navigation }: Props) {
                 </Pressable>
               )}
               <Text style={mine ? styles.bubbleTextMine : styles.bubbleTextTheirs}>{item.body}</Text>
-              <Text style={mine ? styles.timeMine : styles.time}>{formatTime(item.sentAt)}</Text>
+              {/* "Seen" rides with the time, inside the bubble: beside it, it
+                  pushed the bubble off the right edge and left a gap there. */}
+              <Text style={mine ? styles.timeMine : styles.time}>
+                {formatTime(item.sentAt)}
+                {item.id === lastSeenMine ? ` · ${t.chat.seen}` : ''}
+              </Text>
             </View>
-            {item.id === lastSeenMine && <Text style={styles.seen}>{t.chat.seen}</Text>}
           </View>
           {mine && item.undelivered && (
             <Pressable onPress={() => retryPrivateMessage(peerId, item.id)} accessibilityRole="button" hitSlop={8}>
