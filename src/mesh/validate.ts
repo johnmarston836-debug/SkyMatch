@@ -1,6 +1,7 @@
 import type {
   AvatarPacket,
   ChatMessage,
+  DeliveryReceipt,
   PresenceAlert,
   PresenceReaction,
   ReactionKind,
@@ -99,6 +100,7 @@ export function readChatMessage(value: unknown, envelopeFromId: string): ChatMes
     fromLoc: readPackedLocation(message.fromLoc),
     replyTo: readQuote(message.replyTo),
   };
+  delete read.undelivered;
   if (read.fromLoc === undefined) delete read.fromLoc;
   if (image === undefined) delete read.imageBase64;
   else read.imageBase64 = image;
@@ -148,6 +150,15 @@ export function readReceipt(value: unknown, envelopeFromId: string, myId: string
   if (receipt.fromId !== envelopeFromId || receipt.toId !== myId) return null;
   if (!isTime(receipt.upTo)) return null;
   return { fromId: receipt.fromId, toId: receipt.toId, upTo: receipt.upTo };
+}
+
+/** Same rule as a read receipt: from who the mesh says, about a message of ours. */
+export function readDelivery(value: unknown, envelopeFromId: string, myId: string): DeliveryReceipt | null {
+  if (!value || typeof value !== 'object') return null;
+  const receipt = value as Partial<DeliveryReceipt>;
+  if (receipt.fromId !== envelopeFromId || receipt.toId !== myId) return null;
+  if (!isText(receipt.messageId) || receipt.messageId.length === 0) return null;
+  return { fromId: receipt.fromId, toId: receipt.toId, messageId: receipt.messageId.slice(0, 64) };
 }
 
 export function readAvatar(value: unknown, envelopeFromId: string): AvatarPacket | null {

@@ -10,6 +10,7 @@ import { useBlockStore } from '../state/blockStore';
 import { useIdentityStore } from '../state/identityStore';
 import { notifyPrivateMessage } from '../notifications/notifier';
 import * as Background from 'skymatch-peripheral/background';
+import { DeliveryTracker } from './delivery';
 import { AppState } from 'react-native';
 import { t } from '../i18n';
 import { requestBlePermissions } from '../utils/permissions';
@@ -158,6 +159,25 @@ function inFlightCount(): number {
 /** The last moment we told each person we had read up to, so we don't repeat ourselves. */
 const lastReceiptSent = new Map<string, number>();
 
+/** Our own private message with this id, in the conversation with this person. */
+function ownPrivateMessage(peerId: string, messageId: string): ChatMessage | undefined {
+  return useChatStore.getState().privateMessagesByPeer[peerId]?.find((message) => message.id === messageId);
+}
+
+/** Retries private messages until they are confirmed; see delivery.ts. */
+const deliveries = new DeliveryTracker(
+  async (messageId, peerId) => {
+    const message = ownPrivateMessage(peerId, messageId);
+    // Deleted from this phone meanwhile: nothing left to send.
+    if (!message || !service) {
+      deliveries.confirm(messageId);
+      return;
+    }
+    await service.sendPrivateMessage(message, true);
+  },
+  (messageId, peerId) => useChatStore.getState().setUndelivered(peerId, messageId, true),
+);
+
 /** Wires mesh events into the zustand stores. Call once, after the local profile is ready. */
 export async function startMesh(myProfile: Profile): Promise<MeshService> {
   if (service) return service;
@@ -188,6 +208,8 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   // landed under an id nothing else in the app ever looked up.
   service.on('profile', (_peerId, packet) => {
     if (useBlockStore.getState().isMuted(packet.id)) return;
+    // Back in range: whatever didn't reach them while they were away goes again.
+    if (typeof packet?.id === 'string') deliveries.peerBack(packet.id);
     // Everything past this line is untyped input from another phone, which
     // may be running an older build (a profile was a bare seat then) or a
     // newer one. A profile we can't read is dropped rather than stored:
@@ -285,6 +307,9 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
 
     const incoming = message.fromId !== myProfile.id;
     const peerId = incoming ? message.fromId : message.toId!;
+    // A sender that never heard our receipt sends it again; it is already
+    // here, and already announced.
+    if (useChatStore.getState().privateMessagesByPeer[peerId]?.some((m) => m.id === message.id)) return;
     useChatStore.getState().addPrivateMessage(peerId, message, incoming);
     if (incoming) {
       const profile = useDiscoveryStore.getState().peers[peerId]?.profile;
@@ -311,6 +336,14 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
       // Older builds don't send a name; their profile has one.
       nickname: alert.nickname ?? useDiscoveryStore.getState().peers[alert.fromId]?.profile?.nickname,
     });
+  });
+
+  service.on('delivered', (receipt) => {
+    deliveries.confirm(receipt.messageId);
+    // It may have got there after we had given up on it.
+    if (ownPrivateMessage(receipt.fromId, receipt.messageId)?.undelivered) {
+      useChatStore.getState().setUndelivered(receipt.fromId, receipt.messageId, false);
+    }
   });
 
   service.on('read', (receipt) => {
@@ -421,7 +454,19 @@ export async function sendPrivateChatMessage(
       location: profile.location,
     });
   }
-  await service.sendPrivateMessage(message);
+  if (service.acksFrom(toId)) deliveries.expect(message.id, toId);
+  try {
+    await service.sendPrivateMessage(message);
+  } finally {
+    deliveries.sent(message.id);
+  }
+}
+
+/** "Not delivered", tapped: clears the mark and starts a new round of attempts. */
+export function retryPrivateMessage(peerId: string, messageId: string) {
+  if (!service || !ownPrivateMessage(peerId, messageId)) return;
+  useChatStore.getState().setUndelivered(peerId, messageId, false);
+  deliveries.retry(messageId, peerId);
 }
 
 /**

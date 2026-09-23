@@ -106,6 +106,8 @@ export const pt: Strings = {
     noContact: 'Não partilhou contacto',
     placeholder: 'Escreve uma mensagem…',
     seen: 'Visto',
+    /** Under a private message of ours that never reached them; tapping it tries again. */
+    undelivered: 'Não entregue · Toque para reenviar',
     replyingTo: (nickname: string) => `A responder a ${nickname}`,
     encrypted: 'Encriptação ponta a ponta: só vocês os dois podem ler esta conversa',
     notEncrypted: 'Sem encriptação: esta pessoa usa uma versão antiga do SkyMatch',

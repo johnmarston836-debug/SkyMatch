@@ -97,6 +97,8 @@ interface ChatState {
   deleteConversation: (peerId: string) => void;
   /** Records who a conversation is with, so it keeps a name once they are gone. */
   rememberContact: (peerId: string, contact: ChatContact) => void;
+  /** Marks one of our private messages as not having arrived, or clears the mark. */
+  setUndelivered: (peerId: string, messageId: string, undelivered: boolean) => void;
 }
 
 /** Trims a conversation to what is worth keeping on disk. */
@@ -331,6 +333,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
     const next: ChatContact = { ...contact, location: contact.location ?? known?.location };
     set((state) => ({ contacts: { ...state.contacts, [peerId]: next } }));
     if (get().hydrated) void persistContacts(get().contacts);
+  },
+
+  setUndelivered: (peerId, messageId, undelivered) => {
+    const thread = get().privateMessagesByPeer[peerId];
+    const index = thread?.findIndex((message) => message.id === messageId) ?? -1;
+    if (!thread || index < 0 || (thread[index].undelivered === true) === undelivered) return;
+    const updated = { ...thread[index] };
+    if (undelivered) updated.undelivered = true;
+    else delete updated.undelivered;
+    const next = thread.slice();
+    next[index] = updated;
+    set((state) => ({ privateMessagesByPeer: { ...state.privateMessagesByPeer, [peerId]: next } }));
+    if (get().hydrated) void persist(get().privateMessagesByPeer);
   },
 
   newestIncoming: (peerId, myId) => {

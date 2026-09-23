@@ -53,6 +53,12 @@ export interface ProfilePacket extends Profile {
    * theirs; absent from builds before signing existed.
    */
   keys?: { sign: string; box: string };
+  /**
+   * Says this build answers every private message with a DeliveryReceipt,
+   * so the sender can tell a message that got lost from one still on its
+   * way. Absent from builds before delivery receipts.
+   */
+  acks?: boolean;
 }
 
 export type MessageScope = 'group' | 'private';
@@ -99,6 +105,11 @@ export interface ChatMessage {
   /** Set when this message is an answer to another one. */
   replyTo?: ReplyQuote;
   sentAt: number;
+  /**
+   * Only on this phone, never sent: set on a private message of ours once
+   * every attempt at getting it across went unanswered (see delivery.ts).
+   */
+  undelivered?: boolean;
   /** true when this bubble was relayed to us over the mesh rather than received directly */
   viaMesh?: boolean;
 }
@@ -137,6 +148,17 @@ export interface PresenceAlert {
  * forty. Repeating it is harmless, which matters on a radio that loses
  * things.
  */
+/**
+ * "It got here": sent back for every private message received, however
+ * many times it arrives. Unlike a ReadReceipt it says nothing about anyone
+ * looking at it - only that the sender can stop trying.
+ */
+export interface DeliveryReceipt {
+  fromId: string;
+  toId: string;
+  messageId: string;
+}
+
 export interface ReadReceipt {
   fromId: string;
   toId: string;

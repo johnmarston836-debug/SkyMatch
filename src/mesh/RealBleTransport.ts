@@ -1,4 +1,4 @@
-import { BleManager, type Device, type Subscription } from 'react-native-ble-plx';
+import { BleManager, ConnectionPriority, type Device, type Subscription } from 'react-native-ble-plx';
 import * as Peripheral from 'skymatch-peripheral';
 import { Platform } from 'react-native';
 import { Buffer } from 'buffer';
@@ -55,9 +55,13 @@ const STALLED_MS = 2_500;
 const SENT_FRAME_TTL_MS = 60_000;
 
 /**
- * How many times one send is chased before giving up. The photo layer asks
- * again on its own timer anyway, so this only has to cover a bad patch, not
- * a peer who left.
+ * How many repair rounds in a row may bring nothing before a send is given
+ * up on. Counted from the last round that recovered anything: a request
+ * names at most MAX_REPAIR_REQUEST chunks, so a photo that lost a long run
+ * of them needs many rounds - and used to be abandoned after six whatever
+ * they were achieving. The message layer resends the whole thing anyway if
+ * it never arrives (see delivery.ts), so this only has to cover a bad
+ * patch, not a peer who left.
  */
 const MAX_REPAIR_ROUNDS = 6;
 
@@ -147,7 +151,16 @@ export class RealBleTransport implements BleTransport {
   /** frameId -> the chunks of that send so far, across all devices - frame ids are globally unique so one map is enough. */
   private pendingFrames = new Map<
     string,
-    { parts: Map<number, string>; touchedAt: number; total: number; from: string; rounds: number }
+    {
+      parts: Map<number, string>;
+      touchedAt: number;
+      total: number;
+      from: string;
+      /** Repair rounds since the last one that brought anything back. */
+      rounds: number;
+      /** How many chunks were in when the last repair round went out. */
+      partsAtRound: number;
+    }
   >();
   /**
    * The chunks we sent, kept so a receiver can ask for the ones that never
@@ -372,6 +385,13 @@ export class RealBleTransport implements BleTransport {
     }
 
     this.connectedDevices.set(deviceId, connected);
+    // Android starts a link on its slowest connection interval, around 50ms
+    // a round trip - and a photo is hundreds of writes that each wait for
+    // one. High priority is about 15ms. iOS picks its own and has no such
+    // call.
+    if (Platform.OS === 'android') {
+      this.manager.requestConnectionPriorityForDevice(deviceId, ConnectionPriority.High).catch(() => {});
+    }
     useMeshStatusStore.getState().setConnected(this.connectedDevices.size);
 
     connected.monitorCharacteristicForService(SERVICE_UUID, PROFILE_CHAR_UUID, (error, characteristic) => {
@@ -459,7 +479,14 @@ export class RealBleTransport implements BleTransport {
     let pending = this.pendingFrames.get(frame.id);
     if (!pending) {
       if (this.pendingFrames.size >= MAX_PENDING_SENDS) this.dropOldestPending();
-      pending = { parts: new Map<number, string>(), touchedAt: 0, total: frame.total, from: fromPeerId, rounds: 0 };
+      pending = {
+        parts: new Map<number, string>(),
+        touchedAt: 0,
+        total: frame.total,
+        from: fromPeerId,
+        rounds: 0,
+        partsAtRound: 0,
+      };
       this.pendingFrames.set(frame.id, pending);
     }
     // Every chunk of a send states the same total; one that doesn't is not
@@ -541,11 +568,13 @@ export class RealBleTransport implements BleTransport {
     const now = Date.now();
     this.pendingFrames.forEach((pending, frameId) => {
       if (now - pending.touchedAt < STALLED_MS) return; // still arriving
+      if (pending.parts.size > pending.partsAtRound) pending.rounds = 0; // the last round worked
       if (pending.rounds >= MAX_REPAIR_ROUNDS) return;
       const need = missingIndices(pending.parts, pending.total);
       if (need.length === 0) return;
 
       pending.rounds += 1;
+      pending.partsAtRound = pending.parts.size;
       // Counts as activity, so the next round waits its turn rather than
       // firing again on the very next tick.
       pending.touchedAt = now;

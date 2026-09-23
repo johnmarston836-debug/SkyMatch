@@ -5,6 +5,7 @@ import type {
   AvatarPacket,
   AvatarRequest,
   ChatMessage,
+  DeliveryReceipt,
   PresenceAlert,
   PresenceReaction,
   Profile,
@@ -13,7 +14,7 @@ import type {
   UserLocation,
 } from '../types';
 import { newId } from '../utils/id';
-import { readAvatar, readChatMessage, readPresenceAlert, readReaction, readReceipt } from './validate';
+import { readAvatar, readChatMessage, readDelivery, readPresenceAlert, readReaction, readReceipt } from './validate';
 import { isKeyedId, publicKeysOf, type Identity } from '../crypto/identity';
 import { SecureChannel, isSealed } from '../crypto/secure';
 
@@ -43,6 +44,8 @@ type Listeners = {
   avatarRequest: (fromId: string, full: boolean) => void;
   /** Someone has read what we sent them. */
   read: (receipt: ReadReceipt) => void;
+  /** A private message of ours reached the person it was for. */
+  delivered: (receipt: DeliveryReceipt) => void;
 };
 
 /**
@@ -69,7 +72,10 @@ export class MeshService {
     avatar: new Set(),
     avatarRequest: new Set(),
     read: new Set(),
+    delivered: new Set(),
   };
+  /** People whose build answers private messages with a DeliveryReceipt (ProfilePacket.acks). */
+  private ackers = new Set<string>();
 
   /** Null only for a phone with no keys: the tests, and a profile not yet moved to a keyed id. */
   private secure: SecureChannel | null;
@@ -95,6 +101,11 @@ export class MeshService {
     return this.secure?.knows(peerId) ?? false;
   }
 
+  /** Whether this person says when a private message reached them; see delivery.ts. */
+  acksFrom(peerId: string): boolean {
+    return this.ackers.has(peerId);
+  }
+
   async start(location: UserLocation | null) {
     await this.transport.start(this.myPeerId, location);
   }
@@ -117,7 +128,7 @@ export class MeshService {
     // `''` travels: it is how someone says they took their photo down.
     // `undefined` does not: it means we don't know yet, and announcing that
     // as "no photo" makes everyone else throw away the copy they hold.
-    const withHash: ProfilePacket = avatarHash === undefined ? profile : { ...profile, avatarHash };
+    const withHash: ProfilePacket = { ...(avatarHash === undefined ? profile : { ...profile, avatarHash }), acks: true };
     const payload: ProfilePacket = this.secure ? { ...withHash, keys: publicKeysOf(this.secure.identity) } : withHash;
     await this.send({ id: newId(), kind: 'profile', fromId: this.myPeerId, toId: BROADCAST_ID, payload });
   }
@@ -133,13 +144,20 @@ export class MeshService {
    * bandwidth for one photo. A private image only costs the direct
    * connection (or the handful of hops) between the two people involved.
    */
-  async sendPrivateMessage(message: ChatMessage) {
+  async sendPrivateMessage(message: ChatMessage, retry = false) {
     if (!message.toId) throw new Error('sendPrivateMessage requires message.toId');
+    // The "not delivered" mark is this phone's own note; it never travels.
+    const outgoing = { ...message };
+    delete outgoing.undelivered;
     // Sealed whenever the recipient has announced a key: the strangers'
     // phones it crosses on the way can pass it on but not read it. Someone
     // on a build without keys gets it as before - the chat says so.
-    const payload = this.secure?.seal(message) ?? message;
-    await this.send({ id: message.id, kind: 'chat', fromId: this.myPeerId, toId: message.toId, payload });
+    const payload = this.secure?.seal(outgoing) ?? outgoing;
+    // A retry needs an envelope id nobody has seen, or every relay - and the
+    // receiver - would drop it as a copy of the first attempt. The message
+    // keeps its own id, which is what the receiver files it by.
+    const id = retry ? newId() : message.id;
+    await this.send({ id, kind: 'chat', fromId: this.myPeerId, toId: message.toId, payload });
   }
 
   /**
@@ -176,6 +194,12 @@ export class MeshService {
   async requestAvatar(toId: string, full = false) {
     const payload: AvatarRequest = full ? { full: true } : {};
     await this.send({ id: newId(), kind: 'avatarRequest', fromId: this.myPeerId, toId, payload });
+  }
+
+  /** Tells whoever sent us a private message that it arrived, so they stop sending it. */
+  private async sendDelivered(message: ChatMessage) {
+    const receipt: DeliveryReceipt = { fromId: this.myPeerId, toId: message.fromId, messageId: message.id };
+    await this.send({ id: newId(), kind: 'delivered', fromId: this.myPeerId, toId: message.fromId, payload: receipt });
   }
 
   /** Tells one person we have read up to a point in what they sent us. */
@@ -276,6 +300,8 @@ export class MeshService {
     const { fromId, payload } = envelope;
     switch (envelope.kind) {
       case 'profile':
+        if ((payload as ProfilePacket | null)?.acks === true) this.ackers.add(fromId);
+        else this.ackers.delete(fromId);
         this.emit('profile', fromId, payload as ProfilePacket);
         break;
       case 'chat': {
@@ -287,6 +313,9 @@ export class MeshService {
         const addressedToMe = envelope.toId === this.myPeerId && message.toId === this.myPeerId;
         if (message.scope === 'group' ? envelope.toId !== BROADCAST_ID : !addressedToMe) break;
         this.emit('message', message);
+        // Every copy is answered, not just the first: a second copy means
+        // the answer to the first one got lost.
+        if (message.scope === 'private') void this.sendDelivered(message);
         break;
       }
       case 'presence': {
@@ -310,6 +339,11 @@ export class MeshService {
       case 'read': {
         const receipt = readReceipt(payload, fromId, this.myPeerId);
         if (receipt) this.emit('read', receipt);
+        break;
+      }
+      case 'delivered': {
+        const receipt = readDelivery(payload, fromId, this.myPeerId);
+        if (receipt) this.emit('delivered', receipt);
         break;
       }
       default:

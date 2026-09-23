@@ -103,6 +103,8 @@ export const de: Strings = {
     noContact: 'Kein Kontakt geteilt',
     placeholder: 'Schreib eine Nachricht…',
     seen: 'Gelesen',
+    /** Under a private message of ours that never reached them; tapping it tries again. */
+    undelivered: 'Nicht zugestellt · Tippen zum erneuten Senden',
     replyingTo: (nickname: string) => `Antwort an ${nickname}`,
     encrypted: 'Ende-zu-Ende-verschlüsselt: Nur ihr beide könnt diesen Chat lesen',
     notEncrypted: 'Nicht verschlüsselt: Diese Person nutzt eine ältere Version von SkyMatch',

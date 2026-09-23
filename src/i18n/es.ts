@@ -113,6 +113,8 @@ export const es = {
     noContact: 'No ha compartido contacto',
     placeholder: 'Escribe un mensaje…',
     seen: 'Visto',
+    /** Under a private message of ours that never reached them; tapping it tries again. */
+    undelivered: 'No entregado · Toca para reenviar',
     replyingTo: (nickname: string) => `Respondiendo a ${nickname}`,
     /** Under the header of a private chat, depending on whether the other phone announced keys. */
     encrypted: 'Cifrado de extremo a extremo: solo vosotros dos podéis leer este chat',

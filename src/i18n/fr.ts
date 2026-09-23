@@ -103,6 +103,8 @@ export const fr: Strings = {
     noContact: 'Aucun contact partagé',
     placeholder: 'Écris un message…',
     seen: 'Vu',
+    /** Under a private message of ours that never reached them; tapping it tries again. */
+    undelivered: 'Non distribué · Touchez pour renvoyer',
     replyingTo: (nickname: string) => `Réponse à ${nickname}`,
     encrypted: 'Chiffré de bout en bout : vous seuls pouvez lire cette discussion',
     notEncrypted: 'Non chiffré : cette personne utilise une ancienne version de SkyMatch',

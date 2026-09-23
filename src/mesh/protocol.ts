@@ -67,7 +67,7 @@ export const BEAT_RELAY_SUPPRESS_AFTER = 3;
 export const BEAT_RELAY_JITTER_MS: [number, number] = [30, 150]; // recently-relayed message ids kept to stop flood loops
 export const PEER_STALE_MS = 15_000; // an advert not refreshed within this window is considered out of range
 
-export type PacketKind = 'profile' | 'chat' | 'presence' | 'reaction' | 'avatar' | 'avatarRequest' | 'read';
+export type PacketKind = 'profile' | 'chat' | 'presence' | 'reaction' | 'avatar' | 'avatarRequest' | 'read' | 'delivered';
 
 export interface MeshEnvelope<TPayload = unknown> {
   id: string; // uuid; used for dedup across the whole mesh

@@ -103,6 +103,8 @@ export const it: Strings = {
     noContact: 'Non ha condiviso un contatto',
     placeholder: 'Scrivi un messaggio…',
     seen: 'Visto',
+    /** Under a private message of ours that never reached them; tapping it tries again. */
+    undelivered: 'Non consegnato · Tocca per inviare di nuovo',
     replyingTo: (nickname: string) => `Rispondi a ${nickname}`,
     encrypted: 'Crittografia end-to-end: solo voi due potete leggere questa chat',
     notEncrypted: 'Non crittografata: questa persona usa una versione vecchia di SkyMatch',

@@ -103,6 +103,8 @@ export const ca: Strings = {
     noContact: 'No ha compartit contacte',
     placeholder: 'Escriu un missatge…',
     seen: 'Vist',
+    /** Under a private message of ours that never reached them; tapping it tries again. */
+    undelivered: 'No entregat · Toca per tornar-lo a enviar',
     replyingTo: (nickname: string) => `Responent a ${nickname}`,
     encrypted: 'Xifrat d’extrem a extrem: només vosaltres dos podeu llegir aquest xat',
     notEncrypted: 'Sense xifrar: aquesta persona fa servir una versió antiga de SkyMatch',

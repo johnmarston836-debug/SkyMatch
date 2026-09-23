@@ -21,7 +21,12 @@ import { useDiscoveryStore } from '../../state/discoveryStore';
 import { describeConversationPeer } from '../../state/conversationPeer';
 import { useNow } from '../../hooks/useNow';
 import { useProfileStore } from '../../state/profileStore';
-import { requestFullAvatar, sendPrivateChatMessage, sendReadReceipt } from '../../mesh/meshController';
+import {
+  requestFullAvatar,
+  retryPrivateMessage,
+  sendPrivateChatMessage,
+  sendReadReceipt,
+} from '../../mesh/meshController';
 import { colorForPeer } from '../../theme';
 import { t } from '../../i18n';
 import { formatTime, quoteOf } from '../../utils/id';
@@ -94,6 +99,14 @@ export function ChatScreen({ route, navigation }: Props) {
     bubbleTextMine: { ...typography.body, color: colors.background },
     bubbleTextTheirs: { ...typography.body },
     seen: { fontSize: 11, color: colors.textMuted, alignSelf: 'flex-end' as const, marginTop: 2 },
+    undelivered: {
+      fontSize: 11,
+      fontWeight: '600' as const,
+      color: colors.danger,
+      textAlign: 'right' as const,
+      marginTop: -spacing(0.5),
+      marginBottom: spacing(1),
+    },
     time: { fontSize: 11, color: colors.textMuted, alignSelf: 'flex-end' as const, marginTop: 2 },
     timeMine: { fontSize: 11, color: colors.background, opacity: 0.6, alignSelf: 'flex-end' as const, marginTop: 2 },
     image: { width: 220, height: 220, borderRadius: radii.sm, marginBottom: spacing(1) },
@@ -213,22 +226,29 @@ export function ChatScreen({ route, navigation }: Props) {
     const mine = item.fromId === myProfile.id;
     return (
       <SwipeToReply onReply={() => setReplyTo(quoteOf(item))}>
-        <View style={[styles.bubbleRow, mine && styles.bubbleRowMine]}>
-          <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>
-            {item.replyTo && <QuotedMessage quote={item.replyTo} inverted={mine} />}
-            {item.imageBase64 && (
-              <Pressable onPress={() => setZoomedPhoto(item.imageBase64 ?? null)}>
-                <Image
-                  source={{ uri: `data:image/jpeg;base64,${item.imageBase64}` }}
-                  style={styles.image}
-                  resizeMode="cover"
-                />
-              </Pressable>
-            )}
-            <Text style={mine ? styles.bubbleTextMine : styles.bubbleTextTheirs}>{item.body}</Text>
-            <Text style={mine ? styles.timeMine : styles.time}>{formatTime(item.sentAt)}</Text>
+        <View>
+          <View style={[styles.bubbleRow, mine && styles.bubbleRowMine]}>
+            <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>
+              {item.replyTo && <QuotedMessage quote={item.replyTo} inverted={mine} />}
+              {item.imageBase64 && (
+                <Pressable onPress={() => setZoomedPhoto(item.imageBase64 ?? null)}>
+                  <Image
+                    source={{ uri: `data:image/jpeg;base64,${item.imageBase64}` }}
+                    style={styles.image}
+                    resizeMode="cover"
+                  />
+                </Pressable>
+              )}
+              <Text style={mine ? styles.bubbleTextMine : styles.bubbleTextTheirs}>{item.body}</Text>
+              <Text style={mine ? styles.timeMine : styles.time}>{formatTime(item.sentAt)}</Text>
+            </View>
+            {item.id === lastSeenMine && <Text style={styles.seen}>{t.chat.seen}</Text>}
           </View>
-          {item.id === lastSeenMine && <Text style={styles.seen}>{t.chat.seen}</Text>}
+          {mine && item.undelivered && (
+            <Pressable onPress={() => retryPrivateMessage(peerId, item.id)} accessibilityRole="button" hitSlop={8}>
+              <Text style={styles.undelivered}>{t.chat.undelivered}</Text>
+            </Pressable>
+          )}
         </View>
       </SwipeToReply>
     );
