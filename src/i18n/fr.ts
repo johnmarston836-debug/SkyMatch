@@ -13,6 +13,7 @@ export const fr: Strings = {
     you: 'Toi',
     remove: 'Retirer',
     see: 'Voir',
+    cancel: 'Annuler',
   },
 
   welcome: {
@@ -116,6 +117,10 @@ export const fr: Strings = {
     noMessagesYet: 'Pas encore de messages',
     away: (minutes: number) =>
       minutes < 1 ? 'Hors de l’app · à l’instant' : `Hors de l’app · il y a ${minutes} min`,
+    delete: 'Supprimer',
+    deleteTitle: (nickname: string) => `Supprimer la discussion avec ${nickname} ?`,
+    deleteBody: (nickname: string) =>
+      `Les messages et les photos sont supprimés de ce téléphone. ${nickname} garde sa copie.`,
   },
 
   profile: {

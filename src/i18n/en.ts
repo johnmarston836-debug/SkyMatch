@@ -13,6 +13,7 @@ export const en: Strings = {
     you: 'You',
     remove: 'Remove',
     see: 'See',
+    cancel: 'Cancel',
   },
 
   welcome: {
@@ -116,6 +117,10 @@ export const en: Strings = {
     noMessagesYet: 'No messages yet',
     away: (minutes: number) =>
       minutes < 1 ? 'Out of the app · just now' : `Out of the app · ${minutes} min ago`,
+    delete: 'Delete',
+    deleteTitle: (nickname: string) => `Delete your chat with ${nickname}?`,
+    deleteBody: (nickname: string) =>
+      `The messages and photos are deleted from this phone. ${nickname} keeps their copy.`,
   },
 
   profile: {

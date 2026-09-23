@@ -116,3 +116,35 @@ describe('conversations kept on the phone', () => {
     expect(ids).toEqual(['old', 'fresh']);
   });
 });
+
+describe('deleting a conversation', () => {
+  it('forgets its messages, badge, seen mark and banner, and nobody else’s', () => {
+    const message = (id: string, peer: string) => ({
+      id,
+      scope: 'private' as const,
+      fromId: peer,
+      toId: 'me',
+      fromLabel: '1A',
+      fromNickname: peer,
+      body: 'hola',
+      sentAt: 1,
+    });
+    useChatStore.setState({
+      privateMessagesByPeer: { ana: [message('a1', 'ana')], leo: [message('l1', 'leo')] },
+      unreadByPeer: { ana: 2, leo: 1 },
+      readUpToByPeer: { ana: 5 },
+      notice: { peerId: 'ana', messageId: 'a1', nickname: 'ana', body: 'hola' },
+      hydrated: true,
+    });
+
+    useChatStore.getState().deleteConversation('ana');
+
+    const state = useChatStore.getState();
+    expect(state.privateMessagesByPeer.ana).toBeUndefined();
+    expect(state.unreadByPeer.ana).toBeUndefined();
+    expect(state.readUpToByPeer.ana).toBeUndefined();
+    expect(state.notice).toBeNull();
+    expect(state.privateMessagesByPeer.leo).toHaveLength(1);
+    expect(state.unreadByPeer.leo).toBe(1);
+  });
+});

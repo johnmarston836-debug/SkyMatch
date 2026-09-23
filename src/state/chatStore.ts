@@ -70,6 +70,12 @@ interface ChatState {
    * a message sits on is decided by comparing its sender with our id.
    */
   renameSelf: (oldId: string, newId: string) => void;
+  /**
+   * Forgets a conversation on this phone: its messages, unread count, "seen"
+   * mark and any banner pointing at it. Only here - the other person keeps
+   * their copy, and nothing is sent.
+   */
+  deleteConversation: (peerId: string) => void;
 }
 
 /** Trims a conversation to what is worth keeping on disk. */
@@ -224,6 +230,24 @@ export const useChatStore = create<ChatState>((set, get) => ({
         Object.entries(state.privateMessagesByPeer).map(([peerId, messages]) => [peerId, messages.map(rename)]),
       ),
     }));
+    if (get().hydrated) void persist(get().privateMessagesByPeer);
+  },
+
+  deleteConversation: (peerId) => {
+    set((state) => {
+      const privateMessagesByPeer = { ...state.privateMessagesByPeer };
+      const unreadByPeer = { ...state.unreadByPeer };
+      const readUpToByPeer = { ...state.readUpToByPeer };
+      delete privateMessagesByPeer[peerId];
+      delete unreadByPeer[peerId];
+      delete readUpToByPeer[peerId];
+      return {
+        privateMessagesByPeer,
+        unreadByPeer,
+        readUpToByPeer,
+        notice: state.notice?.peerId === peerId ? null : state.notice,
+      };
+    });
     if (get().hydrated) void persist(get().privateMessagesByPeer);
   },
 

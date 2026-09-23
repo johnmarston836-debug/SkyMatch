@@ -13,6 +13,7 @@ export const ca: Strings = {
     you: 'Tu',
     remove: 'Treure',
     see: 'Veure',
+    cancel: 'Cancel·lar',
   },
 
   welcome: {
@@ -116,6 +117,10 @@ export const ca: Strings = {
     noMessagesYet: 'Encara no hi ha missatges',
     away: (minutes: number) =>
       minutes < 1 ? 'Fora de l’app · ara mateix' : `Fora de l’app · fa ${minutes} min`,
+    delete: 'Esborrar',
+    deleteTitle: (nickname: string) => `Vols esborrar el xat amb ${nickname}?`,
+    deleteBody: (nickname: string) =>
+      `S’esborren els missatges i les fotos d’aquest mòbil. ${nickname} en conserva la seva còpia.`,
   },
 
   profile: {

@@ -1,10 +1,11 @@
 import React, { useMemo } from 'react';
-import { FlatList, Pressable, Text, View } from 'react-native';
+import { Alert, FlatList, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
 import { Avatar } from '../../components/Avatar';
 import { CabinSeats } from '../../components/CabinSeats';
+import { SwipeToDelete } from '../../components/SwipeToDelete';
 import { LocationBadge } from '../../components/LocationBadge';
 import { useChatStore } from '../../state/chatStore';
 import { isAway, minutesAway, useDiscoveryStore } from '../../state/discoveryStore';
@@ -40,6 +41,7 @@ export function PassengersScreen({ navigation }: Props) {
   const now = useNow(15_000);
   const messagesByPeer = useChatStore((state) => state.privateMessagesByPeer);
   const unreadByPeer = useChatStore((state) => state.unreadByPeer);
+  const deleteConversation = useChatStore((state) => state.deleteConversation);
   const myId = useProfileStore((state) => state.profile?.id);
   const myVenue = useProfileStore((state) => state.profile?.location.kind) ?? 'plane';
   const venue = venueOf(myVenue);
@@ -61,8 +63,10 @@ export function PassengersScreen({ navigation }: Props) {
       borderWidth: 1,
       borderColor: colors.border,
       padding: spacing(2),
-      marginBottom: spacing(1),
     },
+    // The gap between rows lives outside the row, so the red button a swipe
+    // reveals behind it is exactly the row's height.
+    rowWrap: { marginBottom: spacing(1) },
     rowBody: { flex: 1, gap: spacing(0.5) },
     rowTop: { flexDirection: 'row' as const, alignItems: 'center' as const, gap: spacing(1) },
     rowName: { ...typography.body, fontWeight: '700' as const, flexShrink: 1 },
@@ -80,6 +84,8 @@ export function PassengersScreen({ navigation }: Props) {
       justifyContent: 'center' as const,
     },
     unreadBadgeText: { color: '#FFFFFF', fontSize: 12, fontWeight: '800' as const },
+    // On what the row shows, not on the row: a see-through row would let the
+    // red delete button behind it show through.
     rowAway: { opacity: 0.55 },
     rowAwayText: { ...typography.subtitle, fontSize: 12 },
   }));
@@ -110,41 +116,57 @@ export function PassengersScreen({ navigation }: Props) {
     });
   }, [peers, messagesByPeer, unreadByPeer, now]);
 
+  const confirmDelete = (peerId: string, nickname: string) => {
+    Alert.alert(t.passengers.deleteTitle(nickname), t.passengers.deleteBody(nickname), [
+      { text: t.common.cancel, style: 'cancel' },
+      { text: t.passengers.delete, style: 'destructive', onPress: () => deleteConversation(peerId) },
+    ]);
+  };
+
   const renderItem = ({ item }: { item: Conversation }) => {
     const { peer, lastMessage, unread } = item;
     const nickname = peer.profile?.nickname ?? '?';
     const away = isAway(peer, now);
     return (
-      <Pressable style={[styles.row, away && styles.rowAway]} onPress={() => navigation.navigate('Chat', { peerId: peer.peerId })}>
-        {/* The photo opens their profile; the rest of the row opens the chat. */}
-        <Pressable onPress={() => navigation.navigate('Profile', { peerId: peer.peerId })}>
-          <Avatar peerId={peer.peerId} nickname={nickname} size={48} />
-        </Pressable>
-        <View style={styles.rowBody}>
-          <View style={styles.rowTop}>
-            <Text style={styles.rowName} numberOfLines={1}>
-              {nickname}
-            </Text>
-            {peer.profile && (
-              <LocationBadge label={formatLocation(peer.profile.location)} location={peer.profile.location} />
+      <View style={styles.rowWrap}>
+        <SwipeToDelete
+          label={t.passengers.delete}
+          onDelete={() => confirmDelete(peer.peerId, nickname)}
+          // Nothing to delete with someone you have never written to.
+          enabled={lastMessage !== null}
+        >
+          <Pressable style={styles.row} onPress={() => navigation.navigate('Chat', { peerId: peer.peerId })}>
+            {/* The photo opens their profile; the rest of the row opens the chat. */}
+            <Pressable style={away && styles.rowAway} onPress={() => navigation.navigate('Profile', { peerId: peer.peerId })}>
+              <Avatar peerId={peer.peerId} nickname={nickname} size={48} />
+            </Pressable>
+            <View style={[styles.rowBody, away && styles.rowAway]}>
+              <View style={styles.rowTop}>
+                <Text style={styles.rowName} numberOfLines={1}>
+                  {nickname}
+                </Text>
+                {peer.profile && (
+                  <LocationBadge label={formatLocation(peer.profile.location)} location={peer.profile.location} />
+                )}
+                {lastMessage && <Text style={styles.rowTime}>{formatTime(lastMessage.sentAt)}</Text>}
+              </View>
+              {lastMessage ? (
+                <Text style={[styles.rowPreview, unread > 0 && styles.rowPreviewUnread]} numberOfLines={1}>
+                  {preview(lastMessage, myId)}
+                </Text>
+              ) : (
+                <Text style={styles.rowPreviewEmpty}>{t.passengers.noMessagesYet}</Text>
+              )}
+              {away && <Text style={styles.rowAwayText}>{t.passengers.away(minutesAway(peer, now))}</Text>}
+            </View>
+            {unread > 0 && (
+              <View style={styles.unreadBadge}>
+                <Text style={styles.unreadBadgeText}>{unread > 9 ? '9+' : unread}</Text>
+              </View>
             )}
-            {lastMessage && <Text style={styles.rowTime}>{formatTime(lastMessage.sentAt)}</Text>}
-          </View>
-          {lastMessage ? (
-            <Text style={[styles.rowPreview, unread > 0 && styles.rowPreviewUnread]} numberOfLines={1}>
-              {preview(lastMessage, myId)}
-            </Text>
-          ) : (
-            <Text style={styles.rowPreviewEmpty}>{t.passengers.noMessagesYet}</Text>
-          )}
-          {away && <Text style={styles.rowAwayText}>{t.passengers.away(minutesAway(peer, now))}</Text>}
-        </View>
-        {unread > 0 && (
-          <View style={styles.unreadBadge}>
-            <Text style={styles.unreadBadgeText}>{unread > 9 ? '9+' : unread}</Text>
-          </View>
-        )}
-      </Pressable>
+          </Pressable>
+        </SwipeToDelete>
+      </View>
     );
   };
 

@@ -21,6 +21,7 @@ export const es = {
     you: 'Tú',
     remove: 'Quitar',
     see: 'Ver',
+    cancel: 'Cancelar',
   },
 
   welcome: {
@@ -129,6 +130,11 @@ export const es = {
     /** Under someone the radio has stopped hearing (see AWAY_AFTER_MS). */
     away: (minutes: number) =>
       minutes < 1 ? 'Fuera de la app · ahora mismo' : `Fuera de la app · hace ${minutes} min`,
+    /** The button a leftward swipe reveals behind a conversation, and the confirmation it asks for. */
+    delete: 'Borrar',
+    deleteTitle: (nickname: string) => `¿Borrar el chat con ${nickname}?`,
+    deleteBody: (nickname: string) =>
+      `Se borran los mensajes y las fotos de este móvil. ${nickname} conserva su copia.`,
   },
 
   profile: {

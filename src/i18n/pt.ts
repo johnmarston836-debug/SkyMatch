@@ -16,6 +16,7 @@ export const pt: Strings = {
     you: 'Tu',
     remove: 'Remover',
     see: 'Ver',
+    cancel: 'Cancelar',
   },
 
   welcome: {
@@ -119,6 +120,10 @@ export const pt: Strings = {
     noMessagesYet: 'Ainda sem mensagens',
     away: (minutes: number) =>
       minutes < 1 ? 'Fora da app · agora mesmo' : `Fora da app · há ${minutes} min`,
+    delete: 'Apagar',
+    deleteTitle: (nickname: string) => `Apagar a conversa com ${nickname}?`,
+    deleteBody: (nickname: string) =>
+      `As mensagens e as fotos são apagadas deste telemóvel. ${nickname} mantém a sua cópia.`,
   },
 
   profile: {
