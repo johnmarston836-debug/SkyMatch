@@ -65,9 +65,9 @@ export const en: Strings = {
     page3Caption:
       'The device in the middle only ever holds the message encrypted; the one on the right, who it is for, decrypts it.',
     page3Body2: 'And everything you send is signed by your device, so nobody can write pretending to be you.',
-    securityCalloutTitle: 'Check the top of the chat',
+    securityCalloutTitle: 'Your chats stay with you',
     securityCalloutBody:
-      'If the other person is on an older version of SkyMatch, your private chat is not encrypted, and we warn you in red. What nobody can check is location: each person says their own seat, coach or machine.',
+      'If someone moves away, your chat stays saved on your device, marked in red as “No connection”. When you are close again, you reconnect on your own and carry on where you left off. What you write while they are away doesn’t reach them right then: we send it again when they reappear, and if it still doesn’t arrive you’ll see “Not delivered”, so you can resend it with a tap.',
     understood: 'Got it',
   },
 

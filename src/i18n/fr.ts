@@ -66,9 +66,9 @@ export const fr: Strings = {
       'L’appareil du milieu n’a que le message chiffré ; celui de droite, son destinataire, le déchiffre.',
     page3Body2:
       'De plus, tout ce que tu envoies est signé par ton appareil : personne ne peut écrire en se faisant passer pour toi.',
-    securityCalloutTitle: 'Regarde l’en-tête de la discussion',
+    securityCalloutTitle: 'Tes discussions restent avec toi',
     securityCalloutBody:
-      'Si l’autre personne utilise une ancienne version de SkyMatch, votre discussion privée n’est pas chiffrée, et on te le signale en rouge. Ce que personne ne peut vérifier, c’est l’emplacement : chacun indique lui-même son siège, sa voiture ou sa machine.',
+      'Si quelqu’un s’éloigne, votre discussion reste enregistrée sur ton appareil, marquée en rouge « Pas de connexion ». Quand vous êtes de nouveau proches, vous vous reconnectez tout seuls et reprenez là où vous en étiez. Ce que tu écris pendant son absence ne lui arrive pas tout de suite : on le renvoie quand la personne réapparaît, et si ça n’arrive toujours pas, tu verras « Non distribué » pour le renvoyer d’un geste.',
     understood: 'Compris',
   },
 
@@ -114,7 +114,7 @@ export const fr: Strings = {
     /** Under the chat header while this person is muted; tapping it undoes it. */
     mutedNotice: (nickname: string) => `Tu as masqué ${nickname} : tu ne vois plus ses nouveaux messages.`,
     /** Under a private message of ours that never reached them; tapping it tries again. */
-    undelivered: 'Non distribué · Touchez pour renvoyer',
+    undelivered: 'Non distribué · Touche pour renvoyer',
     replyingTo: (nickname: string) => `Réponse à ${nickname}`,
     encrypted: 'Chiffré de bout en bout',
     notEncrypted: 'Non chiffré : cette personne utilise une ancienne version de SkyMatch',

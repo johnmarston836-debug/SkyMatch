@@ -67,9 +67,9 @@ export const pt: Strings = {
     page3Caption: 'O dispositivo do meio só tem a mensagem encriptada; o da direita, a quem se destina, desencripta-a.',
     page3Body2:
       'Além disso, tudo o que envias vai assinado pelo teu dispositivo, por isso ninguém pode escrever a fazer-se passar por ti.',
-    securityCalloutTitle: 'Repara no topo da conversa',
+    securityCalloutTitle: 'As tuas conversas ficam contigo',
     securityCalloutBody:
-      'Se a outra pessoa usar uma versão antiga do SkyMatch, a vossa conversa privada não vai encriptada e avisamos-te a vermelho. O que ninguém pode confirmar é a localização: o lugar, a carruagem ou a máquina indica-os cada um.',
+      'Se alguém se afastar, a vossa conversa fica guardada no teu dispositivo, marcada a vermelho como «Sem ligação». Quando voltarem a estar perto, ligam-se de novo sozinhos e continuam onde ficaram. O que escreveres enquanto a pessoa está longe não lhe chega nesse momento: voltamos a enviá-lo quando ela reaparece, e se mesmo assim não chegar, vais ver «Não entregue» para o reenviares com um toque.',
     understood: 'Percebido',
   },
 
@@ -115,7 +115,7 @@ export const pt: Strings = {
     /** Under the chat header while this person is muted; tapping it undoes it. */
     mutedNotice: (nickname: string) => `Silenciaste ${nickname}: não vês as mensagens novas.`,
     /** Under a private message of ours that never reached them; tapping it tries again. */
-    undelivered: 'Não entregue · Toque para reenviar',
+    undelivered: 'Não entregue · Toca para reenviar',
     replyingTo: (nickname: string) => `A responder a ${nickname}`,
     encrypted: 'Encriptação ponta a ponta',
     notEncrypted: 'Sem encriptação: esta pessoa usa uma versão antiga do SkyMatch',

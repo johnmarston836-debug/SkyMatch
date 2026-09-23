@@ -66,9 +66,9 @@ export const de: Strings = {
       'Das Gerät in der Mitte hat die Nachricht nur verschlüsselt; das rechte, für das sie bestimmt ist, entschlüsselt sie.',
     page3Body2:
       'Außerdem ist alles, was du sendest, von deinem Gerät signiert – niemand kann in deinem Namen schreiben.',
-    securityCalloutTitle: 'Achte auf den Kopf des Chats',
+    securityCalloutTitle: 'Deine Chats bleiben bei dir',
     securityCalloutBody:
-      'Nutzt die andere Person eine alte SkyMatch-Version, ist euer privater Chat nicht verschlüsselt, und wir warnen dich in Rot. Was niemand prüfen kann, ist der Ort: Sitz, Wagen oder Trainingsgerät gibt jede Person selbst an.',
+      'Entfernt sich jemand, bleibt euer Chat auf deinem Gerät gespeichert, rot markiert als „Keine Verbindung“. Seid ihr wieder in der Nähe, verbindet ihr euch von selbst und macht dort weiter, wo ihr aufgehört habt. Was du schreibst, während die Person weg ist, kommt nicht sofort an: Wir senden es erneut, sobald sie wieder auftaucht – und kommt es trotzdem nicht an, siehst du „Nicht zugestellt“ und kannst es mit einem Tippen erneut senden.',
     understood: 'Verstanden',
   },
 

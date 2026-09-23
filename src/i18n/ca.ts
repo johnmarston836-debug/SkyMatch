@@ -64,9 +64,9 @@ export const ca: Strings = {
     page3Caption: 'El dispositiu del mig només té el missatge xifrat; el de la dreta, a qui va adreçat, el desxifra.',
     page3Body2:
       'A més, tot el que envies va signat pel teu dispositiu, així que ningú no pot escriure fent-se passar per tu.',
-    securityCalloutTitle: 'Fixa’t en la capçalera del xat',
+    securityCalloutTitle: 'Els teus xats es queden amb tu',
     securityCalloutBody:
-      'Si l’altra persona fa servir una versió antiga de SkyMatch, el vostre xat privat no va xifrat i t’ho avisem en vermell. El que ningú no pot comprovar és la ubicació: el seient, el vagó o la màquina els indica cadascú.',
+      'Si algú s’allunya, el vostre xat continua desat al teu dispositiu, marcat en vermell com a «Sense connexió». Quan torneu a ser a prop, us reconnecteu sols i continueu on ho vau deixar. El que li escriguis mentre és lluny no li arriba en aquell moment: l’hi tornem a enviar quan reapareix, i si tot i així no arriba, veuràs «No entregat» per reenviar-lo amb un toc.',
     understood: 'Entesos',
   },
 

@@ -63,9 +63,9 @@ export const it: Strings = {
       'I messaggi privati sono crittografati end-to-end. I dispositivi che fanno da ponte li passano senza poterli aprire: né il testo né le foto.',
     page3Caption: 'Il dispositivo in mezzo ha solo il messaggio cifrato; quello a destra, a cui è destinato, lo decifra.',
     page3Body2: 'Inoltre tutto ciò che invii è firmato dal tuo dispositivo, quindi nessuno può scrivere fingendosi te.',
-    securityCalloutTitle: 'Guarda l’intestazione della chat',
+    securityCalloutTitle: 'Le tue chat restano con te',
     securityCalloutBody:
-      'Se l’altra persona usa una versione vecchia di SkyMatch, la vostra chat privata non è crittografata e te lo segnaliamo in rosso. Quello che nessuno può verificare è la posizione: posto, carrozza o macchina li indica ognuno da sé.',
+      'Se qualcuno si allontana, la vostra chat resta salvata sul tuo dispositivo, segnata in rosso come «Nessuna connessione». Quando tornate vicini, vi ricollegate da soli e riprendete da dove eravate rimasti. Quello che scrivi mentre è lontano non gli arriva subito: lo rimandiamo quando riappare, e se ancora non arriva vedrai «Non consegnato» per inviarlo di nuovo con un tocco.',
     understood: 'Ho capito',
   },
 

@@ -73,9 +73,9 @@ export const es = {
       'El dispositivo de en medio solo tiene el mensaje cifrado; el de la derecha, a quien va dirigido, lo descifra.',
     page3Body2:
       'Además, todo lo que envías va firmado por tu dispositivo, así que nadie puede escribir haciéndose pasar por ti.',
-    securityCalloutTitle: 'Fíjate en la cabecera del chat',
+    securityCalloutTitle: 'Tus chats se quedan contigo',
     securityCalloutBody:
-      'Si la otra persona usa una versión antigua de SkyMatch, vuestro chat privado no va cifrado y te lo avisamos en rojo. Lo que nadie puede comprobar es la ubicación: el asiento, el vagón o la máquina los indica cada uno.',
+      'Si alguien se aleja, vuestro chat sigue guardado en tu dispositivo, marcado en rojo como «Sin conexión». Cuando volváis a estar cerca, os reconectáis solos y seguís donde lo dejasteis. Lo que le escribas mientras está lejos no le llega en ese momento: se lo volvemos a enviar cuando reaparece, y si aun así no llega, verás «No entregado» para reenviarlo con un toque.',
     understood: 'Entendido',
   },
 
