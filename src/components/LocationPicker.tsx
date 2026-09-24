@@ -110,6 +110,7 @@ export function LocationPicker({ location, onChange }: Props) {
         <SeatMap
           seat={location.seat}
           onChange={seat => onChange({ kind: 'plane', seat })}
+          allowWide
         />
       </View>
     );

@@ -93,6 +93,30 @@ function hex(byte: number): string {
 }
 
 /**
+ * Seats the one-byte form can't hold - the G, H, J and K of a long-haul
+ * 3-4-3 cabin - travel under their own venue letters, as the row in two hex
+ * digits and the letter's position in one ("Q1b9" is 27K). Their own
+ * letters rather than a longer 'P': a build from before them reads 'P' as
+ * one byte and would take 27K for some other seat, while a letter it has
+ * never heard of it simply can't read, and falls back to the label the
+ * message carries in words.
+ */
+const WIDE_PLANE_CODE = 'Q';
+const WIDE_TRAIN_CODE = 'R';
+
+function packWideSeat(seat: Seat): string {
+  return hex(Math.min(seat.row, 0xff)) + SEAT_LETTERS.indexOf(seat.letter).toString(16);
+}
+
+function unpackWideSeat(packed: string): Seat | null {
+  if (packed.length !== 3) return null;
+  const row = parseInt(packed.slice(0, 2), 16);
+  const letter = SEAT_LETTERS[parseInt(packed.charAt(2), 16)];
+  if (Number.isNaN(row) || row < 1 || row > MAX_ROW || !letter) return null;
+  return { row, letter };
+}
+
+/**
  * Packs a location into the handful of characters an iOS advertisement can
  * carry (a 128-bit service UUID leaves almost nothing behind it), so a
  * phone can show who is around before the full profile has crossed over.
@@ -100,10 +124,15 @@ function hex(byte: number): string {
 export function packLocation(location: UserLocation): string {
   const code = VENUE_CODES[location.kind];
   switch (location.kind) {
-    case 'plane':
-      return code + hex(packSeat(location.seat));
-    case 'train':
-      return code + hex(Math.min(location.coach, 0xfe)) + hex(packSeat(location.seat));
+    case 'plane': {
+      const packed = packSeat(location.seat);
+      return packed === 0xff ? WIDE_PLANE_CODE + packWideSeat(location.seat) : code + hex(packed);
+    }
+    case 'train': {
+      const coach = hex(Math.min(location.coach, 0xfe));
+      const packed = packSeat(location.seat);
+      return packed === 0xff ? WIDE_TRAIN_CODE + coach + packWideSeat(location.seat) : code + coach + hex(packed);
+    }
     case 'gym':
       return code + hex(MUSCLE_GROUPS.indexOf(location.muscle));
     case 'public':
@@ -121,6 +150,15 @@ export function unpackLocation(packed: string): UserLocation | null {
     case 'T': {
       const coach = byteAt(1);
       const seat = unpackSeat(byteAt(3));
+      return seat && !Number.isNaN(coach) ? { kind: 'train', coach, seat } : null;
+    }
+    case WIDE_PLANE_CODE: {
+      const seat = unpackWideSeat(packed.slice(1));
+      return seat ? { kind: 'plane', seat } : null;
+    }
+    case WIDE_TRAIN_CODE: {
+      const coach = byteAt(1);
+      const seat = unpackWideSeat(packed.slice(3));
       return seat && !Number.isNaN(coach) ? { kind: 'train', coach, seat } : null;
     }
     case 'G': {

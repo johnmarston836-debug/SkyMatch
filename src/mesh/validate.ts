@@ -52,9 +52,9 @@ export const MAX_ALERT_LIFETIME_MS = 10 * 60_000;
 
 const REACTIONS: ReactionKind[] = ['ok', 'heart', 'laugh'];
 
-/** A packed location is a venue letter and two or four hex digits (see packLocation). */
+/** A packed location is a venue letter and two to five hex digits (see packLocation). */
 function readPackedLocation(value: unknown): string | undefined {
-  return typeof value === 'string' && /^[A-Z][0-9a-f]{2,4}$/i.test(value) ? value : undefined;
+  return typeof value === 'string' && /^[A-Z][0-9a-f]{2,5}$/i.test(value) ? value : undefined;
 }
 
 function isText(value: unknown): value is string {

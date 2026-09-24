@@ -28,6 +28,13 @@ const CASES: UserLocation[] = [
   { kind: 'train', coach: 7, seat: { row: 22, letter: 'D' } },
   { kind: 'gym', muscle: 'legs' },
   { kind: 'public', color: 'red', spot: 'en la barra' },
+  // Long-haul 3-4-3 cabins: letters the one-byte form can't hold.
+  { kind: 'plane', seat: { row: 27, letter: 'K' } },
+  { kind: 'plane', seat: { row: 80, letter: 'G' } },
+  // Past row 32 the one-byte form runs out of bits, whatever the letter.
+  { kind: 'plane', seat: { row: 40, letter: 'A' } },
+  { kind: 'plane', seat: { row: 32, letter: 'H' } },
+  { kind: 'train', coach: 12, seat: { row: 9, letter: 'J' } },
 ];
 
 describe('locations', () => {
@@ -47,7 +54,7 @@ describe('locations', () => {
     // "SM" plus the packed location; a 128-bit service UUID leaves roughly
     // nine characters of local name behind it.
     for (const location of CASES) {
-      expect(packLocation(location).length).toBeLessThanOrEqual(5);
+      expect(packLocation(location).length).toBeLessThanOrEqual(6);
     }
   });
 
@@ -66,6 +73,12 @@ describe('locations', () => {
       expect(location.kind).toBe(kind);
       expect(formatLocation(location).length).toBeGreaterThan(0);
     }
+  });
+
+  it('keeps the old one-byte form for every seat it can hold', () => {
+    // Earlier builds read 'P' as a single byte; anything that fits keeps it.
+    expect(packLocation({ kind: 'plane', seat: { row: 14, letter: 'A' } })).toMatch(/^P[0-9a-f]{2}$/);
+    expect(packLocation({ kind: 'plane', seat: { row: 27, letter: 'K' } })).toBe('Q1b9');
   });
 
   it('rejects an advertisement it cannot read', () => {

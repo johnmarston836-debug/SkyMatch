@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { FlatList, Pressable, Text, View } from 'react-native';
 import { t } from '../i18n';
 import { useThemedStyles } from '../theme/ThemeContext';
@@ -6,14 +6,38 @@ import { MAX_ROW } from '../utils/seat';
 import type { Seat, SeatLetter } from '../types';
 
 const ROWS = Array.from({ length: MAX_ROW }, (_, i) => i + 1);
-const CABIN_LETTERS: SeatLetter[] = ['A', 'B', 'C', 'D', 'E', 'F'];
+/**
+ * The two cabins people meet: one aisle with three seats either side, and
+ * the long-haul twin aisle, 3-4-3, where airlines skip the I and the
+ * letters run to K. Each block is a run of seats between aisles.
+ */
+type Cabin = 'narrow' | 'wide';
+const CABINS: Record<Cabin, SeatLetter[][]> = {
+  narrow: [
+    ['A', 'B', 'C'],
+    ['D', 'E', 'F'],
+  ],
+  wide: [
+    ['A', 'B', 'C'],
+    ['D', 'E', 'F', 'G'],
+    ['H', 'J', 'K'],
+  ],
+};
+const NARROW_LETTERS = CABINS.narrow.flat();
 
 interface Props {
   seat: Seat;
   onChange: (seat: Seat) => void;
+  /** Offers the long-haul 3-4-3 cabin too; planes only - a train is never that wide. */
+  allowWide?: boolean;
 }
 
-export function SeatMap({ seat, onChange }: Props) {
+export function SeatMap({ seat, onChange, allowWide = false }: Props) {
+  // Opens on the cabin the seat belongs to: a G, H, J or K is long-haul.
+  const [cabin, setCabin] = useState<Cabin>(
+    allowWide && !NARROW_LETTERS.includes(seat.letter) ? 'wide' : 'narrow',
+  );
+  const wide = cabin === 'wide';
   const rowListRef = useRef<FlatList<number>>(null);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     fuselage: {
@@ -43,6 +67,24 @@ export function SeatMap({ seat, onChange }: Props) {
       borderWidth: 1,
       borderColor: colors.border,
     },
+    // Ten seats and two aisles have to fit where six and one did.
+    seatWide: { maxWidth: 34, marginHorizontal: 1.5, borderRadius: 7 },
+    seatTextWide: { fontSize: 12 },
+    aisleWide: { width: spacing(1.25) },
+    fuselageWide: { paddingHorizontal: spacing(1) },
+    cabins: { flexDirection: 'row' as const, gap: spacing(1), marginBottom: spacing(1.5) },
+    cabinOption: {
+      flex: 1,
+      paddingVertical: spacing(1),
+      borderRadius: radii.pill,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.surface,
+      alignItems: 'center' as const,
+    },
+    cabinOptionSelected: { backgroundColor: colors.text, borderColor: colors.text },
+    cabinText: { color: colors.textMuted, fontWeight: '700' as const, fontSize: 13 },
+    cabinTextSelected: { color: colors.background },
     seatSelected: {
       backgroundColor: colors.text,
       borderColor: colors.text,
@@ -94,22 +136,52 @@ export function SeatMap({ seat, onChange }: Props) {
 
   return (
     <View>
-      <View style={styles.fuselage}>
-        {CABIN_LETTERS.map((letter, index) => {
-          const isAisleBoundary = index === 2;
-          const selected = letter === seat.letter;
-          return (
-            <React.Fragment key={letter}>
+      {allowWide && (
+        <View style={styles.cabins} accessibilityRole="radiogroup">
+          {(['narrow', 'wide'] as Cabin[]).map((option) => {
+            const selected = cabin === option;
+            return (
               <Pressable
-                onPress={() => onChange({ ...seat, letter })}
-                style={[styles.seat, selected && styles.seatSelected]}
+                key={option}
+                style={[styles.cabinOption, selected && styles.cabinOptionSelected]}
+                accessibilityRole="radio"
+                accessibilityState={{ selected }}
+                onPress={() => {
+                  setCabin(option);
+                  // A long-haul letter has no place in a narrow cabin.
+                  if (option === 'narrow' && !NARROW_LETTERS.includes(seat.letter)) onChange({ ...seat, letter: 'A' });
+                }}
               >
-                <Text style={[styles.seatText, selected && styles.seatTextSelected]}>{letter}</Text>
+                <Text style={[styles.cabinText, selected && styles.cabinTextSelected]}>
+                  {option === 'narrow' ? t.picker.cabinNarrow : t.picker.cabinWide}
+                </Text>
               </Pressable>
-              {isAisleBoundary && <View style={styles.aisle} />}
-            </React.Fragment>
-          );
-        })}
+            );
+          })}
+        </View>
+      )}
+      <View style={[styles.fuselage, wide && styles.fuselageWide]}>
+        {CABINS[cabin].map((block, blockIndex) => (
+          <React.Fragment key={blockIndex}>
+            {blockIndex > 0 && <View style={[styles.aisle, wide && styles.aisleWide]} />}
+            {block.map((letter) => {
+              const selected = letter === seat.letter;
+              return (
+                <Pressable
+                  key={letter}
+                  onPress={() => onChange({ ...seat, letter })}
+                  style={[styles.seat, wide && styles.seatWide, selected && styles.seatSelected]}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected }}
+                >
+                  <Text style={[styles.seatText, wide && styles.seatTextWide, selected && styles.seatTextSelected]}>
+                    {letter}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </React.Fragment>
+        ))}
       </View>
       <Text style={styles.helperText}>{t.picker.seatLetterHint}</Text>
 

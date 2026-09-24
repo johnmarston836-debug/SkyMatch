@@ -271,6 +271,9 @@ export const pt: Strings = {
   },
 
   picker: {
+    /** The two cabin layouts a plane seat can be picked from; long-haul planes run to K. */
+    cabinNarrow: 'Um corredor · 3-3',
+    cabinWide: 'Dois corredores · 3-4-3',
     coachLabel: 'CARRUAGEM',
     seatLetterHint: 'Toca na letra do teu lugar',
     rowLabel: 'FILA',

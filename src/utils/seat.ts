@@ -8,11 +8,21 @@ const LETTER_INDEX: Record<SeatLetter, number> = SEAT_LETTERS.reduce(
   {} as Record<SeatLetter, number>,
 );
 
-/** Packs a seat into a single byte for BLE advertisement payloads (row 0-79 in bits 3-7, letter in bits 0-2 among the first 8 letters; row>79 or letter J/K fall back to 0xFF meaning "see full profile"). */
+/**
+ * Packs a seat into a single byte for BLE advertisement payloads: row - 1
+ * in bits 3-7, the letter in bits 0-2 among the first eight letters. Five
+ * bits of row is rows 1 to 32, and 0xFF is kept to mean "doesn't fit"; any
+ * other seat - row 33 and beyond, or a J or K - comes back as 0xFF and goes
+ * in the longer form (see packLocation).
+ *
+ * It used to let rows past 32 overflow the byte, so a phone in row 40
+ * announced itself as some seat in row 3 or so to everyone else.
+ */
 export function packSeat(seat: Seat): number {
   const letterIndex = LETTER_INDEX[seat.letter];
   if (seat.row < 1 || seat.row > MAX_ROW || letterIndex > 7) return 0xff;
-  return ((seat.row - 1) << 3) | letterIndex;
+  const packed = ((seat.row - 1) << 3) | letterIndex;
+  return packed < 0xff ? packed : 0xff;
 }
 
 export function unpackSeat(byte: number): Seat | null {

@@ -286,6 +286,9 @@ export const es = {
   },
 
   picker: {
+    /** The two cabin layouts a plane seat can be picked from; long-haul planes run to K. */
+    cabinNarrow: 'Un pasillo · 3-3',
+    cabinWide: 'Dos pasillos · 3-4-3',
     coachLabel: 'VAGÓN',
     seatLetterHint: 'Toca tu letra de asiento',
     rowLabel: 'FILA',
