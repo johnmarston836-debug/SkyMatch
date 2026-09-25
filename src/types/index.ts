@@ -59,6 +59,13 @@ export interface ProfilePacket extends Profile {
    * way. Absent from builds before delivery receipts.
    */
   acks?: boolean;
+  /**
+   * "Who is still here?" - sent when someone pulls their list down to
+   * refresh. Everyone who hears it answers with their own announcement
+   * straight away instead of at their next beat, so the list is right in a
+   * second or two, not ten.
+   */
+  hello?: boolean;
 }
 
 export type MessageScope = 'group' | 'private';

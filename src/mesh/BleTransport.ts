@@ -37,4 +37,7 @@ export interface BleTransport {
    * send misses and has to be flooded to the whole cabin instead.
    */
   notePeerIdentity?(deviceId: string, profileId: string): void;
+
+  /** Optional: looks around again now - a fresh scan, and forgets radios that went quiet. */
+  rescan?(): void;
 }

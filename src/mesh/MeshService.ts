@@ -101,6 +101,11 @@ export class MeshService {
     return this.secure?.knows(peerId) ?? false;
   }
 
+  /** Looks around again now: see BleTransport.rescan. */
+  rescan() {
+    this.transport.rescan?.();
+  }
+
   /** Whether this person says when a private message reached them; see delivery.ts. */
   acksFrom(peerId: string): boolean {
     return this.ackers.has(peerId);
@@ -124,11 +129,15 @@ export class MeshService {
    * label messages from us, plus the fingerprint of our photo so they can
    * tell whether the one they hold for us is current.
    */
-  async broadcastProfile(profile: Profile, avatarHash?: string) {
+  async broadcastProfile(profile: Profile, avatarHash?: string, hello = false) {
     // `''` travels: it is how someone says they took their photo down.
     // `undefined` does not: it means we don't know yet, and announcing that
     // as "no photo" makes everyone else throw away the copy they hold.
-    const withHash: ProfilePacket = { ...(avatarHash === undefined ? profile : { ...profile, avatarHash }), acks: true };
+    const withHash: ProfilePacket = {
+      ...(avatarHash === undefined ? profile : { ...profile, avatarHash }),
+      acks: true,
+      ...(hello ? { hello: true } : {}),
+    };
     const payload: ProfilePacket = this.secure ? { ...withHash, keys: publicKeysOf(this.secure.identity) } : withHash;
     await this.send({ id: newId(), kind: 'profile', fromId: this.myPeerId, toId: BROADCAST_ID, payload });
   }

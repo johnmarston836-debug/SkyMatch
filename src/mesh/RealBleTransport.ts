@@ -420,6 +420,18 @@ export class RealBleTransport implements BleTransport {
     }, true);
   }
 
+  /**
+   * Pull-to-refresh: a scan started afresh reports every phone in range
+   * again, even ones CoreBluetooth had stopped repeating, and radios that
+   * have gone quiet are let go of now rather than at the next sweep.
+   */
+  rescan() {
+    if (!this.running) return;
+    this.manager.stopDeviceScan();
+    this.scan();
+    this.pruneStalePeers();
+  }
+
   private scan() {
     this.manager.startDeviceScan([SERVICE_UUID], { allowDuplicates: true }, (error, device) => {
       if (error || !device) return;

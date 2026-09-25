@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { Alert, FlatList, Pressable, Text, View } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { Alert, FlatList, Pressable, RefreshControl, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
@@ -7,6 +7,7 @@ import { Avatar } from '../../components/Avatar';
 import { CabinSeats } from '../../components/CabinSeats';
 import { SwipeToDelete } from '../../components/SwipeToDelete';
 import { LocationBadge } from '../../components/LocationBadge';
+import { refreshNearby } from '../../mesh/meshController';
 import { useChatStore } from '../../state/chatStore';
 import { useDiscoveryStore } from '../../state/discoveryStore';
 import { describeConversationPeer, withoutReplaced, type ConversationPeer } from '../../state/conversationPeer';
@@ -37,9 +38,14 @@ function preview(message: ChatMessage, myId: string | undefined): string {
 }
 
 /** The cabin's conversation list: everyone nearby, with the chat you already have with them. */
+/** How long the pull-to-refresh spinner waits for answers to arrive. */
+const REFRESH_SETTLE_MS = 2_500;
+
 export function PassengersScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
-  const { spacing: themeSpacing } = useAppTheme();
+  const theme = useAppTheme();
+  const { spacing: themeSpacing } = theme;
+  const [refreshing, setRefreshing] = useState(false);
   const peers = useDiscoveryStore((state) => state.peers);
   // Away is worked out from the clock, not stored: it changes with nobody
   // sending anything.
@@ -132,6 +138,15 @@ export function PassengersScreen({ navigation }: Props) {
     });
   }, [peers, messagesByPeer, unreadByPeer, contacts, now]);
 
+  // Pull down: ask everyone in range to answer now. The spinner stays long
+  // enough for the answers to come back, so letting go shows the list as it
+  // really is rather than as it was a moment ago.
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await refreshNearby().catch(() => {});
+    setTimeout(() => setRefreshing(false), REFRESH_SETTLE_MS);
+  };
+
   const confirmDelete = (peerId: string, nickname: string) => {
     Alert.alert(t.passengers.deleteTitle(nickname), t.passengers.deleteBody(nickname), [
       { text: t.common.cancel, style: 'cancel' },
@@ -207,7 +222,13 @@ export function PassengersScreen({ navigation }: Props) {
           <Text style={styles.emptySubtitle}>{venue.peopleSearching}</Text>
         </View>
       ) : (
-        <FlatList data={list} keyExtractor={(item) => item.person.peerId} renderItem={renderItem} contentContainerStyle={styles.list} />
+        <FlatList
+          data={list}
+          keyExtractor={(item) => item.person.peerId}
+          renderItem={renderItem}
+          contentContainerStyle={styles.list}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={theme.colors.textMuted} />}
+        />
       )}
     </View>
   );

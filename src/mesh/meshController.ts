@@ -165,6 +165,35 @@ function ownPrivateMessage(peerId: string, messageId: string): ChatMessage | und
   return useChatStore.getState().privateMessagesByPeer[peerId]?.find((message) => message.id === messageId);
 }
 
+/**
+ * When our last answer to someone's "who is still here?" went out. One
+ * announcement answers everybody, so however many people refresh at once,
+ * this phone speaks at most once every few seconds.
+ */
+let lastHelloAnswer = 0;
+const HELLO_ANSWER_EVERY_MS = 3_000;
+
+function answerHello() {
+  const now = Date.now();
+  if (!service || now - lastHelloAnswer < HELLO_ANSWER_EVERY_MS) return;
+  lastHelloAnswer = now;
+  const profile = useProfileStore.getState().profile;
+  if (profile) void service.broadcastProfile(profile, useAvatarStore.getState().myAvatarHash());
+}
+
+/**
+ * Pull-to-refresh on the passenger list: look around again and ask
+ * everyone in range to answer now. Resolves once the question is out; the
+ * answers land in the list as they arrive.
+ */
+export async function refreshNearby() {
+  const profile = useProfileStore.getState().profile;
+  if (!service || !profile) return;
+  service.rescan();
+  useDiscoveryStore.getState().pruneStale();
+  await service.broadcastProfile(profile, useAvatarStore.getState().myAvatarHash(), true);
+}
+
 /** Retries private messages until they are confirmed; see delivery.ts. */
 const deliveries = new DeliveryTracker(
   async (messageId, peerId) => {
@@ -209,6 +238,7 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
   // landed under an id nothing else in the app ever looked up.
   service.on('profile', (_peerId, packet) => {
     if (useBlockStore.getState().isMuted(packet.id)) return;
+    if (packet?.hello === true) answerHello();
     // Back in range: whatever didn't reach them while they were away goes again.
     if (typeof packet?.id === 'string') {
       deliveries.peerBack(packet.id);
