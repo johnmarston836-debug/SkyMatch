@@ -3,7 +3,7 @@ import { Linking, Pressable, ScrollView, Switch, Text, View } from 'react-native
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
-import { ACCENTS, useSettingsStore, type AccentName, type Appearance, type NotifyKind } from '../../state/settingsStore';
+import { ACCENTS, useSettingsStore, type AccentName, type Appearance, type CabinNotifyMode, type NotifyKind } from '../../state/settingsStore';
 import { DEVELOPER_EMAIL } from '../../config';
 import { t } from '../../i18n';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
@@ -13,6 +13,7 @@ type Props = NativeStackScreenProps<MainStackParamList, 'Settings'>;
 const APPEARANCES: Appearance[] = ['system', 'light', 'dark'];
 const ACCENT_NAMES = Object.keys(ACCENTS) as AccentName[];
 const NOTIFY_KINDS: NotifyKind[] = ['private', 'cabin', 'reactions'];
+const CABIN_MODES: CabinNotifyMode[] = ['each', 'summary'];
 
 /** Reached from the gear on your profile: how the app looks, and how to reach whoever makes it. */
 export function SettingsScreen({ navigation }: Props) {
@@ -24,6 +25,8 @@ export function SettingsScreen({ navigation }: Props) {
   const setAccent = useSettingsStore((state) => state.setAccent);
   const notify = useSettingsStore((state) => state.notify);
   const setNotify = useSettingsStore((state) => state.setNotify);
+  const cabinMode = useSettingsStore((state) => state.cabinMode);
+  const setCabinMode = useSettingsStore((state) => state.setCabinMode);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
     scroll: { paddingHorizontal: spacing(3) },
@@ -91,6 +94,8 @@ export function SettingsScreen({ navigation }: Props) {
     disabled: { opacity: 0.55 },
     switchRow: { paddingVertical: spacing(0.75), gap: spacing(1.5) },
     switchText: { flex: 1 },
+    subOption: { marginTop: spacing(1), marginBottom: spacing(0.5) },
+    subSegments: { backgroundColor: colors.background, borderRadius: radii.sm, padding: 2 },
     divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing(0.75) },
   }));
 
@@ -197,6 +202,30 @@ export function SettingsScreen({ navigation }: Props) {
                   accessibilityLabel={notifyLabel[kind].title}
                 />
               </View>
+              {/* Only matters while the common chat notifies at all. */}
+              {kind === 'cabin' && notify.cabin && (
+                <View style={styles.subOption}>
+                  <View style={[styles.segments, styles.subSegments]} accessibilityRole="radiogroup">
+                    {CABIN_MODES.map((mode) => {
+                      const active = cabinMode === mode;
+                      return (
+                        <Pressable
+                          key={mode}
+                          style={[styles.segment, active && styles.segmentActive]}
+                          onPress={() => setCabinMode(mode)}
+                          accessibilityRole="radio"
+                          accessibilityState={{ selected: active }}
+                        >
+                          <Text style={[styles.segmentText, active && styles.segmentTextActive]}>
+                            {mode === 'each' ? t.settings.cabinModeEach : t.settings.cabinModeSummary}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                  <Text style={styles.rowValue}>{t.settings.cabinModeHint}</Text>
+                </View>
+              )}
             </View>
           ))}
         </View>

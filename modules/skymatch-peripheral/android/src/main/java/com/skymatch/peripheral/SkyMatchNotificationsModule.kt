@@ -47,7 +47,12 @@ class SkyMatchNotificationsModule(private val context: ReactApplicationContext) 
   }
 
   @ReactMethod
-  fun present(title: String, body: String, threadId: String?, channelName: String, promise: Promise) {
+  /**
+   * `quiet` updates a card that is already showing without sounding again -
+   * how the common chat's summary keeps counting in a single notification.
+   * A card the user has swiped away alerts once more, as a new one should.
+   */
+  fun present(title: String, body: String, threadId: String?, channelName: String, quiet: Boolean, promise: Promise) {
     if (permission() != "granted") {
       promise.resolve(false)
       return
@@ -81,6 +86,7 @@ class SkyMatchNotificationsModule(private val context: ReactApplicationContext) 
         .setCategory(Notification.CATEGORY_MESSAGE)
         .setAutoCancel(true)
         .setContentIntent(tapIntent)
+        .setOnlyAlertOnce(quiet)
     // One conversation, one group - the same as iOS's thread id.
     if (threadId != null) builder.setGroup(threadId)
 

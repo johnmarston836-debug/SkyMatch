@@ -167,10 +167,13 @@ export const ca: Strings = {
     contactHint: 'Explica’ns què t’agrada, què falla o què trobes a faltar.',
     notifications: 'NOTIFICACIONS',
     notifyPrivate: 'Xats privats',
-    notifyCabin: 'Xat de cabina',
+    notifyCabin: 'Xat comú',
+    cabinModeEach: 'Cada missatge',
+    cabinModeSummary: 'Resum',
+    cabinModeHint: 'Cada missatge: un avís per missatge. Resum: sona amb el primer i la mateixa notificació va comptant els següents en silenci.',
     notifyReactions: 'Reaccions',
     notifyReactionsHint: 'Quan algú reacciona al teu «Estic dret» o «Deixo la màquina».',
-    notifyHint: 'Només avisen amb l’app en segon pla. Al xat de cabina, com a molt una cada 30 segons.',
+    notifyHint: 'Només avisen amb l’app en segon pla.',
   },
 
   myProfile: {
@@ -235,7 +238,8 @@ export const ca: Strings = {
   notifications: {
     sentPhoto: 'T’ha enviat una foto',
     channelName: 'Missatges i avisos',
-    cabinTitle: 'Xat de cabina',
+    cabinTitle: 'Xat comú',
+    cabinSummary: (count: number) => `${count} missatges nous`,
     reactedTo: { standing: 'Ha reaccionat que estàs dret', leavingMachine: 'Ha reaccionat que deixes la màquina' },
   },
 

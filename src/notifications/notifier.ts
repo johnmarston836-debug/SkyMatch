@@ -11,6 +11,9 @@ export const notificationsSupported = Native.isSupported;
 
 let wired = false;
 
+/** Messages in the common chat since the app was last on screen, for the summary card. */
+let cabinUnseen = 0;
+
 /**
  * Keeps the store's idea of "is anyone looking at this?" in sync with iOS, and
  * tidies up the badge and the notification stack when the user comes back.
@@ -33,6 +36,7 @@ export function initNotifications() {
       if (activePeerId) markRead(activePeerId);
       void Native.setBadge(0);
       void Native.clearDelivered();
+      cabinUnseen = 0;
     }
   });
 }
@@ -79,25 +83,30 @@ export async function notifyPrivateMessage(message: ChatMessage) {
   await Native.setBadge(Object.values(unread).reduce((total, count) => total + count, 0));
 }
 
-/**
- * A full cabin can write every few seconds, so the cabin chat has one card,
- * replaced by the newest line, and buzzes at most once in this long.
- */
-export const CABIN_NOTIFY_EVERY_MS = 30_000;
-let lastCabinNotice = 0;
+const CABIN_SUMMARY_ID = 'cabin-summary';
 
-/** A message in the cabin chat that landed while SkyMatch was in the background. */
+/**
+ * A message in the common chat that landed while SkyMatch was in the
+ * background. Either one notification per message, or - in summary mode -
+ * one card that sounds for the first message and then only updates its
+ * count and latest line, silently, until the app is opened again.
+ */
 export async function notifyGroupMessage(message: ChatMessage) {
-  const now = Date.now();
-  if (now - lastCabinNotice < CABIN_NOTIFY_EVERY_MS) return;
   if (!(await mayNotify('cabin'))) return;
-  lastCabinNotice = now;
-  await Native.present(
-    t.notifications.cabinTitle,
-    `${message.fromNickname}: ${textOf(message)}`,
-    'cabin',
-    t.notifications.channelName,
-  );
+  const line = `${message.fromNickname}: ${textOf(message)}`;
+  const title = t.notifications.cabinTitle;
+
+  if (useSettingsStore.getState().cabinMode !== 'summary') {
+    await Native.present(title, line, 'cabin', t.notifications.channelName);
+    return;
+  }
+
+  cabinUnseen += 1;
+  const body = cabinUnseen === 1 ? line : `${t.notifications.cabinSummary(cabinUnseen)} · ${line}`;
+  await Native.present(title, body, 'cabin', t.notifications.channelName, {
+    replaceId: CABIN_SUMMARY_ID,
+    quiet: cabinUnseen > 1,
+  });
 }
 
 /** Notifications are system text, where emoji do render - unlike the app's own icons. */

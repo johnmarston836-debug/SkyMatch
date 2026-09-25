@@ -2,6 +2,7 @@ import * as Native from 'skymatch-peripheral/notifications';
 import { notifyGroupMessage, notifyPrivateMessage, notifyReaction } from '../src/notifications/notifier';
 import { useChatStore } from '../src/state/chatStore';
 import { useSettingsStore } from '../src/state/settingsStore';
+import { setLanguage } from '../src/i18n';
 import type { ChatMessage } from '../src/types';
 
 jest.mock('skymatch-peripheral/notifications', () => ({
@@ -21,9 +22,10 @@ function message(scope: 'group' | 'private', id: string): ChatMessage {
 
 describe('notifications', () => {
   beforeEach(() => {
+    setLanguage('es');
     present.mockClear();
     useChatStore.setState({ appActive: false });
-    useSettingsStore.setState({ notify: { private: true, cabin: true, reactions: true } });
+    useSettingsStore.setState({ notify: { private: true, cabin: true, reactions: true }, cabinMode: 'each' });
   });
 
   it('stays quiet while the app is on screen', async () => {
@@ -45,10 +47,22 @@ describe('notifications', () => {
     expect(present.mock.calls[0][0]).toBe('Leo · 14C');
   });
 
-  it('buzzes for the cabin chat at most once in a while', async () => {
+  it('notifies every common chat message by default', async () => {
     await notifyGroupMessage(message('group', 'g1'));
     await notifyGroupMessage(message('group', 'g2'));
-    expect(present).toHaveBeenCalledTimes(1);
+    expect(present).toHaveBeenCalledTimes(2);
     expect(present.mock.calls[0][2]).toBe('cabin');
+    expect(present.mock.calls[0][4]).toBeUndefined();
+  });
+
+  it('in summary mode, sounds once and then keeps counting quietly on the same card', async () => {
+    useSettingsStore.setState({ cabinMode: 'summary' });
+    await notifyGroupMessage(message('group', 'g1'));
+    await notifyGroupMessage(message('group', 'g2'));
+    await notifyGroupMessage(message('group', 'g3'));
+    const options = present.mock.calls.map((call) => call[4]);
+    expect(options[0]).toEqual({ replaceId: 'cabin-summary', quiet: false });
+    expect(options[1]).toEqual({ replaceId: 'cabin-summary', quiet: true });
+    expect(present.mock.calls[2][1]).toBe('3 mensajes nuevos · Leo: hola');
   });
 });

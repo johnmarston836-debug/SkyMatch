@@ -81,6 +81,47 @@ RCT_EXPORT_METHOD(present:(NSString *)title
                                                         }];
 }
 
+/**
+ * Shows a notification under a fixed identifier, so a later one with the same
+ * identifier replaces it in place instead of stacking. `quiet` makes that
+ * replacement silent - no sound, no banner, just the card in the list with
+ * its new text - which is how the common chat's summary keeps counting.
+ */
+RCT_EXPORT_METHOD(presentReplacing:(NSString *)title
+                  body:(NSString *)body
+                  threadId:(NSString *)threadId
+                  identifier:(NSString *)identifier
+                  quiet:(BOOL)quiet
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+  UNMutableNotificationContent *content = [UNMutableNotificationContent new];
+  content.title = title ?: @"";
+  content.body = body ?: @"";
+  if (threadId != nil) {
+    content.threadIdentifier = threadId;
+  }
+  if (quiet) {
+    if (@available(iOS 15.0, *)) {
+      content.interruptionLevel = UNNotificationInterruptionLevelPassive;
+    }
+  } else {
+    content.sound = [UNNotificationSound defaultSound];
+  }
+
+  UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:identifier
+                                                                       content:content
+                                                                       trigger:nil];
+  [[UNUserNotificationCenter currentNotificationCenter] addNotificationRequest:request
+                                                        withCompletionHandler:^(NSError *_Nullable error) {
+                                                          if (error != nil) {
+                                                            reject(@"present", error.localizedDescription, error);
+                                                            return;
+                                                          }
+                                                          resolve(@YES);
+                                                        }];
+}
+
 /** Unread count on the home-screen icon. Passing 0 clears it. */
 RCT_EXPORT_METHOD(setBadge:(double)count
                   resolver:(RCTPromiseResolveBlock)resolve

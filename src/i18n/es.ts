@@ -181,10 +181,13 @@ export const es = {
     contactHint: 'Cuéntanos qué te gusta, qué falla o qué echas de menos.',
     notifications: 'NOTIFICACIONES',
     notifyPrivate: 'Chats privados',
-    notifyCabin: 'Chat de cabina',
+    notifyCabin: 'Chat común',
+    cabinModeEach: 'Cada mensaje',
+    cabinModeSummary: 'Resumen',
+    cabinModeHint: 'Cada mensaje: un aviso por mensaje. Resumen: suena con el primero y la misma notificación va contando los siguientes en silencio.',
     notifyReactions: 'Reacciones',
     notifyReactionsHint: 'Cuando alguien reacciona a tu «Estoy de pie» o «Dejo la máquina».',
-    notifyHint: 'Solo avisan con la app en segundo plano. En el chat de cabina, como mucho una cada 30 segundos.',
+    notifyHint: 'Solo avisan con la app en segundo plano.',
   },
 
   myProfile: {
@@ -251,7 +254,8 @@ export const es = {
     sentPhoto: 'Te ha enviado una foto',
     /** What Android lists this app's notifications under, in Settings. */
     channelName: 'Mensajes y avisos',
-    cabinTitle: 'Chat de cabina',
+    cabinTitle: 'Chat común',
+    cabinSummary: (count: number) => `${count} mensajes nuevos`,
     reactedTo: { standing: 'Ha reaccionado a que estás de pie', leavingMachine: 'Ha reaccionado a que dejas la máquina' } as Record<PresenceStatus, string>,
   },
 

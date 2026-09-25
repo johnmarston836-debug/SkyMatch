@@ -169,10 +169,13 @@ export const fr: Strings = {
     contactHint: 'Dis-nous ce que tu aimes, ce qui ne marche pas ou ce qui te manque.',
     notifications: 'NOTIFICATIONS',
     notifyPrivate: 'Discussions privées',
-    notifyCabin: 'Chat de cabine',
+    notifyCabin: 'Chat commun',
+    cabinModeEach: 'Chaque message',
+    cabinModeSummary: 'Résumé',
+    cabinModeHint: 'Chaque message : une alerte par message. Résumé : ça sonne au premier, puis la même notification compte les suivants en silence.',
     notifyReactions: 'Réactions',
     notifyReactionsHint: 'Quand quelqu’un réagit à ton « Je suis debout » ou « Je libère la machine ».',
-    notifyHint: 'Uniquement avec l’app en arrière-plan. Pour le chat de cabine, une toutes les 30 secondes au plus.',
+    notifyHint: 'Uniquement avec l’app en arrière-plan.',
   },
 
   myProfile: {
@@ -237,7 +240,8 @@ export const fr: Strings = {
   notifications: {
     sentPhoto: 'T’a envoyé une photo',
     channelName: 'Messages et alertes',
-    cabinTitle: 'Chat de cabine',
+    cabinTitle: 'Chat commun',
+    cabinSummary: (count: number) => `${count} nouveaux messages`,
     reactedTo: { standing: 'A réagi : tu es debout', leavingMachine: 'A réagi : tu libères la machine' },
   },
 

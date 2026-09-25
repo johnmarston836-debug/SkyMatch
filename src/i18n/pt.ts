@@ -170,10 +170,13 @@ export const pt: Strings = {
     contactHint: 'Conta-nos o que gostas, o que falha ou o que te falta.',
     notifications: 'NOTIFICAÇÕES',
     notifyPrivate: 'Chats privados',
-    notifyCabin: 'Chat da cabine',
+    notifyCabin: 'Chat comum',
+    cabinModeEach: 'Cada mensagem',
+    cabinModeSummary: 'Resumo',
+    cabinModeHint: 'Cada mensagem: um aviso por mensagem. Resumo: toca com a primeira e a mesma notificação vai contando as seguintes em silêncio.',
     notifyReactions: 'Reações',
     notifyReactionsHint: 'Quando alguém reage ao teu «Estou de pé» ou «Deixo a máquina».',
-    notifyHint: 'Só avisam com a app em segundo plano. No chat da cabine, no máximo uma a cada 30 segundos.',
+    notifyHint: 'Só avisam com a app em segundo plano.',
   },
 
   myProfile: {
@@ -238,7 +241,8 @@ export const pt: Strings = {
   notifications: {
     sentPhoto: 'Enviou-te uma foto',
     channelName: 'Mensagens e avisos',
-    cabinTitle: 'Chat da cabine',
+    cabinTitle: 'Chat comum',
+    cabinSummary: (count: number) => `${count} mensagens novas`,
     reactedTo: { standing: 'Reagiu a estares de pé', leavingMachine: 'Reagiu a deixares a máquina' },
   },
 

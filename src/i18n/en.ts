@@ -168,10 +168,13 @@ export const en: Strings = {
     contactHint: 'Tell us what you like, what breaks or what you miss.',
     notifications: 'NOTIFICATIONS',
     notifyPrivate: 'Private chats',
-    notifyCabin: 'Cabin chat',
+    notifyCabin: 'Common chat',
+    cabinModeEach: 'Every message',
+    cabinModeSummary: 'Summary',
+    cabinModeHint: 'Every message: one alert per message. Summary: it sounds for the first one, then the same notification keeps counting the rest silently.',
     notifyReactions: 'Reactions',
     notifyReactionsHint: 'When someone reacts to your “I’m standing” or “Leaving the machine”.',
-    notifyHint: 'They only show with the app in the background. For the cabin chat, at most one every 30 seconds.',
+    notifyHint: 'They only show with the app in the background.',
   },
 
   myProfile: {
@@ -236,7 +239,8 @@ export const en: Strings = {
   notifications: {
     sentPhoto: 'Sent you a photo',
     channelName: 'Messages and alerts',
-    cabinTitle: 'Cabin chat',
+    cabinTitle: 'Common chat',
+    cabinSummary: (count: number) => `${count} new messages`,
     reactedTo: { standing: 'Reacted to you standing up', leavingMachine: 'Reacted to you leaving the machine' },
   },
 

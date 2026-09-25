@@ -28,16 +28,24 @@ export type AccentName = keyof typeof ACCENTS;
 /** The three kinds of notification the app can show, each switched on or off in Settings. */
 export type NotifyKind = 'private' | 'cabin' | 'reactions';
 
+/**
+ * How the common chat notifies: a notification for every message, or one
+ * that sounds once and then keeps counting quietly until the app is opened.
+ */
+export type CabinNotifyMode = 'each' | 'summary';
+
 interface Settings {
   appearance: Appearance;
   accent: AccentName;
   notify: Record<NotifyKind, boolean>;
+  cabinMode: CabinNotifyMode;
 }
 
 const DEFAULTS: Settings = {
   appearance: 'system',
   accent: 'blue',
   notify: { private: true, cabin: true, reactions: true },
+  cabinMode: 'each',
 };
 
 interface SettingsState extends Settings {
@@ -46,6 +54,7 @@ interface SettingsState extends Settings {
   setAppearance: (appearance: Appearance) => void;
   setAccent: (accent: AccentName) => void;
   setNotify: (kind: NotifyKind, on: boolean) => void;
+  setCabinMode: (mode: CabinNotifyMode) => void;
 }
 
 function read(raw: string | null): Settings {
@@ -64,6 +73,7 @@ function read(raw: string | null): Settings {
         cabin: stored.notify?.cabin !== false,
         reactions: stored.notify?.reactions !== false,
       },
+      cabinMode: stored.cabinMode === 'summary' ? 'summary' : 'each',
     };
   } catch {
     return DEFAULTS;
@@ -73,8 +83,8 @@ function read(raw: string | null): Settings {
 /** How this phone's owner likes the app to look. Only ever local. */
 export const useSettingsStore = create<SettingsState>((set, get) => {
   const persist = () => {
-    const { appearance, accent, notify } = get();
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ appearance, accent, notify })).catch(() => {});
+    const { appearance, accent, notify, cabinMode } = get();
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ appearance, accent, notify, cabinMode })).catch(() => {});
   };
   return {
     ...DEFAULTS,
@@ -93,6 +103,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
     },
     setNotify: (kind, on) => {
       set((state) => ({ notify: { ...state.notify, [kind]: on } }));
+      persist();
+    },
+    setCabinMode: (cabinMode) => {
+      set({ cabinMode });
       persist();
     },
   };
