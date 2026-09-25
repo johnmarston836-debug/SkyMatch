@@ -3,6 +3,8 @@
 static NSString *const kWriteEvent = @"SkyMatchPeripheralWrite";
 static NSString *const kStateEvent = @"SkyMatchPeripheralState";
 static NSString *const kSubscribersEvent = @"SkyMatchPeripheralSubscribers";
+/** Most frames kept waiting for CoreBluetooth's transmit queue: a large photo, and then some. */
+static const NSUInteger kMaxOutbox = 4096;
 
 @implementation SkyMatchPeripheral {
   CBPeripheralManager *_manager;
@@ -30,6 +32,22 @@ RCT_EXPORT_MODULE();
 + (BOOL)requiresMainQueueSetup
 {
   return NO;
+}
+
+/**
+ * Every exported method runs on the main queue, the same one CoreBluetooth
+ * calls the delegate on (the manager is created with queue:nil). The outbox,
+ * the subscriber set and the characteristic are touched from both sides:
+ * JS queues frames through notify:, CoreBluetooth drains them in
+ * peripheralManagerIsReadyToUpdateSubscribers:. With the methods on React's
+ * own background queue the two ran at once, and a mutable array changed
+ * from two threads crashed the app ("-[__NSArrayM insertObject:atIndex:]:
+ * index 1 beyond bounds for empty array" in notify:). One queue for both
+ * sides makes them take turns.
+ */
+- (dispatch_queue_t)methodQueue
+{
+  return dispatch_get_main_queue();
 }
 
 - (NSArray<NSString *> *)supportedEvents
@@ -110,6 +128,12 @@ RCT_EXPORT_METHOD(notify:(NSString *)base64Value
   if (_subscribers.count == 0) {
     resolve(@NO);
     return;
+  }
+  // A central that stopped reading without unsubscribing would otherwise let
+  // the backlog grow for ever; the oldest frames go first - repair frames and
+  // delivery retries cover whatever is dropped.
+  if (_outbox.count >= kMaxOutbox) {
+    [_outbox removeObjectsInRange:NSMakeRange(0, _outbox.count - kMaxOutbox + 1)];
   }
   [_outbox addObject:data];
   [self drainOutbox];
