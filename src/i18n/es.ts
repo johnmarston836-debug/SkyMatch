@@ -315,6 +315,9 @@ export const es = {
     classSideLabel: 'LADO DEL AULA',
     classSideHint: 'Mirando hacia la pizarra.',
     classSides: { left: 'Izquierda', center: 'Centro', right: 'Derecha' } as Record<ClassSide, string>,
+    classRoomLabel: '¿QUÉ CLASE? (OPCIONAL)',
+    classRoomPlaceholder: '1º C, aula de informática, Historia…',
+    classRoomHint: 'Para saber en qué clase estás cuando hay varias cerca. Sale en tu ficha.',
   },
 
   venues: {

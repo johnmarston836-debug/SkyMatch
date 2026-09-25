@@ -297,6 +297,9 @@ export const ca: Strings = {
     classSideLabel: 'COSTAT DE L’AULA',
     classSideHint: 'Mirant cap a la pissarra.',
     classSides: { left: 'Esquerra', center: 'Centre', right: 'Dreta' },
+    classRoomLabel: 'QUINA CLASSE? (OPCIONAL)',
+    classRoomPlaceholder: '1r C, aula d’informàtica, Història…',
+    classRoomHint: 'Per saber a quina classe ets quan n’hi ha diverses a prop. Surt a la teva fitxa.',
   },
 
   venues: {

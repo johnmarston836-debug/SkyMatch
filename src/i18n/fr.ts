@@ -299,6 +299,9 @@ export const fr: Strings = {
     classSideLabel: 'CÔTÉ DE LA SALLE',
     classSideHint: 'Face au tableau.',
     classSides: { left: 'Gauche', center: 'Centre', right: 'Droite' },
+    classRoomLabel: 'QUEL COURS ? (FACULTATIF)',
+    classRoomPlaceholder: '3e C, salle info, Histoire…',
+    classRoomHint: 'Pour savoir dans quel cours tu es quand il y en a plusieurs à côté. Visible sur ta fiche.',
   },
 
   venues: {

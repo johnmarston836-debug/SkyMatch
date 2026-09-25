@@ -89,7 +89,9 @@ export function describeLocation(location: UserLocation): string {
         ? `${t.colors[location.color]} · ${location.spot}`
         : t.location.describeOutfit(t.colors[location.color]);
     case 'class':
-      return t.location.describeClass(location.row, t.location.sideLong[location.side]);
+      return location.room
+        ? `${location.room} · ${t.location.describeClass(location.row, t.location.sideLong[location.side])}`
+        : t.location.describeClass(location.row, t.location.sideLong[location.side]);
   }
 }
 
@@ -251,7 +253,8 @@ export function normalizeLocation(value: unknown): UserLocation | null {
       const { row, side } = raw;
       if (typeof row !== 'number' || !Number.isInteger(row) || row < 1 || row > MAX_CLASS_ROW) return null;
       if (typeof side !== 'string' || !CLASS_SIDES.includes(side as ClassSide)) return null;
-      return { kind: 'class', row, side: side as ClassSide };
+      const room = typeof raw.room === 'string' && raw.room.length > 0 ? raw.room.slice(0, 40) : undefined;
+      return { kind: 'class', row, side: side as ClassSide, room };
     }
     default:
       // Some future venue this build doesn't have. Better no badge than a crash.

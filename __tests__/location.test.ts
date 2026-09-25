@@ -51,6 +51,14 @@ describe('classroom', () => {
     expect(normalizeLocation({ kind: 'class', row: 4, side: 'right' })).toEqual({ kind: 'class', row: 4, side: 'right' });
     expect(unpackLocation('C039')).toBeNull();
   });
+
+  it('says which class it is on the card, when given', () => {
+    const location = normalizeLocation({ kind: 'class', row: 2, side: 'center', room: '1º C' });
+    expect(location).toEqual({ kind: 'class', row: 2, side: 'center', room: '1º C' });
+    expect(describeLocation(location!)).toBe('1º C · Fila 2, en el centro');
+    // Too long for the advertisement: the badge stays row and side.
+    expect(formatLocation(location!)).toBe('F2 · Centro');
+  });
 });
 
 describe('locations', () => {

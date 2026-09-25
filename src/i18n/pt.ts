@@ -300,6 +300,9 @@ export const pt: Strings = {
     classSideLabel: 'LADO DA SALA',
     classSideHint: 'Virado para o quadro.',
     classSides: { left: 'Esquerda', center: 'Centro', right: 'Direita' },
+    classRoomLabel: 'QUE AULA? (OPCIONAL)',
+    classRoomPlaceholder: '9.º C, sala de informática, História…',
+    classRoomHint: 'Para saberem em que aula estás quando há várias por perto. Aparece na tua ficha.',
   },
 
   venues: {

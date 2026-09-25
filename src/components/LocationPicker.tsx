@@ -232,6 +232,21 @@ export function LocationPicker({ location, onChange }: Props) {
             );
           })}
         </View>
+
+        <Text style={styles.spotLabel}>{t.picker.classRoomLabel}</Text>
+        <TextInput
+          selectionColor={theme.colors.accent}
+          cursorColor={theme.colors.accent}
+          style={styles.input}
+          value={location.room ?? ''}
+          onChangeText={room =>
+            onChange({ ...location, room: room || undefined })
+          }
+          placeholder={t.picker.classRoomPlaceholder}
+          placeholderTextColor={theme.colors.textMuted}
+          maxLength={28}
+        />
+        <Text style={styles.hint}>{t.picker.classRoomHint}</Text>
       </View>
     );
   }

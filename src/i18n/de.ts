@@ -301,6 +301,9 @@ export const de: Strings = {
     classSideLabel: 'SEITE DES RAUMS',
     classSideHint: 'Mit Blick zur Tafel.',
     classSides: { left: 'Links', center: 'Mitte', right: 'Rechts' },
+    classRoomLabel: 'WELCHER KURS? (OPTIONAL)',
+    classRoomPlaceholder: '9c, Computerraum, Geschichte…',
+    classRoomHint: 'Damit man weiß, in welchem Kurs du bist, wenn mehrere in der Nähe sind. Steht auf deiner Karte.',
   },
 
   venues: {

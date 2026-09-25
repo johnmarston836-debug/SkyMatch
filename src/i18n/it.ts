@@ -296,6 +296,9 @@ export const it: Strings = {
     classSideLabel: 'LATO DELL’AULA',
     classSideHint: 'Guardando la lavagna.',
     classSides: { left: 'Sinistra', center: 'Centro', right: 'Destra' },
+    classRoomLabel: 'QUALE CLASSE? (FACOLTATIVO)',
+    classRoomPlaceholder: '1ª C, aula di informatica, Storia…',
+    classRoomHint: 'Per sapere in che classe sei quando ce ne sono diverse vicine. Compare sulla tua scheda.',
   },
 
   venues: {

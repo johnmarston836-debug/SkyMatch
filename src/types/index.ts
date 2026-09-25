@@ -35,7 +35,8 @@ export type UserLocation =
   | { kind: 'train'; coach: number; seat: Seat }
   | { kind: 'gym'; muscle: MuscleGroup }
   | { kind: 'public'; color: OutfitColor; spot?: string }
-  | { kind: 'class'; row: number; side: ClassSide };
+  /** `room` is which class it is ("1º C", "Aula de informática"), free text like a public place's spot. */
+  | { kind: 'class'; row: number; side: ClassSide; room?: string };
 
 export interface Profile {
   id: string; // stable local UUID, regenerated per install (not tied to BLE MAC)

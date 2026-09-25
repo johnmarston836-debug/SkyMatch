@@ -298,6 +298,9 @@ export const en: Strings = {
     classSideLabel: 'SIDE OF THE ROOM',
     classSideHint: 'Facing the board.',
     classSides: { left: 'Left', center: 'Centre', right: 'Right' },
+    classRoomLabel: 'WHICH CLASS? (OPTIONAL)',
+    classRoomPlaceholder: 'Year 9C, computer lab, History…',
+    classRoomHint: 'So people know which class you’re in when there are several nearby. Shown on your card.',
   },
 
   venues: {
