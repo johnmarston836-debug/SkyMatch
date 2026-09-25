@@ -23,7 +23,7 @@ function render() {
 describe('settings', () => {
   beforeEach(async () => {
     await AsyncStorage.clear();
-    useSettingsStore.setState({ appearance: 'system', accent: 'blue', hydrated: false });
+    useSettingsStore.setState({ appearance: 'system', accent: 'blue', notify: { private: true, cabin: true, reactions: true }, hydrated: false });
   });
 
   it('chooses the appearance and the highlight colour, and remembers both', async () => {
@@ -46,5 +46,21 @@ describe('settings', () => {
     expect(useSettingsStore.getState()).toMatchObject({ appearance: 'dark', accent: 'green' });
     expect(ACCENTS.green).toMatch(/^#/);
     await ReactTestRenderer.act(() => tree!.unmount());
+  });
+
+  it('switches each kind of notification on and off, and remembers it', async () => {
+    let tree: ReactTestRenderer.ReactTestRenderer | undefined;
+    await ReactTestRenderer.act(() => {
+      tree = render();
+    });
+    const cabin = tree!.root.find(
+      (node) => node.props.accessibilityLabel === t.settings.notifyCabin && typeof node.props.onValueChange === 'function',
+    );
+    await ReactTestRenderer.act(() => cabin.props.onValueChange(false));
+    expect(useSettingsStore.getState().notify).toEqual({ private: true, cabin: false, reactions: true });
+
+    useSettingsStore.setState({ notify: { private: true, cabin: true, reactions: true } });
+    await useSettingsStore.getState().hydrate();
+    expect(useSettingsStore.getState().notify.cabin).toBe(false);
   });
 });

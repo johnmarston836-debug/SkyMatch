@@ -167,6 +167,12 @@ export const fr: Strings = {
     contactDeveloper: 'Écrire au développeur',
     contactSoon: 'Disponible très bientôt',
     contactHint: 'Dis-nous ce que tu aimes, ce qui ne marche pas ou ce qui te manque.',
+    notifications: 'NOTIFICATIONS',
+    notifyPrivate: 'Discussions privées',
+    notifyCabin: 'Chat de cabine',
+    notifyReactions: 'Réactions',
+    notifyReactionsHint: 'Quand quelqu’un réagit à ton « Je suis debout » ou « Je libère la machine ».',
+    notifyHint: 'Uniquement avec l’app en arrière-plan. Pour le chat de cabine, une toutes les 30 secondes au plus.',
   },
 
   myProfile: {
@@ -184,8 +190,8 @@ export const fr: Strings = {
     mutedUnknown: 'Quelqu’un qui n’est plus à proximité',
     alertsTitle: 'Alertes',
     alertsOn:
-      'On te prévient des messages privés qui arrivent quand l’appli est en arrière-plan. Si tu fermes complètement l’appli, le Bluetooth s’éteint et plus rien n’arrive.',
-    alertsOff: 'Active les alertes pour être au courant des messages privés même sans l’appli à l’écran.',
+      'On te prévient de ce qui arrive quand l’app est en arrière-plan ; choisis quoi dans Réglages. Si tu fermes complètement l’app, le Bluetooth s’arrête et rien n’arrive.',
+    alertsOff: 'Active les alertes pour être prévenu des messages et réactions même sans l’app à l’écran.',
     openSettings: 'Ouvrir les Réglages',
     enableAlerts: 'Activer les alertes',
     save: 'Enregistrer',
@@ -230,7 +236,9 @@ export const fr: Strings = {
 
   notifications: {
     sentPhoto: 'T’a envoyé une photo',
-    channelName: 'Messages privés',
+    channelName: 'Messages et alertes',
+    cabinTitle: 'Chat de cabine',
+    reactedTo: { standing: 'A réagi : tu es debout', leavingMachine: 'A réagi : tu libères la machine' },
   },
 
   presence: {

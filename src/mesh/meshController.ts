@@ -9,7 +9,7 @@ import { useProfileStore } from '../state/profileStore';
 import { useAvatarStore } from '../state/avatarStore';
 import { useBlockStore } from '../state/blockStore';
 import { useIdentityStore } from '../state/identityStore';
-import { notifyPrivateMessage } from '../notifications/notifier';
+import { notifyGroupMessage, notifyPrivateMessage, notifyReaction } from '../notifications/notifier';
 import * as Background from 'skymatch-peripheral/background';
 import { DeliveryTracker } from './delivery';
 import { AppState } from 'react-native';
@@ -337,7 +337,10 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
     const message: ChatMessage = { ...packet, fromLabel: labelOf(packet), viaMesh: true };
 
     if (message.scope === 'group') {
+      // Relays deliver the same line more than once; only the first is news.
+      const isNew = !useChatStore.getState().groupMessages.some((m) => m.id === message.id);
       useChatStore.getState().addGroupMessage(message);
+      if (isNew && message.fromId !== myProfile.id) void notifyGroupMessage(message);
       return;
     }
 
@@ -389,7 +392,15 @@ export async function startMesh(myProfile: Profile): Promise<MeshService> {
 
   service.on('reaction', (reaction) => {
     if (useBlockStore.getState().isMuted(reaction.fromId)) return;
-    usePresenceStore.getState().applyReaction({ ...reaction, fromLabel: labelOf(reaction) });
+    const presence = usePresenceStore.getState();
+    const isNew = !(presence.reactionsByAlert[reaction.alertId] ?? []).some((r) => r.id === reaction.id);
+    presence.applyReaction({ ...reaction, fromLabel: labelOf(reaction) });
+    // Only reactions to my own alert are addressed to me.
+    const alert = presence.alerts[reaction.alertId];
+    if (isNew && alert && alert.id === presence.myActiveAlertId && reaction.fromId !== myProfile.id) {
+      const nickname = useDiscoveryStore.getState().peers[reaction.fromId]?.profile?.nickname ?? '';
+      void notifyReaction(nickname, labelOf(reaction), reaction.kind, alert.status, `reaction-${alert.id}-${reaction.fromId}`);
+    }
   });
 
   await service.start(myProfile.location);

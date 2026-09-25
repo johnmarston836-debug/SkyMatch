@@ -1,9 +1,9 @@
 import React from 'react';
-import { Linking, Pressable, ScrollView, Text, View } from 'react-native';
+import { Linking, Pressable, ScrollView, Switch, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { MainStackParamList } from '../../navigation/RootNavigator';
-import { ACCENTS, useSettingsStore, type AccentName, type Appearance } from '../../state/settingsStore';
+import { ACCENTS, useSettingsStore, type AccentName, type Appearance, type NotifyKind } from '../../state/settingsStore';
 import { DEVELOPER_EMAIL } from '../../config';
 import { t } from '../../i18n';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
@@ -12,6 +12,7 @@ type Props = NativeStackScreenProps<MainStackParamList, 'Settings'>;
 
 const APPEARANCES: Appearance[] = ['system', 'light', 'dark'];
 const ACCENT_NAMES = Object.keys(ACCENTS) as AccentName[];
+const NOTIFY_KINDS: NotifyKind[] = ['private', 'cabin', 'reactions'];
 
 /** Reached from the gear on your profile: how the app looks, and how to reach whoever makes it. */
 export function SettingsScreen({ navigation }: Props) {
@@ -21,6 +22,8 @@ export function SettingsScreen({ navigation }: Props) {
   const accent = useSettingsStore((state) => state.accent);
   const setAppearance = useSettingsStore((state) => state.setAppearance);
   const setAccent = useSettingsStore((state) => state.setAccent);
+  const notify = useSettingsStore((state) => state.notify);
+  const setNotify = useSettingsStore((state) => state.setNotify);
   const styles = useThemedStyles(({ colors, radii, spacing, typography }) => ({
     container: { flex: 1, backgroundColor: colors.background },
     scroll: { paddingHorizontal: spacing(3) },
@@ -86,12 +89,21 @@ export function SettingsScreen({ navigation }: Props) {
     rowValue: { ...typography.subtitle, fontSize: 13, marginTop: 2 },
     rowArrow: { ...typography.subtitle, fontSize: 18 },
     disabled: { opacity: 0.55 },
+    switchRow: { paddingVertical: spacing(0.75), gap: spacing(1.5) },
+    switchText: { flex: 1 },
+    divider: { height: 1, backgroundColor: colors.border, marginVertical: spacing(0.75) },
   }));
 
   const appearanceLabel: Record<Appearance, string> = {
     system: t.settings.appearanceSystem,
     light: t.settings.appearanceLight,
     dark: t.settings.appearanceDark,
+  };
+
+  const notifyLabel: Record<NotifyKind, { title: string; hint?: string }> = {
+    private: { title: t.settings.notifyPrivate },
+    cabin: { title: t.settings.notifyCabin },
+    reactions: { title: t.settings.notifyReactions, hint: t.settings.notifyReactionsHint },
   };
 
   const writeToDeveloper = () => {
@@ -167,6 +179,28 @@ export function SettingsScreen({ navigation }: Props) {
           </View>
         </View>
         <Text style={styles.hint}>{t.settings.accentHint}</Text>
+
+        <Text style={styles.sectionLabel}>{t.settings.notifications}</Text>
+        <View style={styles.card}>
+          {NOTIFY_KINDS.map((kind, index) => (
+            <View key={kind}>
+              {index > 0 && <View style={styles.divider} />}
+              <View style={[styles.row, styles.switchRow]}>
+                <View style={styles.switchText}>
+                  <Text style={styles.rowTitle}>{notifyLabel[kind].title}</Text>
+                  {notifyLabel[kind].hint && <Text style={styles.rowValue}>{notifyLabel[kind].hint}</Text>}
+                </View>
+                <Switch
+                  value={notify[kind]}
+                  onValueChange={(on) => setNotify(kind, on)}
+                  trackColor={{ true: theme.colors.accent }}
+                  accessibilityLabel={notifyLabel[kind].title}
+                />
+              </View>
+            </View>
+          ))}
+        </View>
+        <Text style={styles.hint}>{t.settings.notifyHint}</Text>
 
         <Text style={styles.sectionLabel}>{t.settings.contact}</Text>
         <Pressable

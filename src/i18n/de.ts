@@ -167,6 +167,12 @@ export const de: Strings = {
     contactDeveloper: 'Dem Entwickler schreiben',
     contactSoon: 'Bald verfügbar',
     contactHint: 'Sag uns, was dir gefällt, was nicht funktioniert oder was dir fehlt.',
+    notifications: 'MITTEILUNGEN',
+    notifyPrivate: 'Private Chats',
+    notifyCabin: 'Kabinen-Chat',
+    notifyReactions: 'Reaktionen',
+    notifyReactionsHint: 'Wenn jemand auf dein „Ich stehe“ oder „Gerät wird frei“ reagiert.',
+    notifyHint: 'Nur, wenn die App im Hintergrund ist. Beim Kabinen-Chat höchstens eine alle 30 Sekunden.',
   },
 
   myProfile: {
@@ -184,8 +190,8 @@ export const de: Strings = {
     mutedUnknown: 'Jemand, der nicht mehr in der Nähe ist',
     alertsTitle: 'Hinweise',
     alertsOn:
-      'Wir sagen dir Bescheid, wenn private Nachrichten ankommen, während die App im Hintergrund läuft. Schließt du die App ganz, geht Bluetooth aus und es kommt gar nichts mehr an.',
-    alertsOff: 'Schalte Hinweise ein, um von privaten Nachrichten zu erfahren, auch wenn die App nicht auf dem Bildschirm ist.',
+      'Wir sagen dir Bescheid, was ankommt, während die App im Hintergrund ist; was genau, wählst du in den Einstellungen. Schließt du die App ganz, stoppt Bluetooth und es kommt nichts an.',
+    alertsOff: 'Schalte Hinweise ein, um Nachrichten und Reaktionen mitzubekommen, auch wenn die App nicht offen ist.',
     openSettings: 'Einstellungen öffnen',
     enableAlerts: 'Hinweise einschalten',
     save: 'Änderungen speichern',
@@ -230,7 +236,9 @@ export const de: Strings = {
 
   notifications: {
     sentPhoto: 'Hat dir ein Foto geschickt',
-    channelName: 'Private Nachrichten',
+    channelName: 'Nachrichten und Hinweise',
+    cabinTitle: 'Kabinen-Chat',
+    reactedTo: { standing: 'Hat darauf reagiert, dass du stehst', leavingMachine: 'Hat darauf reagiert, dass du das Gerät freigibst' },
   },
 
   presence: {

@@ -165,6 +165,12 @@ export const ca: Strings = {
     contactDeveloper: 'Escriure al desenvolupador',
     contactSoon: 'Disponible molt aviat',
     contactHint: 'Explica’ns què t’agrada, què falla o què trobes a faltar.',
+    notifications: 'NOTIFICACIONS',
+    notifyPrivate: 'Xats privats',
+    notifyCabin: 'Xat de cabina',
+    notifyReactions: 'Reaccions',
+    notifyReactionsHint: 'Quan algú reacciona al teu «Estic dret» o «Deixo la màquina».',
+    notifyHint: 'Només avisen amb l’app en segon pla. Al xat de cabina, com a molt una cada 30 segons.',
   },
 
   myProfile: {
@@ -182,8 +188,8 @@ export const ca: Strings = {
     mutedUnknown: 'Algú que ja no és a prop',
     alertsTitle: 'Avisos',
     alertsOn:
-      'T’avisem dels missatges privats que arribin amb l’app en segon pla. Si tanques l’app del tot, el Bluetooth s’apaga i no arriba res.',
-    alertsOff: 'Activa els avisos per assabentar-te dels missatges privats encara que no tinguis l’app a la pantalla.',
+      'T’avisem del que arribi amb l’app en segon pla; tries què a Configuració. Si tanques l’app del tot, el Bluetooth s’atura i no arriba res.',
+    alertsOff: 'Activa els avisos per assabentar-te de missatges i reaccions encara que no tinguis l’app en pantalla.',
     openSettings: 'Obrir Configuració',
     enableAlerts: 'Activar avisos',
     save: 'Desar canvis',
@@ -228,7 +234,9 @@ export const ca: Strings = {
 
   notifications: {
     sentPhoto: 'T’ha enviat una foto',
-    channelName: 'Missatges privats',
+    channelName: 'Missatges i avisos',
+    cabinTitle: 'Xat de cabina',
+    reactedTo: { standing: 'Ha reaccionat que estàs dret', leavingMachine: 'Ha reaccionat que deixes la màquina' },
   },
 
   presence: {

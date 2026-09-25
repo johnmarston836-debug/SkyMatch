@@ -166,6 +166,12 @@ export const en: Strings = {
     contactDeveloper: 'Write to the developer',
     contactSoon: 'Coming very soon',
     contactHint: 'Tell us what you like, what breaks or what you miss.',
+    notifications: 'NOTIFICATIONS',
+    notifyPrivate: 'Private chats',
+    notifyCabin: 'Cabin chat',
+    notifyReactions: 'Reactions',
+    notifyReactionsHint: 'When someone reacts to your “I’m standing” or “Leaving the machine”.',
+    notifyHint: 'They only show with the app in the background. For the cabin chat, at most one every 30 seconds.',
   },
 
   myProfile: {
@@ -183,8 +189,8 @@ export const en: Strings = {
     mutedUnknown: 'Someone who is no longer nearby',
     alertsTitle: 'Alerts',
     alertsOn:
-      'We’ll tell you about private messages that arrive while the app is in the background. Close the app completely and Bluetooth goes off, so nothing arrives at all.',
-    alertsOff: 'Turn alerts on to hear about private messages even when the app isn’t on screen.',
+      'We let you know about what arrives while the app is in the background; choose what in Settings. If you close the app completely, Bluetooth stops and nothing arrives.',
+    alertsOff: 'Turn on alerts to hear about messages and reactions even when the app isn’t on screen.',
     openSettings: 'Open Settings',
     enableAlerts: 'Turn alerts on',
     save: 'Save changes',
@@ -229,7 +235,9 @@ export const en: Strings = {
 
   notifications: {
     sentPhoto: 'Sent you a photo',
-    channelName: 'Private messages',
+    channelName: 'Messages and alerts',
+    cabinTitle: 'Cabin chat',
+    reactedTo: { standing: 'Reacted to you standing up', leavingMachine: 'Reacted to you leaving the machine' },
   },
 
   presence: {

@@ -164,6 +164,12 @@ export const it: Strings = {
     contactDeveloper: 'Scrivi allo sviluppatore',
     contactSoon: 'Disponibile a breve',
     contactHint: 'Raccontaci cosa ti piace, cosa non va o cosa ti manca.',
+    notifications: 'NOTIFICHE',
+    notifyPrivate: 'Chat private',
+    notifyCabin: 'Chat di cabina',
+    notifyReactions: 'Reazioni',
+    notifyReactionsHint: 'Quando qualcuno reagisce al tuo «Sono in piedi» o «Lascio la macchina».',
+    notifyHint: 'Solo con l’app in background. Per la chat di cabina, al massimo una ogni 30 secondi.',
   },
 
   myProfile: {
@@ -181,8 +187,8 @@ export const it: Strings = {
     mutedUnknown: 'Qualcuno che non è più vicino',
     alertsTitle: 'Avvisi',
     alertsOn:
-      'Ti avvisiamo dei messaggi privati che arrivano con l’app in secondo piano. Se chiudi l’app del tutto, il Bluetooth si spegne e non arriva niente.',
-    alertsOff: 'Attiva gli avvisi per sapere dei messaggi privati anche senza l’app sullo schermo.',
+      'Ti avvisiamo di ciò che arriva con l’app in background; scegli cosa in Impostazioni. Se chiudi del tutto l’app, il Bluetooth si ferma e non arriva nulla.',
+    alertsOff: 'Attiva gli avvisi per sapere di messaggi e reazioni anche senza l’app sullo schermo.',
     openSettings: 'Apri Impostazioni',
     enableAlerts: 'Attiva gli avvisi',
     save: 'Salva modifiche',
@@ -227,7 +233,9 @@ export const it: Strings = {
 
   notifications: {
     sentPhoto: 'Ti ha mandato una foto',
-    channelName: 'Messaggi privati',
+    channelName: 'Messaggi e avvisi',
+    cabinTitle: 'Chat di cabina',
+    reactedTo: { standing: 'Ha reagito: sei in piedi', leavingMachine: 'Ha reagito: lasci la macchina' },
   },
 
   presence: {

@@ -179,6 +179,12 @@ export const es = {
     contactDeveloper: 'Escribir al desarrollador',
     contactSoon: 'Disponible muy pronto',
     contactHint: 'Cuéntanos qué te gusta, qué falla o qué echas de menos.',
+    notifications: 'NOTIFICACIONES',
+    notifyPrivate: 'Chats privados',
+    notifyCabin: 'Chat de cabina',
+    notifyReactions: 'Reacciones',
+    notifyReactionsHint: 'Cuando alguien reacciona a tu «Estoy de pie» o «Dejo la máquina».',
+    notifyHint: 'Solo avisan con la app en segundo plano. En el chat de cabina, como mucho una cada 30 segundos.',
   },
 
   myProfile: {
@@ -196,8 +202,8 @@ export const es = {
     mutedUnknown: 'Alguien que ya no está cerca',
     alertsTitle: 'Avisos',
     alertsOn:
-      'Te avisamos de los mensajes privados que lleguen con la app en segundo plano. Si cierras la app del todo, el Bluetooth se apaga y no llega nada.',
-    alertsOff: 'Activa los avisos para enterarte de los mensajes privados aunque no tengas la app en pantalla.',
+      'Te avisamos de lo que llegue con la app en segundo plano; eliges qué en Ajustes. Si cierras la app del todo, el Bluetooth se apaga y no llega nada.',
+    alertsOff: 'Activa los avisos para enterarte de mensajes y reacciones aunque no tengas la app en pantalla.',
     openSettings: 'Abrir Ajustes',
     enableAlerts: 'Activar avisos',
     save: 'Guardar cambios',
@@ -244,7 +250,9 @@ export const es = {
   notifications: {
     sentPhoto: 'Te ha enviado una foto',
     /** What Android lists this app's notifications under, in Settings. */
-    channelName: 'Mensajes privados',
+    channelName: 'Mensajes y avisos',
+    cabinTitle: 'Chat de cabina',
+    reactedTo: { standing: 'Ha reaccionado a que estás de pie', leavingMachine: 'Ha reaccionado a que dejas la máquina' } as Record<PresenceStatus, string>,
   },
 
   presence: {

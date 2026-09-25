@@ -25,18 +25,27 @@ export const ACCENTS = {
 
 export type AccentName = keyof typeof ACCENTS;
 
+/** The three kinds of notification the app can show, each switched on or off in Settings. */
+export type NotifyKind = 'private' | 'cabin' | 'reactions';
+
 interface Settings {
   appearance: Appearance;
   accent: AccentName;
+  notify: Record<NotifyKind, boolean>;
 }
 
-const DEFAULTS: Settings = { appearance: 'system', accent: 'blue' };
+const DEFAULTS: Settings = {
+  appearance: 'system',
+  accent: 'blue',
+  notify: { private: true, cabin: true, reactions: true },
+};
 
 interface SettingsState extends Settings {
   hydrated: boolean;
   hydrate: () => Promise<void>;
   setAppearance: (appearance: Appearance) => void;
   setAccent: (accent: AccentName) => void;
+  setNotify: (kind: NotifyKind, on: boolean) => void;
 }
 
 function read(raw: string | null): Settings {
@@ -49,6 +58,12 @@ function read(raw: string | null): Settings {
           ? stored.appearance
           : DEFAULTS.appearance,
       accent: typeof stored.accent === 'string' && stored.accent in ACCENTS ? stored.accent : DEFAULTS.accent,
+      // Anything not stored as a plain false stays on: older installs had no switches.
+      notify: {
+        private: stored.notify?.private !== false,
+        cabin: stored.notify?.cabin !== false,
+        reactions: stored.notify?.reactions !== false,
+      },
     };
   } catch {
     return DEFAULTS;
@@ -58,8 +73,8 @@ function read(raw: string | null): Settings {
 /** How this phone's owner likes the app to look. Only ever local. */
 export const useSettingsStore = create<SettingsState>((set, get) => {
   const persist = () => {
-    const { appearance, accent } = get();
-    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ appearance, accent })).catch(() => {});
+    const { appearance, accent, notify } = get();
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ appearance, accent, notify })).catch(() => {});
   };
   return {
     ...DEFAULTS,
@@ -74,6 +89,10 @@ export const useSettingsStore = create<SettingsState>((set, get) => {
     },
     setAccent: (accent) => {
       set({ accent });
+      persist();
+    },
+    setNotify: (kind, on) => {
+      set((state) => ({ notify: { ...state.notify, [kind]: on } }));
       persist();
     },
   };
