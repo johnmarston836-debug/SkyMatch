@@ -44,30 +44,31 @@ export const en: Strings = {
     /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
     page2Title: 'Open the app to discover people around you',
     page2Body:
-      'Open SkyMatch for a few seconds so your iPhone connects with the people near you. After that you can lock it or use other apps: if someone writes to you in a chat you’ve already started, you’ll keep getting their messages with your iPhone locked, and you keep relaying for others.',
+      'Open it for a few seconds when you arrive to connect with the people near you. Then you can lock your iPhone: chats you’ve already started keep reaching you.',
     page2Caption: 'The device in the middle is locked, and still passes your message on.',
-    page2Body2:
-      'There is no server: messages only exist on the devices around you, so whatever is said while you are disconnected cannot be recovered. Your private chats do stay saved on your device.',
-    page2CalloutTitle: 'What a locked iPhone can’t do',
+    page2CalloutTitle: 'With your iPhone locked',
     page2CalloutBody:
-      'With the screen locked it takes longer to find new people, and two locked iPhones that have never met won’t find each other. If you close SkyMatch completely from the app switcher, you stop getting messages and stop relaying them.',
+      'It takes longer to find new people, and two locked iPhones that have never met won’t find each other. If you close SkyMatch from the app switcher, you stop receiving.',
     /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
     page2TitleAndroid: 'Open the app to discover people around you',
     page2BodyAndroid:
-      'SkyMatch stays connected in the background - you’ll see it in a notification. If someone writes to you in a chat you’ve already started, you’ll keep getting their messages with your device locked, and you keep relaying for others.',
+      'SkyMatch stays connected in the background, as a notification will show: you can lock your device and keep getting messages.',
     page2CalloutTitleAndroid: 'When it stops working',
     page2CalloutBodyAndroid:
       'If you tap “Disconnect” in the notification or close SkyMatch from the recent apps, you stop getting messages and stop relaying them.',
     page3Label: 'HOW IT WORKS · 3 OF 3',
     page3Title: 'Only the two of you can read your private chats',
-    page3Body:
-      'Private messages are end-to-end encrypted. The devices that relay them pass them on without being able to open them: neither the text nor the photos.',
+    page3Body: 'Private chats are end-to-end encrypted and signed: nobody can read them or pretend to be you.',
     page3Caption:
       'The device in the middle only ever holds the message encrypted; the one on the right, who it is for, decrypts it.',
-    page3Body2: 'And everything you send is signed by your device, so nobody can write pretending to be you.',
     securityCalloutTitle: 'Your chats stay with you',
     securityCalloutBody:
-      'If someone moves away, your chat stays saved on your device, marked in red as “No connection”. When you are close again, you reconnect on your own and carry on where you left off. What you write while they are away doesn’t reach them right then: we send it again when they reappear, and if it still doesn’t arrive you’ll see “Not delivered”, so you can resend it with a tap.',
+      'If someone moves away, your chat stays saved and marked “No connection”. When you’re close again you reconnect on your own, and anything that didn’t arrive is sent again.',
+    permissionTitle: 'Tap “Allow”',
+    permissionBody:
+      'When you go in, your iPhone will ask to use Bluetooth. Accept it: without it SkyMatch can’t find anyone.',
+    permissionBodyAndroid:
+      'When you go in, your device will ask to find nearby devices. Accept it: without that permission SkyMatch can’t find anyone.',
     understood: 'Got it',
   },
 
@@ -84,7 +85,8 @@ export const en: Strings = {
 
   profileSetup: {
     step: 'STEP 3 OF 3',
-    title: 'What should we call you?',
+    title: 'Create your profile',
+    photoHint: 'Optional: the people around you will see it.',
     identitySuffix: '— the name is just there to go with it.',
     namePlaceholder: 'Your name or a nickname',
     contactLabel: 'Instagram / WhatsApp (optional)',

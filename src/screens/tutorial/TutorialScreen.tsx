@@ -84,9 +84,12 @@ interface PageContent {
   body: string;
   diagram: 'relay' | 'pocket' | 'sealed';
   caption: string;
-  body2: string;
+  /** Only the first page has a second paragraph; the other two say it in one. */
+  body2?: string;
   calloutTitle: string;
   calloutBody: string;
+  /** On the last page: what to answer when the phone asks for Bluetooth. */
+  notice?: { title: string; body: string };
 }
 
 function pages(): PageContent[] {
@@ -108,7 +111,6 @@ function pages(): PageContent[] {
       body: ANDROID ? tt.page2BodyAndroid : tt.page2Body,
       diagram: 'pocket',
       caption: tt.page2Caption,
-      body2: tt.page2Body2,
       calloutTitle: ANDROID ? tt.page2CalloutTitleAndroid : tt.page2CalloutTitle,
       calloutBody: ANDROID ? tt.page2CalloutBodyAndroid : tt.page2CalloutBody,
     },
@@ -118,9 +120,13 @@ function pages(): PageContent[] {
       body: tt.page3Body,
       diagram: 'sealed',
       caption: tt.page3Caption,
-      body2: tt.page3Body2,
       calloutTitle: tt.securityCalloutTitle,
       calloutBody: tt.securityCalloutBody,
+      // Said right before the app asks, so "Allow" is the obvious answer.
+      notice: {
+        title: tt.permissionTitle,
+        body: ANDROID ? tt.permissionBodyAndroid : tt.permissionBody,
+      },
     },
   ];
 }
@@ -152,6 +158,8 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
     },
     calloutTitle: { color: colors.accent, fontWeight: '700' as const, marginBottom: spacing(0.5) },
     calloutText: { ...typography.body, fontSize: 14, lineHeight: 20 },
+    notice: { borderColor: colors.text, marginTop: spacing(1.5) },
+    noticeTitle: { color: colors.text },
 
     footer: { paddingHorizontal: spacing(3), paddingTop: spacing(1), gap: spacing(2) },
     dots: { flexDirection: 'row' as const, justifyContent: 'center' as const, gap: spacing(1) },
@@ -209,15 +217,25 @@ function TutorialCarousel({ onFinish, finishLabel, onBack }: CarouselProps) {
                 <MeshDiagram variant={content.diagram} />
                 <Text style={styles.diagramCaption}>{content.caption}</Text>
               </Reveal>
-              <Reveal animate={animate} order={3}>
-                <Text style={styles.bodySpaced}>{content.body2}</Text>
-              </Reveal>
+              {content.body2 && (
+                <Reveal animate={animate} order={3}>
+                  <Text style={styles.bodySpaced}>{content.body2}</Text>
+                </Reveal>
+              )}
               <Reveal animate={animate} order={4}>
                 <View style={styles.callout}>
                   <Text style={styles.calloutTitle}>{content.calloutTitle}</Text>
                   <Text style={styles.calloutText}>{content.calloutBody}</Text>
                 </View>
               </Reveal>
+              {content.notice && (
+                <Reveal animate={animate} order={5}>
+                  <View style={[styles.callout, styles.notice]}>
+                    <Text style={[styles.calloutTitle, styles.noticeTitle]}>{content.notice.title}</Text>
+                    <Text style={styles.calloutText}>{content.notice.body}</Text>
+                  </View>
+                </Reveal>
+              )}
             </ScrollView>
           );
         })}

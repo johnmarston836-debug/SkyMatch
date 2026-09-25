@@ -44,31 +44,32 @@ export const de: Strings = {
     /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
     page2Title: 'Öffne die App, um Leute in deiner Nähe zu entdecken',
     page2Body:
-      'Öffne SkyMatch ein paar Sekunden lang, damit sich dein iPhone mit den Leuten in der Nähe verbindet. Danach kannst du es sperren oder andere Apps nutzen: Schreibt dir jemand in einem schon begonnenen Chat, bekommst du die Nachrichten auch bei gesperrtem iPhone – und du leitest weiterhin Nachrichten für andere weiter.',
+      'Öffne sie beim Ankommen ein paar Sekunden, um dich mit den Leuten in der Nähe zu verbinden. Danach kannst du dein iPhone sperren: Schon begonnene Chats erreichen dich weiter.',
     page2Caption: 'Das Gerät in der Mitte ist gesperrt und gibt deine Nachricht trotzdem weiter.',
-    page2Body2:
-      'Es gibt keinen Server: Nachrichten existieren nur auf den Geräten um dich herum. Was gesagt wird, während du nicht verbunden bist, lässt sich nicht nachholen. Deine privaten Chats bleiben aber auf deinem Gerät gespeichert.',
-    page2CalloutTitle: 'Was ein gesperrtes iPhone nicht kann',
+    page2CalloutTitle: 'Mit gesperrtem iPhone',
     page2CalloutBody:
-      'Bei gesperrtem Bildschirm findet es neue Leute langsamer, und zwei gesperrte iPhones, die sich noch nie gesehen haben, finden sich nicht. Wenn du SkyMatch im App-Umschalter ganz schließt, bekommst du keine Nachrichten mehr und leitest keine mehr weiter.',
+      'Neue Leute findet es langsamer, und zwei gesperrte iPhones, die sich nie gesehen haben, finden sich nicht. Schließt du SkyMatch im App-Umschalter, bekommst du nichts mehr.',
     /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
     page2TitleAndroid: 'Öffne die App, um Leute in deiner Nähe zu entdecken',
     page2BodyAndroid:
-      'SkyMatch bleibt im Hintergrund verbunden – du siehst es an einer Benachrichtigung. Schreibt dir jemand in einem schon begonnenen Chat, bekommst du die Nachrichten auch bei gesperrtem Gerät – und du leitest weiterhin Nachrichten für andere weiter.',
+      'SkyMatch bleibt im Hintergrund verbunden, wie eine Benachrichtigung zeigt: Du kannst dein Gerät sperren und weiter Nachrichten bekommen.',
     page2CalloutTitleAndroid: 'Wann es aufhört',
     page2CalloutBodyAndroid:
       'Wenn du in der Benachrichtigung auf „Trennen“ tippst oder SkyMatch in den letzten Apps schließt, bekommst du keine Nachrichten mehr und leitest keine mehr weiter.',
     page3Label: 'SO FUNKTIONIERT’S · 3 VON 3',
     page3Title: 'Eure privaten Chats könnt nur ihr zwei lesen',
     page3Body:
-      'Private Nachrichten sind Ende-zu-Ende-verschlüsselt. Die Geräte, die sie weitergeben, können sie nicht öffnen: weder den Text noch die Fotos.',
+      'Private Chats sind Ende-zu-Ende-verschlüsselt und signiert: Niemand kann sie lesen oder sich als du ausgeben.',
     page3Caption:
       'Das Gerät in der Mitte hat die Nachricht nur verschlüsselt; das rechte, für das sie bestimmt ist, entschlüsselt sie.',
-    page3Body2:
-      'Außerdem ist alles, was du sendest, von deinem Gerät signiert – niemand kann in deinem Namen schreiben.',
     securityCalloutTitle: 'Deine Chats bleiben bei dir',
     securityCalloutBody:
-      'Entfernt sich jemand, bleibt euer Chat auf deinem Gerät gespeichert, rot markiert als „Keine Verbindung“. Seid ihr wieder in der Nähe, verbindet ihr euch von selbst und macht dort weiter, wo ihr aufgehört habt. Was du schreibst, während die Person weg ist, kommt nicht sofort an: Wir senden es erneut, sobald sie wieder auftaucht – und kommt es trotzdem nicht an, siehst du „Nicht zugestellt“ und kannst es mit einem Tippen erneut senden.',
+      'Entfernt sich jemand, bleibt euer Chat gespeichert und als „Keine Verbindung“ markiert. Seid ihr wieder nah, verbindet ihr euch von selbst, und was nicht ankam, wird erneut gesendet.',
+    permissionTitle: 'Tippe auf „Erlauben“',
+    permissionBody:
+      'Beim Hineingehen fragt dein iPhone, ob es Bluetooth nutzen darf. Stimme zu: Ohne Bluetooth findet SkyMatch niemanden.',
+    permissionBodyAndroid:
+      'Beim Hineingehen fragt dein Gerät, ob es Geräte in der Nähe finden darf. Stimme zu: Ohne diese Berechtigung findet SkyMatch niemanden.',
     understood: 'Verstanden',
   },
 
@@ -85,7 +86,8 @@ export const de: Strings = {
 
   profileSetup: {
     step: 'SCHRITT 3 VON 3',
-    title: 'Wie sollen wir dich nennen?',
+    title: 'Erstelle dein Profil',
+    photoHint: 'Optional: Die Leute in deiner Nähe sehen es.',
     identitySuffix: '— der Name steht nur daneben.',
     namePlaceholder: 'Dein Name oder Spitzname',
     contactLabel: 'Instagram / WhatsApp (optional)',

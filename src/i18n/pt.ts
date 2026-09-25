@@ -46,30 +46,31 @@ export const pt: Strings = {
     /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
     page2Title: 'Abre a app para descobrir quem está à tua volta',
     page2Body:
-      'Abre o SkyMatch uns segundos para o teu iPhone se ligar a quem está por perto. Depois podes bloqueá-lo ou usar outras apps: se te escreverem numa conversa já começada, continuas a receber as mensagens com o iPhone bloqueado, e continuas a servir de ponte para os outros.',
+      'Abre-a uns segundos ao chegar para te ligares a quem está por perto. Depois podes bloquear o iPhone: as conversas já começadas continuam a chegar-te.',
     page2Caption: 'O dispositivo do meio está bloqueado e, mesmo assim, passa a tua mensagem.',
-    page2Body2:
-      'Não há servidor: as mensagens só existem nos dispositivos à tua volta, por isso o que se disser enquanto estiveres desligado não se pode recuperar. As tuas conversas privadas ficam guardadas no teu dispositivo.',
-    page2CalloutTitle: 'O que um iPhone bloqueado não consegue fazer',
+    page2CalloutTitle: 'Com o iPhone bloqueado',
     page2CalloutBody:
-      'Com o ecrã bloqueado demora mais a encontrar gente nova, e dois iPhone bloqueados que nunca se viram não se encontram. Se fechares o SkyMatch por completo no seletor de apps, deixas de receber mensagens e de servir de ponte.',
+      'Demora mais a encontrar gente nova, e dois iPhone bloqueados que nunca se viram não se encontram. Se fechares o SkyMatch no seletor de apps, deixas de receber.',
     /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
     page2TitleAndroid: 'Abre a app para descobrir quem está à tua volta',
     page2BodyAndroid:
-      'O SkyMatch continua ligado em segundo plano: vais vê-lo numa notificação. Se te escreverem numa conversa já começada, continuas a receber as mensagens com o dispositivo bloqueado, e continuas a servir de ponte para os outros.',
+      'O SkyMatch continua ligado em segundo plano, como vais ver numa notificação: podes bloquear o dispositivo e continuar a receber mensagens.',
     page2CalloutTitleAndroid: 'Quando deixa de funcionar',
     page2CalloutBodyAndroid:
       'Se tocares em «Desligar» na notificação ou fechares o SkyMatch nas apps recentes, deixas de receber mensagens e de servir de ponte.',
     page3Label: 'COMO FUNCIONA · 3 DE 3',
     page3Title: 'As vossas conversas privadas só vocês os dois as leem',
     page3Body:
-      'As mensagens privadas são encriptadas ponto a ponto. Os dispositivos que servem de ponte passam-nas sem as conseguir abrir: nem o texto nem as fotos.',
+      'As conversas privadas são encriptadas ponto a ponto e assinadas: ninguém as pode ler nem fazer-se passar por ti.',
     page3Caption: 'O dispositivo do meio só tem a mensagem encriptada; o da direita, a quem se destina, desencripta-a.',
-    page3Body2:
-      'Além disso, tudo o que envias vai assinado pelo teu dispositivo, por isso ninguém pode escrever a fazer-se passar por ti.',
     securityCalloutTitle: 'As tuas conversas ficam contigo',
     securityCalloutBody:
-      'Se alguém se afastar, a vossa conversa fica guardada no teu dispositivo, marcada a vermelho como «Sem ligação». Quando voltarem a estar perto, ligam-se de novo sozinhos e continuam onde ficaram. O que escreveres enquanto a pessoa está longe não lhe chega nesse momento: voltamos a enviá-lo quando ela reaparece, e se mesmo assim não chegar, vais ver «Não entregue» para o reenviares com um toque.',
+      'Se alguém se afastar, a vossa conversa fica guardada e marcada «Sem ligação». Quando voltarem a estar perto ligam-se sozinhos, e o que não chegou é reenviado.',
+    permissionTitle: 'Toca em «Permitir»',
+    permissionBody:
+      'Ao entrar, o teu iPhone vai pedir para usar o Bluetooth. Aceita: sem ele, o SkyMatch não consegue encontrar ninguém.',
+    permissionBodyAndroid:
+      'Ao entrar, o teu dispositivo vai pedir para encontrar dispositivos próximos. Aceita: sem essa permissão, o SkyMatch não consegue encontrar ninguém.',
     understood: 'Percebido',
   },
 
@@ -86,7 +87,8 @@ export const pt: Strings = {
 
   profileSetup: {
     step: 'PASSO 3 DE 3',
-    title: 'Como te chamamos?',
+    title: 'Cria o teu perfil',
+    photoHint: 'Opcional: as pessoas perto de ti vão vê-la.',
     identitySuffix: '— o nome só serve para acompanhar.',
     namePlaceholder: 'O teu nome ou alcunha',
     contactLabel: 'Instagram / WhatsApp (opcional)',

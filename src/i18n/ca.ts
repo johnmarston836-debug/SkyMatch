@@ -43,30 +43,31 @@ export const ca: Strings = {
     /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
     page2Title: 'Obre l’app per descobrir gent al voltant',
     page2Body:
-      'Obre SkyMatch uns segons perquè el teu iPhone es connecti amb qui tens a prop. Després pots bloquejar-lo o fer servir altres apps: si t’escriuen en un xat ja començat, continuaràs rebent els missatges amb l’iPhone bloquejat, i continuaràs fent de pont per als altres.',
+      'Obre-la uns segons en arribar per connectar-te amb qui tens a prop. Després pots bloquejar l’iPhone: els xats ja començats et continuaran arribant.',
     page2Caption: 'El dispositiu del mig està bloquejat, i tot i així passa el teu missatge.',
-    page2Body2:
-      'No hi ha servidor: els missatges només existeixen als dispositius del voltant, així que el que es digui mentre estiguis desconnectat no es pot recuperar. Els teus xats privats sí que es desen al teu dispositiu.',
-    page2CalloutTitle: 'El que un iPhone bloquejat no pot fer',
+    page2CalloutTitle: 'Amb l’iPhone bloquejat',
     page2CalloutBody:
-      'Amb la pantalla bloquejada triga més a trobar gent nova, i dos iPhone bloquejats que no s’han vist mai no es troben. Si tanques SkyMatch del tot des de la multitasca, deixes de rebre missatges i de fer de pont.',
+      'Triga més a trobar gent nova, i dos iPhone bloquejats que no s’han vist no es troben. Si tanques SkyMatch des de la multitasca, deixes de rebre.',
     /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
     page2TitleAndroid: 'Obre l’app per descobrir gent al voltant',
     page2BodyAndroid:
-      'SkyMatch continua connectada en segon pla: ho veuràs en una notificació. Si t’escriuen en un xat ja començat, continuaràs rebent els missatges amb el dispositiu bloquejat, i continuaràs fent de pont per als altres.',
+      'SkyMatch continua connectada en segon pla, com veuràs en una notificació: pots bloquejar el dispositiu i continuar rebent missatges.',
     page2CalloutTitleAndroid: 'Quan deixa de funcionar',
     page2CalloutBodyAndroid:
       'Si toques «Desconnectar» a la notificació o tanques SkyMatch des de la multitasca, deixes de rebre missatges i de fer de pont.',
     page3Label: 'COM FUNCIONA · 3 DE 3',
     page3Title: 'Els vostres xats privats només els llegiu vosaltres dos',
     page3Body:
-      'Els missatges privats van xifrats d’extrem a extrem. Els dispositius que fan de pont els passen sense poder obrir-los: ni el text ni les fotos.',
+      'Els xats privats van xifrats d’extrem a extrem i signats: ningú no els pot llegir ni fer-se passar per tu.',
     page3Caption: 'El dispositiu del mig només té el missatge xifrat; el de la dreta, a qui va adreçat, el desxifra.',
-    page3Body2:
-      'A més, tot el que envies va signat pel teu dispositiu, així que ningú no pot escriure fent-se passar per tu.',
     securityCalloutTitle: 'Els teus xats es queden amb tu',
     securityCalloutBody:
-      'Si algú s’allunya, el vostre xat continua desat al teu dispositiu, marcat en vermell com a «Sense connexió». Quan torneu a ser a prop, us reconnecteu sols i continueu on ho vau deixar. El que li escriguis mentre és lluny no li arriba en aquell moment: l’hi tornem a enviar quan reapareix, i si tot i així no arriba, veuràs «No entregat» per reenviar-lo amb un toc.',
+      'Si algú s’allunya, el vostre xat queda desat i marcat «Sense connexió». En tornar a ser a prop us reconnecteu sols, i el que no va arribar es torna a enviar.',
+    permissionTitle: 'Toca «Permet»',
+    permissionBody:
+      'En entrar, el teu iPhone et demanarà fer servir el Bluetooth. Accepta-ho: sense això, SkyMatch no pot trobar ningú.',
+    permissionBodyAndroid:
+      'En entrar, el teu dispositiu et demanarà trobar dispositius propers. Accepta-ho: sense aquest permís, SkyMatch no pot trobar ningú.',
     understood: 'Entesos',
   },
 
@@ -83,7 +84,8 @@ export const ca: Strings = {
 
   profileSetup: {
     step: 'PAS 3 DE 3',
-    title: 'Com et diem?',
+    title: 'Crea el teu perfil',
+    photoHint: 'Opcional: la veuran les persones que tinguis a prop.',
     identitySuffix: '— el nom només és per acompanyar-lo.',
     namePlaceholder: 'El teu nom o sobrenom',
     contactLabel: 'Instagram / WhatsApp (opcional)',

@@ -44,31 +44,32 @@ export const fr: Strings = {
     /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
     page2Title: 'Ouvre l’appli pour découvrir les gens autour de toi',
     page2Body:
-      'Ouvre SkyMatch quelques secondes pour que ton iPhone se connecte aux personnes proches. Ensuite, tu peux le verrouiller ou utiliser d’autres applis : si on t’écrit dans une discussion déjà commencée, tu continues à recevoir les messages iPhone verrouillé, et à les relayer pour les autres.',
+      'Ouvre-la quelques secondes en arrivant pour te connecter aux personnes proches. Ensuite tu peux verrouiller ton iPhone : les discussions déjà commencées continuent de t’arriver.',
     page2Caption: 'L’appareil du milieu est verrouillé, et il transmet quand même ton message.',
-    page2Body2:
-      'Il n’y a pas de serveur : les messages n’existent que sur les appareils autour de toi, donc ce qui se dit pendant que tu es déconnecté ne peut pas être récupéré. Tes discussions privées, elles, restent enregistrées sur ton appareil.',
-    page2CalloutTitle: 'Ce qu’un iPhone verrouillé ne peut pas faire',
+    page2CalloutTitle: 'iPhone verrouillé',
     page2CalloutBody:
-      'Écran verrouillé, il met plus de temps à trouver de nouvelles personnes, et deux iPhone verrouillés qui ne se sont jamais vus ne se trouvent pas. Si tu fermes complètement SkyMatch depuis le sélecteur d’applis, tu ne reçois plus de messages et tu ne les relaies plus.',
+      'Il met plus de temps à trouver de nouvelles personnes, et deux iPhone verrouillés qui ne se sont jamais vus ne se trouvent pas. Si tu fermes SkyMatch depuis le sélecteur d’applis, tu ne reçois plus rien.',
     /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
     page2TitleAndroid: 'Ouvre l’appli pour découvrir les gens autour de toi',
     page2BodyAndroid:
-      'SkyMatch reste connectée en arrière-plan : tu le verras dans une notification. Si on t’écrit dans une discussion déjà commencée, tu continues à recevoir les messages appareil verrouillé, et à les relayer pour les autres.',
+      'SkyMatch reste connectée en arrière-plan, comme l’indiquera une notification : tu peux verrouiller ton appareil et continuer à recevoir des messages.',
     page2CalloutTitleAndroid: 'Quand elle cesse de fonctionner',
     page2CalloutBodyAndroid:
       'Si tu touches « Déconnecter » dans la notification ou fermes SkyMatch depuis les applis récentes, tu ne reçois plus de messages et tu ne les relaies plus.',
     page3Label: 'COMMENT ÇA MARCHE · 3 SUR 3',
     page3Title: 'Vos discussions privées, vous seuls pouvez les lire',
     page3Body:
-      'Les messages privés sont chiffrés de bout en bout. Les appareils qui les relaient les transmettent sans pouvoir les ouvrir : ni le texte ni les photos.',
+      'Les discussions privées sont chiffrées de bout en bout et signées : personne ne peut les lire ni se faire passer pour toi.',
     page3Caption:
       'L’appareil du milieu n’a que le message chiffré ; celui de droite, son destinataire, le déchiffre.',
-    page3Body2:
-      'De plus, tout ce que tu envoies est signé par ton appareil : personne ne peut écrire en se faisant passer pour toi.',
     securityCalloutTitle: 'Tes discussions restent avec toi',
     securityCalloutBody:
-      'Si quelqu’un s’éloigne, votre discussion reste enregistrée sur ton appareil, marquée en rouge « Pas de connexion ». Quand vous êtes de nouveau proches, vous vous reconnectez tout seuls et reprenez là où vous en étiez. Ce que tu écris pendant son absence ne lui arrive pas tout de suite : on le renvoie quand la personne réapparaît, et si ça n’arrive toujours pas, tu verras « Non distribué » pour le renvoyer d’un geste.',
+      'Si quelqu’un s’éloigne, votre discussion reste enregistrée et marquée « Pas de connexion ». Quand vous êtes de nouveau proches, vous vous reconnectez tout seuls, et ce qui n’est pas arrivé est renvoyé.',
+    permissionTitle: 'Touche « Autoriser »',
+    permissionBody:
+      'En entrant, ton iPhone te demandera d’utiliser le Bluetooth. Accepte : sans lui, SkyMatch ne peut trouver personne.',
+    permissionBodyAndroid:
+      'En entrant, ton appareil te demandera de trouver les appareils à proximité. Accepte : sans cette autorisation, SkyMatch ne peut trouver personne.',
     understood: 'Compris',
   },
 
@@ -85,7 +86,8 @@ export const fr: Strings = {
 
   profileSetup: {
     step: 'ÉTAPE 3 SUR 3',
-    title: 'On t’appelle comment ?',
+    title: 'Crée ton profil',
+    photoHint: 'Facultatif : les personnes autour de toi la verront.',
     identitySuffix: '— le nom est juste là pour l’accompagner.',
     namePlaceholder: 'Ton nom ou un surnom',
     contactLabel: 'Instagram / WhatsApp (facultatif)',

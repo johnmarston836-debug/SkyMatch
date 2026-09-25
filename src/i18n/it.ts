@@ -43,29 +43,30 @@ export const it: Strings = {
     /** Page 2 on iOS: the links an iPhone already has keep working locked; finding new people is what iOS limits. */
     page2Title: 'Apri l’app per scoprire chi hai intorno',
     page2Body:
-      'Apri SkyMatch per qualche secondo così il tuo iPhone si collega con chi hai vicino. Poi puoi bloccarlo o usare altre app: se ti scrivono in una chat già iniziata, continuerai a ricevere i messaggi con l’iPhone bloccato, e continuerai a fare da ponte per gli altri.',
+      'Aprila qualche secondo quando arrivi per collegarti con chi hai vicino. Poi puoi bloccare l’iPhone: le chat già iniziate continueranno ad arrivarti.',
     page2Caption: 'Il dispositivo in mezzo è bloccato, eppure passa il tuo messaggio.',
-    page2Body2:
-      'Non c’è un server: i messaggi esistono solo sui dispositivi intorno a te, quindi quello che si dice mentre sei disconnesso non si può recuperare. Le tue chat private invece restano salvate sul tuo dispositivo.',
-    page2CalloutTitle: 'Cosa non può fare un iPhone bloccato',
+    page2CalloutTitle: 'Con l’iPhone bloccato',
     page2CalloutBody:
-      'Con lo schermo bloccato ci mette di più a trovare persone nuove, e due iPhone bloccati che non si sono mai visti non si trovano. Se chiudi del tutto SkyMatch dal multitasking, smetti di ricevere messaggi e di fare da ponte.',
+      'Ci mette di più a trovare persone nuove, e due iPhone bloccati che non si sono mai visti non si trovano. Se chiudi SkyMatch dal multitasking, smetti di ricevere.',
     /** Page 2 on Android, where the app stays on the mesh in the background (SkyMatchBackgroundService). */
     page2TitleAndroid: 'Apri l’app per scoprire chi hai intorno',
     page2BodyAndroid:
-      'SkyMatch resta connessa in background: lo vedrai in una notifica. Se ti scrivono in una chat già iniziata, continuerai a ricevere i messaggi con il dispositivo bloccato, e continuerai a fare da ponte per gli altri.',
+      'SkyMatch resta connessa in background, come vedrai in una notifica: puoi bloccare il dispositivo e continuare a ricevere messaggi.',
     page2CalloutTitleAndroid: 'Quando smette di funzionare',
     page2CalloutBodyAndroid:
       'Se tocchi «Disconnetti» nella notifica o chiudi SkyMatch dalle app recenti, smetti di ricevere messaggi e di fare da ponte.',
     page3Label: 'COME FUNZIONA · 3 DI 3',
     page3Title: 'Le vostre chat private le leggete solo voi due',
-    page3Body:
-      'I messaggi privati sono crittografati end-to-end. I dispositivi che fanno da ponte li passano senza poterli aprire: né il testo né le foto.',
+    page3Body: 'Le chat private sono crittografate end-to-end e firmate: nessuno può leggerle né fingersi te.',
     page3Caption: 'Il dispositivo in mezzo ha solo il messaggio cifrato; quello a destra, a cui è destinato, lo decifra.',
-    page3Body2: 'Inoltre tutto ciò che invii è firmato dal tuo dispositivo, quindi nessuno può scrivere fingendosi te.',
     securityCalloutTitle: 'Le tue chat restano con te',
     securityCalloutBody:
-      'Se qualcuno si allontana, la vostra chat resta salvata sul tuo dispositivo, segnata in rosso come «Nessuna connessione». Quando tornate vicini, vi ricollegate da soli e riprendete da dove eravate rimasti. Quello che scrivi mentre è lontano non gli arriva subito: lo rimandiamo quando riappare, e se ancora non arriva vedrai «Non consegnato» per inviarlo di nuovo con un tocco.',
+      'Se qualcuno si allontana, la vostra chat resta salvata e segnata «Nessuna connessione». Quando tornate vicini vi ricollegate da soli, e quello che non era arrivato viene rimandato.',
+    permissionTitle: 'Tocca «Consenti»',
+    permissionBody:
+      'Quando entri, l’iPhone ti chiederà di usare il Bluetooth. Accetta: senza, SkyMatch non può trovare nessuno.',
+    permissionBodyAndroid:
+      'Quando entri, il dispositivo ti chiederà di trovare i dispositivi nelle vicinanze. Accetta: senza questo permesso SkyMatch non può trovare nessuno.',
     understood: 'Ho capito',
   },
 
@@ -82,7 +83,8 @@ export const it: Strings = {
 
   profileSetup: {
     step: 'PASSO 3 DI 3',
-    title: 'Come ti chiamiamo?',
+    title: 'Crea il tuo profilo',
+    photoHint: 'Facoltativa: la vedranno le persone vicino a te.',
     identitySuffix: '— il nome serve solo ad accompagnarlo.',
     namePlaceholder: 'Il tuo nome o un soprannome',
     contactLabel: 'Instagram / WhatsApp (facoltativo)',
