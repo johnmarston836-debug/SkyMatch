@@ -274,6 +274,11 @@ export const it: Strings = {
     describeCoachSeat: (coach: number, seat: string) => `Carrozza ${coach}, posto ${seat}`,
     describeMuscle: (muscle: string) => `Oggi allena ${muscle.toLowerCase()}`,
     describeOutfit: (color: string) => `Veste di ${color.toLowerCase()}`,
+    /** Prefix of the row number on a classroom badge: one letter, like the coach's. */
+    rowShort: 'F',
+    sideShort: { left: 'Sin.', center: 'Centro', right: 'Des.' },
+    sideLong: { left: 'a sinistra', center: 'al centro', right: 'a destra' },
+    describeClass: (row: number, side: string) => `Fila ${row}, ${side}`,
   },
 
   picker: {
@@ -287,6 +292,10 @@ export const it: Strings = {
     spotLabel: 'DOVE SEI? (FACOLTATIVO)',
     spotPlaceholder: 'Al bancone, in terrazza, vicino all’ingresso…',
     spotHint: 'Un punto preciso ti risparmia metà delle occhiate. Puoi cambiarlo quando ti sposti.',
+    classRowHint: 'Contando dalla lavagna: la prima fila è la 1.',
+    classSideLabel: 'LATO DELL’AULA',
+    classSideHint: 'Guardando la lavagna.',
+    classSides: { left: 'Sinistra', center: 'Centro', right: 'Destra' },
   },
 
   venues: {
@@ -361,6 +370,23 @@ export const it: Strings = {
       locationFieldLabel: 'IL COLORE DEI TUOI VESTITI',
       identityNote: 'Qui ti vedranno come',
       enterCta: 'Entra',
+    },
+    class: {
+      name: 'Lezione',
+      shortName: 'Lezione',
+      tagline: 'La tua fila e il tuo lato dell’aula',
+      spaceTitle: 'Lezione',
+      peopleLabel: 'Compagni',
+      peopleSearching: 'Cerco compagni vicini…',
+      composerPlaceholder: 'Scrivi a tutta la classe…',
+      emptyTitle: 'Nessuno ha ancora scritto',
+      emptySubtitle: 'Appena ci saranno compagni vicini con SkyMatch, appariranno qui.',
+      locationTitle: 'Dove sei seduto?',
+      locationSubtitle: 'Fila e lato dell’aula: così ti trovano.',
+      locationHelp: 'In aula i banchi non hanno lettere, quindi si indica qualcuno come sempre: «quello in terza fila, a sinistra». Compare accanto ai tuoi messaggi. Se cambi posto, cambialo in Il mio profilo.',
+      locationFieldLabel: 'IL TUO POSTO IN AULA',
+      identityNote: 'Nella chat della lezione ti vedranno come',
+      enterCta: 'Entra in aula',
     },
   },
 };

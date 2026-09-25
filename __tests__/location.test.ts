@@ -35,7 +35,23 @@ const CASES: UserLocation[] = [
   { kind: 'plane', seat: { row: 40, letter: 'A' } },
   { kind: 'plane', seat: { row: 32, letter: 'H' } },
   { kind: 'train', coach: 12, seat: { row: 9, letter: 'J' } },
+  { kind: 'class', row: 3, side: 'left' },
+  { kind: 'class', row: 30, side: 'right' },
 ];
+
+describe('classroom', () => {
+  it('reads as a row and a side of the room', () => {
+    expect(formatLocation({ kind: 'class', row: 3, side: 'left' })).toBe('F3 · Izq.');
+    expect(packLocation({ kind: 'class', row: 3, side: 'center' })).toBe('C031');
+  });
+
+  it('rejects rows and sides that are not there', () => {
+    expect(normalizeLocation({ kind: 'class', row: 0, side: 'left' })).toBeNull();
+    expect(normalizeLocation({ kind: 'class', row: 4, side: 'back' })).toBeNull();
+    expect(normalizeLocation({ kind: 'class', row: 4, side: 'right' })).toEqual({ kind: 'class', row: 4, side: 'right' });
+    expect(unpackLocation('C039')).toBeNull();
+  });
+});
 
 describe('locations', () => {
   it('survives the round trip through an advertisement', () => {

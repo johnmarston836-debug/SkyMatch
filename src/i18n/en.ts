@@ -276,6 +276,11 @@ export const en: Strings = {
     describeCoachSeat: (coach: number, seat: string) => `Coach ${coach}, seat ${seat}`,
     describeMuscle: (muscle: string) => `Training ${muscle.toLowerCase()} today`,
     describeOutfit: (color: string) => `Wearing ${color.toLowerCase()}`,
+    /** Prefix of the row number on a classroom badge: one letter, like the coach's. */
+    rowShort: 'R',
+    sideShort: { left: 'Left', center: 'Centre', right: 'Right' },
+    sideLong: { left: 'on the left', center: 'in the centre', right: 'on the right' },
+    describeClass: (row: number, side: string) => `Row ${row}, ${side}`,
   },
 
   picker: {
@@ -289,6 +294,10 @@ export const en: Strings = {
     spotLabel: 'WHEREABOUTS? (OPTIONAL)',
     spotPlaceholder: 'At the bar, on the terrace, near the door…',
     spotHint: 'A specific spot saves half the looking around. You can change it when you move.',
+    classRowHint: 'Counting from the board: the front row is 1.',
+    classSideLabel: 'SIDE OF THE ROOM',
+    classSideHint: 'Facing the board.',
+    classSides: { left: 'Left', center: 'Centre', right: 'Right' },
   },
 
   venues: {
@@ -363,6 +372,23 @@ export const en: Strings = {
       locationFieldLabel: 'YOUR CLOTHES’ COLOUR',
       identityNote: 'Here you’ll show up as',
       enterCta: 'Enter',
+    },
+    class: {
+      name: 'Class',
+      shortName: 'Class',
+      tagline: 'Your row and side of the room',
+      spaceTitle: 'Class',
+      peopleLabel: 'Classmates',
+      peopleSearching: 'Looking for classmates nearby…',
+      composerPlaceholder: 'Write to the whole class…',
+      emptyTitle: 'Nobody has spoken yet',
+      emptySubtitle: 'As soon as classmates nearby have SkyMatch, they will show up here.',
+      locationTitle: 'Where are you sitting?',
+      locationSubtitle: 'Row and side of the room: that is how they find you.',
+      locationHelp: 'Desks in a classroom have no letters, so people point at someone the usual way: “third row, on the left”. It shows next to your messages. If you move, change it in My profile.',
+      locationFieldLabel: 'YOUR SPOT IN CLASS',
+      identityNote: 'In the class chat you will appear as',
+      enterCta: 'Join the class',
     },
   },
 };

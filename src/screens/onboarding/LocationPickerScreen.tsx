@@ -6,7 +6,7 @@ import type { OnboardingStackParamList } from '../../navigation/RootNavigator';
 import { LocationPicker } from '../../components/LocationPicker';
 import { venueOf } from '../../venues';
 import { t } from '../../i18n';
-import { defaultLocation, formatLocation } from '../../utils/location';
+import { defaultLocation } from '../../utils/location';
 import { useAppTheme, useThemedStyles } from '../../theme/ThemeContext';
 import type { UserLocation } from '../../types';
 
@@ -33,8 +33,6 @@ export function LocationPickerScreen({ route, navigation }: Props) {
       marginBottom: spacing(3),
     },
     helpText: { ...typography.subtitle, fontSize: 13, lineHeight: 19 },
-    readout: { alignItems: 'center' as const, marginBottom: spacing(3) },
-    readoutText: { color: colors.text, fontSize: 40, fontWeight: '800' as const, letterSpacing: 1, textAlign: 'center' as const },
     cta: {
       marginTop: 'auto' as const,
       backgroundColor: colors.accent,
@@ -64,10 +62,6 @@ export function LocationPickerScreen({ route, navigation }: Props) {
 
         <View style={styles.helpCard}>
           <Text style={styles.helpText}>{venue.locationHelp}</Text>
-        </View>
-
-        <View style={styles.readout}>
-          <Text style={styles.readoutText}>{formatLocation(location)}</Text>
         </View>
 
         <LocationPicker location={location} onChange={setLocation} />

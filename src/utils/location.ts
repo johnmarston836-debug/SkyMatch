@@ -1,8 +1,14 @@
 import { formatSeat, packSeat, unpackSeat, MAX_ROW, SEAT_LETTERS } from './seat';
 import { t } from '../i18n';
-import type { MuscleGroup, OutfitColor, Seat, SeatLetter, UserLocation, VenueKind } from '../types';
+import type { ClassSide, MuscleGroup, OutfitColor, Seat, SeatLetter, UserLocation, VenueKind } from '../types';
 
 export const MAX_COACH = 20;
+
+/** Rows of a classroom or lecture hall; the back of a big one is still "at the back". */
+export const MAX_CLASS_ROW = 30;
+
+/** Left to right as seen facing the board, which is also the order they are offered in. */
+export const CLASS_SIDES: ClassSide[] = ['left', 'center', 'right'];
 
 export const MUSCLE_GROUPS: MuscleGroup[] = [
   'chest',
@@ -44,6 +50,8 @@ export function defaultLocation(kind: VenueKind): UserLocation {
       return { kind: 'gym', muscle: 'chest' };
     case 'public':
       return { kind: 'public', color: 'black' };
+    case 'class':
+      return { kind: 'class', row: 1, side: 'center' };
   }
 }
 
@@ -62,6 +70,8 @@ export function formatLocation(location: UserLocation): string {
       return t.muscles[location.muscle];
     case 'public':
       return t.colors[location.color];
+    case 'class':
+      return `${t.location.rowShort}${location.row} · ${t.location.sideShort[location.side]}`;
   }
 }
 
@@ -78,6 +88,8 @@ export function describeLocation(location: UserLocation): string {
       return location.spot
         ? `${t.colors[location.color]} · ${location.spot}`
         : t.location.describeOutfit(t.colors[location.color]);
+    case 'class':
+      return t.location.describeClass(location.row, t.location.sideLong[location.side]);
   }
 }
 
@@ -86,7 +98,7 @@ export function locationSwatch(location: UserLocation): string | null {
   return location.kind === 'public' ? OUTFIT_COLOR_HEX[location.color] : null;
 }
 
-const VENUE_CODES: Record<VenueKind, string> = { plane: 'P', train: 'T', gym: 'G', public: 'U' };
+const VENUE_CODES: Record<VenueKind, string> = { plane: 'P', train: 'T', gym: 'G', public: 'U', class: 'C' };
 
 function hex(byte: number): string {
   return byte.toString(16).padStart(2, '0');
@@ -137,6 +149,9 @@ export function packLocation(location: UserLocation): string {
       return code + hex(MUSCLE_GROUPS.indexOf(location.muscle));
     case 'public':
       return code + hex(OUTFIT_COLORS.indexOf(location.color));
+    case 'class':
+      // Row in two hex digits, side in one: "C031" is row 3, centre.
+      return code + hex(Math.min(location.row, MAX_CLASS_ROW)) + CLASS_SIDES.indexOf(location.side).toString(16);
   }
 }
 
@@ -168,6 +183,12 @@ export function unpackLocation(packed: string): UserLocation | null {
     case 'U': {
       const color = OUTFIT_COLORS[byteAt(1)];
       return color ? { kind: 'public', color } : null;
+    }
+    case 'C': {
+      if (packed.length !== 4) return null;
+      const row = byteAt(1);
+      const side = CLASS_SIDES[parseInt(packed.charAt(3), 16)];
+      return side && row >= 1 && row <= MAX_CLASS_ROW ? { kind: 'class', row, side } : null;
     }
     default:
       return null;
@@ -225,6 +246,12 @@ export function normalizeLocation(value: unknown): UserLocation | null {
       if (typeof color !== 'string' || !OUTFIT_COLORS.includes(color as OutfitColor)) return null;
       const spot = typeof raw.spot === 'string' && raw.spot.length > 0 ? raw.spot.slice(0, 40) : undefined;
       return { kind: 'public', color: color as OutfitColor, spot };
+    }
+    case 'class': {
+      const { row, side } = raw;
+      if (typeof row !== 'number' || !Number.isInteger(row) || row < 1 || row > MAX_CLASS_ROW) return null;
+      if (typeof side !== 'string' || !CLASS_SIDES.includes(side as ClassSide)) return null;
+      return { kind: 'class', row, side: side as ClassSide };
     }
     default:
       // Some future venue this build doesn't have. Better no badge than a crash.

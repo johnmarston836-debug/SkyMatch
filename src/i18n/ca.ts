@@ -275,6 +275,11 @@ export const ca: Strings = {
     describeCoachSeat: (coach: number, seat: string) => `Vagó ${coach}, seient ${seat}`,
     describeMuscle: (muscle: string) => `Avui entrena ${muscle.toLowerCase()}`,
     describeOutfit: (color: string) => `Va de ${color.toLowerCase()}`,
+    /** Prefix of the row number on a classroom badge: one letter, like the coach's. */
+    rowShort: 'F',
+    sideShort: { left: 'Esq.', center: 'Centre', right: 'Dta.' },
+    sideLong: { left: 'a l’esquerra', center: 'al centre', right: 'a la dreta' },
+    describeClass: (row: number, side: string) => `Fila ${row}, ${side}`,
   },
 
   picker: {
@@ -288,6 +293,10 @@ export const ca: Strings = {
     spotLabel: 'ON ETS? (OPCIONAL)',
     spotPlaceholder: 'A la barra, a la terrassa, prop de l’entrada…',
     spotHint: 'Un lloc concret estalvia la meitat de les mirades. El pots canviar quan et moguis.',
+    classRowHint: 'Comptant des de la pissarra: la primera fila és la 1.',
+    classSideLabel: 'COSTAT DE L’AULA',
+    classSideHint: 'Mirant cap a la pissarra.',
+    classSides: { left: 'Esquerra', center: 'Centre', right: 'Dreta' },
   },
 
   venues: {
@@ -362,6 +371,23 @@ export const ca: Strings = {
       locationFieldLabel: 'COLOR DE LA TEVA ROBA',
       identityNote: 'Aquí et veuran com a',
       enterCta: 'Entrar',
+    },
+    class: {
+      name: 'Classe',
+      shortName: 'Classe',
+      tagline: 'La teva fila i el teu costat de l’aula',
+      spaceTitle: 'Classe',
+      peopleLabel: 'Companys',
+      peopleSearching: 'Buscant companys a prop…',
+      composerPlaceholder: 'Escriu a tota la classe…',
+      emptyTitle: 'Encara no ha parlat ningú',
+      emptySubtitle: 'Quan hi hagi companys a prop amb SkyMatch, apareixeran aquí.',
+      locationTitle: 'On seus?',
+      locationSubtitle: 'Fila i costat de l’aula: amb això et troben.',
+      locationHelp: 'En una aula els pupitres no porten lletra, així que s’assenyala algú com sempre: «el de la tercera fila, a l’esquerra». Surt al costat dels teus missatges. Si canvies de lloc, canvia-ho a El meu perfil.',
+      locationFieldLabel: 'EL TEU LLOC A CLASSE',
+      identityNote: 'Al xat de la classe et veuran com',
+      enterCta: 'Entrar a classe',
     },
   },
 };

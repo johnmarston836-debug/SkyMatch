@@ -277,6 +277,11 @@ export const fr: Strings = {
     describeCoachSeat: (coach: number, seat: string) => `Voiture ${coach}, place ${seat}`,
     describeMuscle: (muscle: string) => `S’entraîne aujourd’hui : ${muscle.toLowerCase()}`,
     describeOutfit: (color: string) => `Est en ${color.toLowerCase()}`,
+    /** Prefix of the row number on a classroom badge: one letter, like the coach's. */
+    rowShort: 'R',
+    sideShort: { left: 'Gauche', center: 'Centre', right: 'Droite' },
+    sideLong: { left: 'à gauche', center: 'au centre', right: 'à droite' },
+    describeClass: (row: number, side: string) => `Rangée ${row}, ${side}`,
   },
 
   picker: {
@@ -290,6 +295,10 @@ export const fr: Strings = {
     spotLabel: 'TU ES OÙ ? (FACULTATIF)',
     spotPlaceholder: 'Au bar, en terrasse, près de l’entrée…',
     spotHint: 'Un endroit précis évite la moitié des regards. Tu peux le changer quand tu bouges.',
+    classRowHint: 'En partant du tableau : le premier rang est le 1.',
+    classSideLabel: 'CÔTÉ DE LA SALLE',
+    classSideHint: 'Face au tableau.',
+    classSides: { left: 'Gauche', center: 'Centre', right: 'Droite' },
   },
 
   venues: {
@@ -364,6 +373,23 @@ export const fr: Strings = {
       locationFieldLabel: 'LA COULEUR DE TES VÊTEMENTS',
       identityNote: 'Ici on te verra comme',
       enterCta: 'Entrer',
+    },
+    class: {
+      name: 'Cours',
+      shortName: 'Cours',
+      tagline: 'Ta rangée et ton côté de la salle',
+      spaceTitle: 'Cours',
+      peopleLabel: 'Camarades',
+      peopleSearching: 'Recherche de camarades à proximité…',
+      composerPlaceholder: 'Écris à toute la classe…',
+      emptyTitle: 'Personne n’a encore parlé',
+      emptySubtitle: 'Dès que des camarades à proximité auront SkyMatch, ils apparaîtront ici.',
+      locationTitle: 'Où es-tu assis ?',
+      locationSubtitle: 'Rangée et côté de la salle : c’est comme ça qu’on te trouve.',
+      locationHelp: 'Dans une salle de cours, les tables n’ont pas de lettre, alors on désigne quelqu’un comme toujours : « celui du troisième rang, à gauche ». Ça s’affiche à côté de tes messages. Si tu changes de place, modifie-le dans Mon profil.',
+      locationFieldLabel: 'TA PLACE EN COURS',
+      identityNote: 'Dans le chat du cours, on te verra comme',
+      enterCta: 'Entrer en cours',
     },
   },
 };

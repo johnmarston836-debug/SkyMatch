@@ -9,16 +9,25 @@ import { t } from '../src/i18n';
 
 const metrics = { frame: { x: 0, y: 0, width: 390, height: 844 }, insets: { top: 0, left: 0, right: 0, bottom: 0 } };
 
+const mounted: ReactTestRenderer.ReactTestRenderer[] = [];
+
 function render() {
   const navigation = { goBack: jest.fn() } as never;
-  return ReactTestRenderer.create(
+  const tree = ReactTestRenderer.create(
     <SafeAreaProvider initialMetrics={metrics}>
       <ThemeProvider>
         <SettingsScreen navigation={navigation} route={{ key: 'k', name: 'Settings' } as never} />
       </ThemeProvider>
     </SafeAreaProvider>,
   );
+  mounted.push(tree);
+  return tree;
 }
+
+// Left mounted, a screen keeps rendering after Jest has torn the module registry down.
+afterEach(async () => {
+  await ReactTestRenderer.act(() => mounted.splice(0).forEach((tree) => tree.unmount()));
+});
 
 describe('settings', () => {
   beforeEach(async () => {

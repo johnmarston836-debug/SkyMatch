@@ -279,6 +279,11 @@ export const de: Strings = {
     // doesn't lowercase what it is handed.
     describeMuscle: (muscle: string) => `Trainiert heute ${muscle}`,
     describeOutfit: (color: string) => `Trägt ${color}`,
+    /** Prefix of the row number on a classroom badge: one letter, like the coach's. */
+    rowShort: 'R',
+    sideShort: { left: 'Links', center: 'Mitte', right: 'Rechts' },
+    sideLong: { left: 'links', center: 'in der Mitte', right: 'rechts' },
+    describeClass: (row: number, side: string) => `Reihe ${row}, ${side}`,
   },
 
   picker: {
@@ -292,6 +297,10 @@ export const de: Strings = {
     spotLabel: 'WO GENAU? (OPTIONAL)',
     spotPlaceholder: 'An der Bar, auf der Terrasse, nahe am Eingang…',
     spotHint: 'Ein konkreter Ort spart die Hälfte der Suchblicke. Du kannst ihn ändern, wenn du dich bewegst.',
+    classRowHint: 'Von der Tafel aus gezählt: die erste Reihe ist 1.',
+    classSideLabel: 'SEITE DES RAUMS',
+    classSideHint: 'Mit Blick zur Tafel.',
+    classSides: { left: 'Links', center: 'Mitte', right: 'Rechts' },
   },
 
   venues: {
@@ -366,6 +375,23 @@ export const de: Strings = {
       locationFieldLabel: 'DIE FARBE DEINER KLEIDUNG',
       identityNote: 'Hier sieht man dich als',
       enterCta: 'Rein',
+    },
+    class: {
+      name: 'Unterricht',
+      shortName: 'Kurs',
+      tagline: 'Deine Reihe und Seite im Raum',
+      spaceTitle: 'Kurs',
+      peopleLabel: 'Mitschüler',
+      peopleSearching: 'Suche Mitschüler in der Nähe…',
+      composerPlaceholder: 'Schreib an den ganzen Kurs…',
+      emptyTitle: 'Noch hat niemand etwas geschrieben',
+      emptySubtitle: 'Sobald Mitschüler in der Nähe SkyMatch haben, erscheinen sie hier.',
+      locationTitle: 'Wo sitzt du?',
+      locationSubtitle: 'Reihe und Seite im Raum: daran erkennt man dich.',
+      locationHelp: 'Im Hörsaal oder Klassenzimmer haben Tische keine Buchstaben, also zeigt man auf jemanden wie immer: „dritte Reihe, links“. Das steht neben deinen Nachrichten. Wenn du den Platz wechselst, ändere es in Mein Profil.',
+      locationFieldLabel: 'DEIN PLATZ IM KURS',
+      identityNote: 'Im Kurs-Chat sieht man dich als',
+      enterCta: 'Zum Kurs',
     },
   },
 };

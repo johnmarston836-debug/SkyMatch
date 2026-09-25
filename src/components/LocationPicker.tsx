@@ -5,6 +5,8 @@ import { useAppTheme, useThemedStyles } from '../theme/ThemeContext';
 import { venueOf } from '../venues';
 import { t } from '../i18n';
 import {
+  CLASS_SIDES,
+  MAX_CLASS_ROW,
   MAX_COACH,
   MUSCLE_GROUPS,
   OUTFIT_COLORS,
@@ -13,6 +15,7 @@ import {
 import type { UserLocation } from '../types';
 
 const COACHES = Array.from({ length: MAX_COACH }, (_, i) => i + 1);
+const CLASS_ROWS = Array.from({ length: MAX_CLASS_ROW }, (_, i) => i + 1);
 
 interface Props {
   location: UserLocation;
@@ -76,6 +79,7 @@ export function LocationPicker({ location, onChange }: Props) {
       backgroundColor: colors.surfaceAlt,
     },
     tileText: { ...typography.body, fontWeight: '700' as const },
+    sideTile: { flexBasis: '30%' as const, justifyContent: 'center' as const, paddingHorizontal: spacing(1) },
     swatch: {
       width: 22,
       height: 22,
@@ -171,6 +175,59 @@ export function LocationPicker({ location, onChange }: Props) {
                 onPress={() => onChange({ kind: 'gym', muscle })}
               >
                 <Text style={styles.tileText}>{t.muscles[muscle]}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+    );
+  }
+
+  if (location.kind === 'class') {
+    return (
+      <View>
+        <Text style={styles.sectionLabel}>{t.picker.rowLabel}</Text>
+        <Text style={styles.fieldHint}>{t.picker.classRowHint}</Text>
+        <FlatList
+          data={CLASS_ROWS}
+          horizontal
+          keyExtractor={item => String(item)}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.coachList}
+          initialScrollIndex={Math.max(0, location.row - 3)}
+          getItemLayout={(_, index) => ({
+            length: 60,
+            offset: 60 * index,
+            index,
+          })}
+          renderItem={({ item }) => {
+            const selected = item === location.row;
+            return (
+              <Pressable
+                style={[styles.chip, selected && styles.chipSelected]}
+                onPress={() => onChange({ ...location, row: item })}
+              >
+                <Text
+                  style={[styles.chipText, selected && styles.chipTextSelected]}
+                >
+                  {item}
+                </Text>
+              </Pressable>
+            );
+          }}
+        />
+        <Text style={styles.spotLabel}>{t.picker.classSideLabel}</Text>
+        <Text style={styles.fieldHint}>{t.picker.classSideHint}</Text>
+        <View style={styles.grid}>
+          {CLASS_SIDES.map(side => {
+            const selected = side === location.side;
+            return (
+              <Pressable
+                key={side}
+                style={[styles.tile, styles.sideTile, selected && styles.tileSelected]}
+                onPress={() => onChange({ ...location, side })}
+              >
+                <Text style={styles.tileText}>{t.picker.classSides[side]}</Text>
               </Pressable>
             );
           })}

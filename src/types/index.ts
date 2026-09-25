@@ -10,7 +10,7 @@ export interface Seat {
  * decides the only thing that really differs between them: how a person is
  * pointed at without knowing their name.
  */
-export type VenueKind = 'plane' | 'train' | 'gym' | 'public';
+export type VenueKind = 'plane' | 'train' | 'gym' | 'public' | 'class';
 
 export type MuscleGroup = 'chest' | 'back' | 'legs' | 'shoulders' | 'arms' | 'core' | 'cardio' | 'fullbody';
 
@@ -22,12 +22,20 @@ export type MuscleGroup = 'chest' | 'back' | 'legs' | 'shoulders' | 'arms' | 'co
  */
 export type OutfitColor = 'black' | 'white' | 'grey' | 'red' | 'blue' | 'green' | 'yellow' | 'pink';
 
+/**
+ * Which part of a classroom row, seen facing the board. Desks aren't
+ * lettered like seats on a plane, but "row 3, on the left" is how anyone
+ * would point at somebody in a lecture hall.
+ */
+export type ClassSide = 'left' | 'center' | 'right';
+
 /** Where you are, in whatever terms the place you are in actually uses. */
 export type UserLocation =
   | { kind: 'plane'; seat: Seat }
   | { kind: 'train'; coach: number; seat: Seat }
   | { kind: 'gym'; muscle: MuscleGroup }
-  | { kind: 'public'; color: OutfitColor; spot?: string };
+  | { kind: 'public'; color: OutfitColor; spot?: string }
+  | { kind: 'class'; row: number; side: ClassSide };
 
 export interface Profile {
   id: string; // stable local UUID, regenerated per install (not tied to BLE MAC)

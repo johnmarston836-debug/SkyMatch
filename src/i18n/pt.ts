@@ -278,6 +278,11 @@ export const pt: Strings = {
     describeCoachSeat: (coach: number, seat: string) => `Carruagem ${coach}, lugar ${seat}`,
     describeMuscle: (muscle: string) => `Hoje treina ${muscle.toLowerCase()}`,
     describeOutfit: (color: string) => `Anda de ${color.toLowerCase()}`,
+    /** Prefix of the row number on a classroom badge: one letter, like the coach's. */
+    rowShort: 'F',
+    sideShort: { left: 'Esq.', center: 'Centro', right: 'Dir.' },
+    sideLong: { left: 'à esquerda', center: 'ao centro', right: 'à direita' },
+    describeClass: (row: number, side: string) => `Fila ${row}, ${side}`,
   },
 
   picker: {
@@ -291,6 +296,10 @@ export const pt: Strings = {
     spotLabel: 'ONDE ESTÁS? (OPCIONAL)',
     spotPlaceholder: 'No balcão, na esplanada, perto da entrada…',
     spotHint: 'Um sítio concreto poupa metade dos olhares. Podes mudá-lo quando te mexeres.',
+    classRowHint: 'A contar do quadro: a primeira fila é a 1.',
+    classSideLabel: 'LADO DA SALA',
+    classSideHint: 'Virado para o quadro.',
+    classSides: { left: 'Esquerda', center: 'Centro', right: 'Direita' },
   },
 
   venues: {
@@ -365,6 +374,23 @@ export const pt: Strings = {
       locationFieldLabel: 'A COR DA TUA ROUPA',
       identityNote: 'Aqui vão ver-te como',
       enterCta: 'Entrar',
+    },
+    class: {
+      name: 'Aula',
+      shortName: 'Aula',
+      tagline: 'A tua fila e o teu lado da sala',
+      spaceTitle: 'Aula',
+      peopleLabel: 'Colegas',
+      peopleSearching: 'À procura de colegas por perto…',
+      composerPlaceholder: 'Escreve para a turma toda…',
+      emptyTitle: 'Ainda ninguém falou',
+      emptySubtitle: 'Assim que houver colegas por perto com SkyMatch, aparecem aqui.',
+      locationTitle: 'Onde estás sentado?',
+      locationSubtitle: 'Fila e lado da sala: é assim que te encontram.',
+      locationHelp: 'Numa sala de aula as mesas não têm letra, por isso aponta-se para alguém como sempre: «o da terceira fila, à esquerda». Aparece junto às tuas mensagens. Se mudares de lugar, muda-o em O meu perfil.',
+      locationFieldLabel: 'O TEU LUGAR NA AULA',
+      identityNote: 'No chat da aula vão ver-te como',
+      enterCta: 'Entrar na aula',
     },
   },
 };

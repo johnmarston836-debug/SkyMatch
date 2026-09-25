@@ -67,6 +67,15 @@ const VENUE_CONFIG: Record<VenueKind, VenueConfig> = {
     alertIconActive: require('./assets/icons/standing.png'),
     hasSeats: false,
   },
+  class: {
+    kind: 'class',
+    icon: require('./assets/icons/class.png'),
+    alertStatus: 'standing',
+    alertIcon: require('./assets/icons/seated.png'),
+    alertIconActive: require('./assets/icons/standing.png'),
+    // Rows, but no lettered seats to draw a map of.
+    hasSeats: false,
+  },
 };
 
 /**
@@ -80,7 +89,8 @@ export const PRESENCE_COUNTDOWN: Record<PresenceStatus, boolean> = {
   leavingMachine: true,
 };
 
-export const VENUE_ORDER: VenueKind[] = ['plane', 'train', 'gym', 'public'];
+/** Travel on one side, rooms on the other, and the open "anywhere" in the middle. */
+export const VENUE_ORDER: VenueKind[] = ['plane', 'train', 'public', 'gym', 'class'];
 
 /**
  * Built per call rather than held in a constant, because half of it is the

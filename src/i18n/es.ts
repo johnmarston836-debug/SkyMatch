@@ -1,4 +1,4 @@
-import type { MuscleGroup, OutfitColor, PresenceStatus, VenueKind } from '../types';
+import type { ClassSide, MuscleGroup, OutfitColor, PresenceStatus, VenueKind } from '../types';
 
 /**
  * The Spanish copy, and the shape every other language has to match.
@@ -293,6 +293,11 @@ export const es = {
     describeCoachSeat: (coach: number, seat: string) => `Vagón ${coach}, asiento ${seat}`,
     describeMuscle: (muscle: string) => `Hoy entrena ${muscle.toLowerCase()}`,
     describeOutfit: (color: string) => `Va de ${color.toLowerCase()}`,
+    /** Prefix of the row number on a classroom badge: one letter, like the coach's. */
+    rowShort: 'F',
+    sideShort: { left: 'Izq.', center: 'Centro', right: 'Dcha.' } as Record<ClassSide, string>,
+    sideLong: { left: 'a la izquierda', center: 'en el centro', right: 'a la derecha' } as Record<ClassSide, string>,
+    describeClass: (row: number, side: string) => `Fila ${row}, ${side}`,
   },
 
   picker: {
@@ -306,6 +311,10 @@ export const es = {
     spotLabel: '¿DÓNDE ESTÁS? (OPCIONAL)',
     spotPlaceholder: 'En la barra, la terraza, cerca de la entrada…',
     spotHint: 'Un sitio concreto ahorra la mitad de las miradas. Puedes cambiarlo cuando te muevas.',
+    classRowHint: 'Contando desde la pizarra: la primera fila es la 1.',
+    classSideLabel: 'LADO DEL AULA',
+    classSideHint: 'Mirando hacia la pizarra.',
+    classSides: { left: 'Izquierda', center: 'Centro', right: 'Derecha' } as Record<ClassSide, string>,
   },
 
   venues: {
@@ -382,6 +391,23 @@ export const es = {
       locationFieldLabel: 'COLOR DE TU ROPA',
       identityNote: 'Aquí te verán como',
       enterCta: 'Entrar',
+    },
+    class: {
+      name: 'Clase',
+      shortName: 'Clase',
+      tagline: 'Tu fila y tu lado del aula',
+      spaceTitle: 'Clase',
+      peopleLabel: 'Compañeros',
+      peopleSearching: 'Buscando compañeros cerca…',
+      composerPlaceholder: 'Escribe a toda la clase…',
+      emptyTitle: 'Nadie ha hablado todavía',
+      emptySubtitle: 'En cuanto haya compañeros cerca con SkyMatch, aparecerán aquí.',
+      locationTitle: '¿Dónde te sientas?',
+      locationSubtitle: 'Fila y lado del aula: con eso te encuentran.',
+      locationHelp: 'En un aula los pupitres no llevan letra, así que se señala a alguien como se hace siempre: «el de la tercera fila, a la izquierda». Sale junto a tus mensajes. Si te cambias de sitio, cámbialo en Mi perfil.',
+      locationFieldLabel: 'TU SITIO EN CLASE',
+      identityNote: 'En el chat de la clase te verán como',
+      enterCta: 'Entrar a clase',
     },
   } as Record<VenueKind, VenueStrings>,
 };

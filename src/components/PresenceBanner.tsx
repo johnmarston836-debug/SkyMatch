@@ -38,7 +38,7 @@ interface Props {
 function whoIsUp(alert: PresenceAlert): string {
   if (!alert.nickname) return alert.label;
   const where = alert.loc ? unpackLocation(alert.loc) : null;
-  const hasSeat = where ? where.kind === 'plane' || where.kind === 'train' : alert.status === 'standing';
+  const hasSeat = where ? where.kind === 'plane' || where.kind === 'train' || where.kind === 'class' : alert.status === 'standing';
   return hasSeat && alert.label ? `${alert.nickname} (${alert.label})` : alert.nickname;
 }
 export function PresenceBanner({ onOpenChat }: Props) {
